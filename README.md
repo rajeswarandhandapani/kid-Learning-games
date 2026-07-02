@@ -29,6 +29,14 @@ games/<game-name>/         one folder per game (index.html + game.js)
 multiple choice, auto-advances (counted wrong) on timeout. Restrict to
 specific tables via a query param, e.g. `games/multiplication/index.html?tables=6,7,8`.
 
+## Tamil Alphabets Quiz
+
+One question per letter, covering the 12 vowels (உயிர் எழுத்துக்கள்) and 18
+consonants (மெய் எழுத்துக்கள்), 10 seconds per question, 4-choice multiple
+choice matching the Tamil letter to its romanized sound. Restrict to one
+group via a query param, e.g.
+`games/tamil-alphabets/index.html?type=vowels` or `?type=consonants`.
+
 ## Running locally
 
 No build step required — just open `index.html` in a browser, or serve the

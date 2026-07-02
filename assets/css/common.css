@@ -94,6 +94,15 @@ body {
   text-align: center;
 }
 
+.tamil-glyph,
+.tamil-glyph .fw-bold {
+  font-family: "Noto Sans Tamil", "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+}
+
+.quiz-question.tamil-glyph {
+  font-size: 5rem;
+}
+
 .quiz-choice-btn {
   font-size: 1.5rem;
   font-weight: 700;
