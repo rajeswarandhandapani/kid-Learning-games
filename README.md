@@ -59,6 +59,26 @@ choices for a compound letter are drawn from the same consonant row (கி vs
 கீ/கை) or the same vowel column (கி vs சி/மி), so the quiz genuinely tests
 recognition of the vowel signs.
 
+## Rounding & Place Value Quiz
+
+20 questions, 15 seconds each (sentence prompts need more reading time than
+bare facts), 4-choice multiple choice. Mixes four question kinds:
+
+- **Rounding** to the nearest 10 / 100 / 1,000 ("Round 3,472 to the nearest
+  hundred"), using the school rule: 5 or more rounds up.
+- **Digit at place** ("Which digit is in the tens place of 4,728?")
+- **Value of digit** ("What is the value of the 7 in 4,728?")
+- **Expanded form** ("3,000 + 400 + 20 + 5 = ?")
+
+Distractors mirror real kid mistakes: rounding the wrong way, rounding to
+the neighbouring place, picking the digit one place over, or scrambling the
+order of digits. Place-value numbers always have four *distinct* digits so
+the other digits of the number are safe wrong choices.
+
+Practice one skill with `?type=rounding` or `?type=placevalue` (buttons on
+the start screen); the default mixes both. Tracks a best-time record per
+mode with the same rules as the multiplication quiz (perfect scores only).
+
 ## Running locally
 
 No build step required — just open `index.html` in a browser, or serve the
