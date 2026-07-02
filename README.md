@@ -79,6 +79,37 @@ Practice one skill with `?type=rounding` or `?type=placevalue` (buttons on
 the start screen); the default mixes both. Tracks a best-time record per
 mode with the same rules as the multiplication quiz (perfect scores only).
 
+## Time & Elapsed Time Quiz
+
+15 questions, 20 seconds each, 4-choice multiple choice. Mixes four kinds:
+reading clock faces (the 24 clock emoji 🕐–🕧 cover every hour and
+half-hour, so no images are needed), end times ("Soccer practice starts at
+4:30 PM and lasts 45 minutes — when does it end?"), elapsed time ("How much
+time passes from 2:20 PM to 4:05 PM?") and minute conversions (with the
+classic "2 hours 15 minutes = 215" concatenation error as a distractor).
+Times are handled as minutes-since-midnight so crossing noon works for
+free. Practice one skill with `?type=clock` or `?type=elapsed`.
+
+## Money & Making Change Quiz
+
+15 questions, 20 seconds each (US coins and dollars, all arithmetic in
+whole cents). Mixes coin counting ("How much money is 2 quarters, 1 dime
+and 3 pennies?"), making change, adding two prices, and dollars→cents
+conversion. Amounts under a dollar display as "63¢", the rest as "$1.15".
+Practice one skill with `?type=coins` or `?type=change`.
+
+## Tamil Words Quiz
+
+The next step after the alphabets quiz: ~95 everyday words (animals, food,
+nature, body parts, things, family, colors) with an emoji for each, stored
+as data in `game.js`. Two kinds: picture → Tamil word (🐘 → யானை) and
+Tamil word → English meaning. Wrong choices are drawn from the same
+category so the quiz tests real word recognition. 20 questions, 10 seconds
+each; pick a kind with `?type=picture` or `?type=meaning`.
+
+All three quizzes track per-mode best-time records with the same
+perfect-score-only rule as the multiplication quiz.
+
 ## Running locally
 
 No build step required — just open `index.html` in a browser, or serve the
