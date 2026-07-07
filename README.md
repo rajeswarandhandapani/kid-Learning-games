@@ -168,6 +168,34 @@ mode never offers a distractor that makes the same starting sound as the
 answer (C/K/Q, G/J, S/C). Without speech synthesis the audio modes degrade
 into reading practice, like Number Sounds.
 
+## Spelling Bee
+
+Speech synthesis says a word out loud (tap the 🔊 to repeat it) and the
+child picks the correct spelling from four choices. Three levels via the
+start-screen buttons or `?level=1|2|3`: short phonetic words (cat, ship),
+longer everyday words (banana, school) and tricky spellings (because,
+knight, scissors) — 24 words per level, 15 questions per round.
+
+Wrong choices are misspellings generated in code, ordered by how
+convincing they are: sound-alike substitutions kids actually write
+(freind, elefant, becauze, enuff), dropped unstressed vowels (choclate),
+doubling errors (scisors, beautifull), dropped silent e, and
+adjacent-letter swaps as filler. A generated misspelling is never allowed
+to be a real word — "meet" must not offer "meat" — checked against all
+game words plus a homophone list. Without speech synthesis the prompt
+degrades to the word's emoji and a clue ("🐱 a pet that says meow").
+
+## World Capitals Quiz
+
+~70 countries with flag emoji, grouped by continent. Two directions via
+`?mode=` (country → capital by default, `?mode=country` for capital →
+country) and a continent filter via `?region=asia|europe|africa|americas|
+oceania`; direction and region combine freely. Distractors prefer capitals
+from the same continent, and countries whose most famous city is *not*
+the capital carry a trap city (Australia → Sydney, Turkey → Istanbul,
+Canada → Toronto…) that is always among the choices in capital mode —
+that's the mix-up everyone actually makes.
+
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.
 
