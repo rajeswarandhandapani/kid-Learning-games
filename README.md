@@ -46,6 +46,19 @@ group with the buttons on the start screen or via a query param:
 `?type=vowels`, `?type=consonants`, `?type=uyirmei`, or practice a single
 consonant's row of 12 with `?type=uyirmei&base=க`.
 
+Two play directions, combinable with any letter group: **Read & Match**
+(default — see the letter, tap its sound) and **Listen & Find**
+(`?mode=listen` — the browser says the letter in Tamil and the child taps
+the matching glyph, no reading required). Listening needs a Tamil (ta-*)
+speech-synthesis voice on the device: Android, iOS and Edge ship one,
+Windows needs the Tamil language pack, and desktop Chrome's built-in
+Google voices don't include Tamil. When no Tamil voice is found the game
+warns on the start screen and shows the romanized sound as the prompt
+instead, so it stays playable everywhere. Wrong choices in listen mode
+always sound different from the answer (ந்/ன் are never offered against
+each other) and the short/long partner (அ/ஆ, கி/கீ) is always among the
+choices, since that's the classic listening mix-up.
+
 Sound conventions: vowels use English phonics (ee as in "see", oh as in
 "go"); மெய் letters carry the புள்ளி (dot) and therefore map to the *pure*
 consonant sound (க் = "k", not "ka"); capitalized N/L/R mark the retroflex
