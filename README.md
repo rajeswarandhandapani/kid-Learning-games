@@ -38,7 +38,7 @@ only on a perfect score, so guessing fast never beats getting them right.
 ## Tamil Alphabets Quiz
 
 Covers the 12 vowels (உயிர் எழுத்துக்கள்), 18 consonants (மெய் எழுத்துக்கள்)
-and the 216 compound letters (உயிர்மெய் எழுத்துக்கள்), 10 seconds per
+and the 216 compound letters (உயிர்மெய் எழுத்துக்கள்), 2 minutes per
 question, 4-choice multiple choice matching the Tamil letter to its
 romanized sound. Vowel/consonant quizzes ask one question per letter;
 the compound-letter quiz asks 30 random letters out of the 216. Pick a
@@ -94,7 +94,7 @@ mode with the same rules as the multiplication quiz (perfect scores only).
 
 ## Time & Elapsed Time Quiz
 
-15 questions, 20 seconds each, 4-choice multiple choice. Mixes four kinds:
+15 questions, 2 minutes each, 4-choice multiple choice. Mixes four kinds:
 reading clock faces (the 24 clock emoji 🕐–🕧 cover every hour and
 half-hour, so no images are needed), end times ("Soccer practice starts at
 4:30 PM and lasts 45 minutes — when does it end?"), elapsed time ("How much
@@ -105,7 +105,7 @@ free. Practice one skill with `?type=clock` or `?type=elapsed`.
 
 ## Money & Making Change Quiz
 
-15 questions, 20 seconds each (US coins and dollars, all arithmetic in
+15 questions, 2 minutes each (US coins and dollars, all arithmetic in
 whole cents). Mixes coin counting ("How much money is 2 quarters, 1 dime
 and 3 pennies?"), making change, adding two prices, and dollars→cents
 conversion. Amounts under a dollar display as "63¢", the rest as "$1.15".
@@ -118,7 +118,7 @@ nature, body parts, things, family, colors) with an emoji for each, stored
 in `assets/js/tamil-words-data.js` (shared with the Tamil Word Builder
 quiz). Two kinds: picture → Tamil word (🐘 → யானை) and
 Tamil word → English meaning. Wrong choices are drawn from the same
-category so the quiz tests real word recognition. 20 questions, 10 seconds
+category so the quiz tests real word recognition. 20 questions, 2 minutes
 each; pick a kind with `?type=picture` or `?type=meaning`.
 
 ## Tamil Word Builder Quiz

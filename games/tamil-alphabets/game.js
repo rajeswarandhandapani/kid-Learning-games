@@ -297,12 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 216 uyirmei letters is too long for one sitting — quiz a random subset.
   // Listening takes longer per question, so listen rounds are shorter.
   const totalQuestions = Math.min(letters.length, isListen ? 15 : 30);
-  const timePerQuestion = isListen ? 15 : 10;
+  const timePerQuestion = 120;
   document.getElementById("question-count-label").textContent =
     totalQuestions < letters.length
       ? `${totalQuestions} random letters out of ${letters.length}`
       : "One question per letter";
-  document.getElementById("seconds-label").textContent = timePerQuestion;
 
   const questionText = document.getElementById("question-text");
   const speechNote = document.getElementById("speech-note");
