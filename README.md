@@ -196,6 +196,78 @@ the capital carry a trap city (Australia → Sydney, Turkey → Istanbul,
 Canada → Toronto…) that is always among the choices in capital mode —
 that's the mix-up everyone actually makes.
 
+## Counting Quiz (pre-K)
+
+A cluster of identical emoji is shown (🍎🍎🍎🍎🍎 🍎🍎) and the child taps
+how many there are, on extra-large buttons. Groups bigger than five are
+split into rows of five so kids can count in fives. The range is picked on
+the start screen (1–5, 1–10, 1–20) or with `?max=N`; each count is asked at
+most once per round (via `dedupeKey`, since the same count can appear with
+different emoji). Distractors are the neighbours (n±1, n±2) — where you
+land when you skip or double-count one. 20 seconds per question (30 for
+the 1–20 range).
+
+## Comparing Numbers Quiz
+
+Three kinds: tap the **biggest** of four numbers, tap the **smallest**, and
+pick the right **< > = sign** for a pair ("37 __ 73", with equal pairs
+showing up often enough that = stays a live option). Pick a kind with
+`?type=biggest|smallest|symbol` and a range with `?max=10|100|1000`
+(default 100); both have start-screen buttons and combine freely. The
+numbers are built to be tricky: half the sets use the same digits scrambled
+(37, 73, 33, 77) — the classic compare-the-wrong-digit-first trap — and the
+rest are close neighbours. 15 questions, 10 seconds each.
+
+## Addition & Subtraction Facts Quiz
+
+The step before the multiplication tables: 20 questions, plain facts like
+"7 + 8" and "52 − 38". Pick the operation (`?op=add|sub`, default mixes
+both) and the range (`?max=10|20|100`, default 20 — 100 means two-digit
+problems at 15 seconds instead of 10). Distractors mirror real kid slips:
+off-by-one/two everywhere, forgetting the carry or borrow (±10) on
+two-digit problems, and the classic column-subtraction error of
+subtracting the smaller digit from the larger in each column (52 − 38
+→ 26).
+
+## Calendar Quiz
+
+15 questions, 15 seconds each. Day questions: what comes after/before a
+day, "if today is Friday, what was yesterday?", the nth day of the week
+(weeks start on Sunday, like a wall calendar — and the counted-from-Monday
+answer is always among the wrong choices), days in a week/weekend. Month
+questions: after/before, the nth month, how many days a month has
+(February is asked as "the shortest month" instead, so leap years never
+make an answer wrong), months in a year, days in a year (with 356 — the
+scrambled 365 — as a distractor). Wrap-arounds (after Saturday, after
+December) come up deliberately often. Practice one half with `?type=days`
+or `?type=months`.
+
+## Fractions Quiz
+
+15 questions, 20 seconds each, four kinds: read a fraction picture built
+from squares (🟩🟩🟩⬜⬜ — what fraction is green?), find the **equivalent**
+fraction ("Which equals 1/2?"), **compare** four fractions (same
+denominator, or same numerator — where "bigger denominator means bigger
+piece" is exactly the trap), and **add & subtract** with like denominators.
+Distractors are the real mistakes: counting the white squares (2/5),
+part-over-part (3/2), flipping the fraction (5/3), adding tops *and*
+bottoms (1/4 + 2/4 = 3/8), and adding instead of multiplying to grow an
+equivalent (1/2 → 2/3). A distractor is never allowed to *equal* the
+correct answer in value (2/4 is never offered against 1/2), checked by
+cross-multiplication. Practice one kind with
+`?type=identify|equivalent|compare|add`.
+
+## Baby Animals Quiz
+
+~27 animals with emoji, two directions mixed by default: "What is a baby
+cow called? 🐮" and "Which animal has a baby called a joey?" (practice one
+with `?mode=baby` or `?mode=animal`). Shared and synonymous baby names are
+handled so exactly one offered answer is ever right: a calf is a baby cow,
+elephant *and* whale, a cub belongs to bears, lions and tigers, and a baby
+fox answers to kit, cub or pup — each animal carries an avoid-list and a
+choice set never mixes two animals that share a name. 15 questions,
+15 seconds each.
+
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.
 
