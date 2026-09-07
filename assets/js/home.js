@@ -162,7 +162,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const tiles = [...document.querySelectorAll('.game-card[data-game]')];
   const groups = {
-    language: ['english-alphabets','tamil-alphabets','rhyming-words','opposites','tamil-words','spelling-bee','tamil-word-builder','reading-stories'],
+    language: ['english-alphabets','tamil-alphabets','rhyming-words','opposites','tamil-words','spelling-bee','tamil-word-builder','reading-stories','tamil-sentence-words','tamil-missing-letters'],
     world: ['baby-animals','calendar','solar-system','science-quiz','world-capitals','animal-habitats'],
     logic: ['patterns','memory-match']
   };

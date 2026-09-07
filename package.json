@@ -5,9 +5,10 @@
   "description": "Accessible, browser-based learning games for curious kids",
   "scripts": {
     "start": "python3 -m http.server 4173",
-    "test": "node --test tests/progress.test.cjs",
+    "test": "node --test tests/*.test.cjs",
     "test:e2e": "node tests/browser.cjs",
-    "build": "node scripts/build.cjs"
+    "build": "node scripts/build.cjs",
+    "test:tamil": "node tests/tamil-browser.cjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

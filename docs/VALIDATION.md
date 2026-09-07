@@ -23,3 +23,13 @@ Reviewed Chromium screenshots of the desktop home, phone home/library, counting,
 - Age bands are suggestions; activities have not undergone formal curriculum or child-user validation.
 - Scores, favorites, and progress remain on one browser. There is no cloud sync or parent account.
 - The bundled emoji font adds about 11 MB on its first load and is cached by the browser according to hosting headers.
+
+## Tamil typing additions · September 7, 2026
+
+- Two new, separately linked activities: Tamil Sentence Words and Tamil Missing Letters. Total library count is now 30.
+- The shared bank has 32 distinct Tamil sentence contexts across three topics. Letter mode excludes one-letter words, leaving 31 eligible contexts.
+- Unit tests cover all target words and synonyms against the available on-screen keyboard, canonical Unicode normalization, and Tamil consonant/vowel-sign/pulli boundaries.
+- The dedicated browser suite completes one shuffled 10-sentence round in each mode. It checks empty and incorrect submissions, retries, whole-word rejection in letter mode, native text insertion with Enter, composition-event submission protection, on-screen typing/deletion, answer reveal followed by required typing, pinned answer preview, score recording, replay, and persistence after reload.
+- Both games were captured and visually inspected at phone and desktop widths; overflow checks and screenshots cover 320, 390, 768, and 1366 pixels. Wider compound-letter keys and a pinned answer preview address small-screen keyboard usability.
+- The full library regression passed with all 30 activities; no browser page errors were observed.
+- The site remains local. These additions were not exported or published.
