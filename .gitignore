@@ -6,3 +6,6 @@ dist/
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# Raw audio downloads (scripts/fetch-tamil-audio.cjs)
+.cache/

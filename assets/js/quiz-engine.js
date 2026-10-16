@@ -10,6 +10,8 @@
  *       // for games where the visible prompt isn't unique (e.g. audio
  *       // questions that all display 🔊)
  *     formatAnswer: (value) => String(value),   // optional
+ *     onQuestionShown: (question) => { ... },   // optional, after render
+ *     onAnswered: (question, isCorrect, selected) => { ... }, // optional
  *     onFinish: (result) => { ... },            // optional, receives
  *       { score, total, elapsedMs } — elapsedMs is time spent answering
  *       (question shown -> answered), excluding feedback pauses
@@ -38,6 +40,8 @@ class QuizEngine {
     this.generateQuestion = options.generateQuestion;
     this.formatAnswer = options.formatAnswer || ((v) => String(v));
     this.onFinish = options.onFinish || (() => {});
+    this.onQuestionShown = options.onQuestionShown || (() => {});
+    this.onAnswered = options.onAnswered || (() => {});
     this.correctDelay = options.correctDelay || 900;
     this.incorrectDelay = options.incorrectDelay || 2500;
 
@@ -144,6 +148,7 @@ class QuizEngine {
       clearTimeout(this.transitionTimer);
       this.locked = true;
       if (window.speechSynthesis) speechSynthesis.cancel();
+      if (window.KlgTamilAudio) KlgTamilAudio.stop();
       this.el.quizScreen.classList.add('d-none');
       document.getElementById('start-screen').classList.remove('d-none');
       startButton.focus();
@@ -204,6 +209,7 @@ class QuizEngine {
     this.questionStartMs = Date.now();
     this.el.questionText.focus({ preventScroll: true });
     if (this.listenButton.hidden === false) this._speakQuestion();
+    this.onQuestionShown(this.currentQuestion);
   }
 
   _questionSpeech() {
@@ -252,7 +258,7 @@ class QuizEngine {
       btn.dataset.answer = answer;
       btn.addEventListener("click", () => this._handleAnswer(choice, btn));
       tile.appendChild(btn);
-      if (this.speechAvailable && /[A-Za-z]{2,}/.test(label)) {
+      if (this.speechAvailable && !this.currentQuestion.noChoiceListen && /[A-Za-z]{2,}/.test(label)) {
         tile.classList.add('has-listen');
         const listen = document.createElement('button');
         listen.type = 'button';
@@ -321,6 +327,7 @@ class QuizEngine {
       });
     }
     this._updateScorePill();
+    this.onAnswered(this.currentQuestion, isCorrect, selected);
 
     this.el.choicesContainer.querySelectorAll('.quiz-choice-btn').forEach((btn) => {
       btn.disabled = true;
