@@ -93,13 +93,6 @@
 /* --- Tamil memory --------------------------------------------------------- */
 .tg-memory-card.flipped.tamil-glyph { font-size: clamp(1rem, 3.6vw, 1.6rem); overflow-wrap: anywhere; padding: 4px; }
 
-/* --- Finish panel --------------------------------------------------------- */
-.tg-finish { margin: 10px 0; }
-.tg-finish-score { font-size: 3rem; font-weight: 800; color: var(--klg-purple); }
-.tg-finish-stars { font-size: 2.2rem; }
-.tg-finish-note { font-size: 1.15rem; font-weight: 600; margin: 8px 0; }
-.tg-finish-xp { color: #3e6f5d; font-weight: 700; }
-
 @media (max-width: 760px) {
   .tg-chart-12, .tg-chart-6 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .tg-detail { padding: 12px; gap: 12px; }

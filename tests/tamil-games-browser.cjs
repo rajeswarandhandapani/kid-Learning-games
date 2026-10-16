@@ -47,14 +47,14 @@ const fakeAudio = () => {
 
   // --- Home: Tamil tab and learning path -----------------------------------
   await page.goto(base);
-  assert.equal(await page.locator('.game-card').count(), 44);
+  assert.equal(await page.locator('.game-card').count(), 51);
   assert.equal(await page.locator('.tamil-steps li').count(), 9);
   await page.locator('#tamil-jump').click();
   assert.equal(await page.locator('.game-tile:visible').count(), 16);
   assert.equal(await page.locator('.subject-tabs [data-subject="tamil"]').getAttribute('aria-pressed'), 'true');
   await noOverflow('home');
   await page.screenshot({ path: 'artifacts/home-tamil-mobile.png', fullPage: false });
-  console.log('PASS home: 44 games, Tamil tab shows 16, learning path');
+  console.log('PASS home: 51 games, Tamil tab shows 16, learning path');
 
   // --- Tamil Alphabets listen mode now works with no Tamil voice ------------
   await page.goto(`${base}/games/tamil-alphabets/index.html?mode=listen&type=vowels`);

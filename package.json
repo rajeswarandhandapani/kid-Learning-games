@@ -10,6 +10,7 @@
     "build": "node scripts/build.cjs",
     "test:tamil": "node tests/tamil-browser.cjs",
     "test:tamil-games": "node tests/tamil-games-browser.cjs",
+    "test:math": "node tests/math-games-browser.cjs",
     "audio:tamil": "node scripts/fetch-tamil-audio.cjs"
   },
   "devDependencies": {
