@@ -3,3 +3,6 @@ artifacts/*.png
 artifacts/*.json
 site-output/
 dist/
+
+# Local Claude Code settings
+.claude/settings.local.json
