@@ -359,3 +359,12 @@ button.kv-swatch:disabled { opacity: 0.3; }
 .kv-map .pk-hot.wrong { fill: #f2a1a1; }
 .kv-matchboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .kv-matchcell { overflow-wrap: anywhere; padding: 4px 6px; font-size: clamp(0.95rem, 4.4vw, 1.15rem); }
+.kv-pvchart { width: 100%; }
+.kv-pvchart table { width: 100%; max-width: 360px; table-layout: fixed; }
+.kv-pvchart th { padding: 4px 2px; font-size: clamp(0.55rem, 2.6vw, 0.8rem); overflow-wrap: anywhere; }
+.kv-pvchart td { padding: 4px 6px; }
+.kv-itemgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kv-itemcell { min-width: 0; padding: 4px; }
+.kv-itemcell .kv-choice-text { font-size: 0.78rem; overflow-wrap: anywhere; text-align: center; line-height: 1.1; }
+.kv-pcell { padding: 3px 1px; border-width: 2px; }
+@media (max-width: 360px) { .kv-solar { --k: 0.6; gap: 3px; } .kv-pname { font-size: 0.5rem; } }

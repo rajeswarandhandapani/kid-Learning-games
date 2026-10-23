@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const base = process.env.BASE_URL || 'http://localhost:4173';
 const only = process.env.ONLY;
+const width = Number(process.env.VIEW_WIDTH || 390); // VIEW_WIDTH=320 plays everything on a small phone
 
 const sections = [];
 const section = (name, fn) => sections.push([name, fn]);
@@ -14,7 +15,7 @@ const section = (name, fn) => sections.push([name, fn]);
 (async () => {
   fs.mkdirSync('artifacts', { recursive: true });
   const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const page = await browser.newPage({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
   const errors = [];
   const external = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -27,7 +28,8 @@ const section = (name, fn) => sections.push([name, fn]);
   async function playQuiz(path, check, rounds = 10) {
     await go(path);
     await page.locator('#start-btn').click();
-    for (let i = 0; i < rounds; i++) {
+    const total = Number(await page.locator('#total-questions').textContent());
+    for (let i = 0; i < Math.min(rounds, total); i++) {
       await page.locator('.quiz-choice-btn').first().waitFor();
       const prompt = await page.locator('#question-text').textContent();
       const labels = await page.locator('.quiz-choice-btn').evaluateAll((bs) => bs.map((b) => b.dataset.answer));
@@ -42,7 +44,7 @@ const section = (name, fn) => sections.push([name, fn]);
       await noOverflow(path);
       await page.locator('.quiz-next').click();
     }
-    assert.ok(await page.locator('#results-screen').isVisible(), path);
+    if (rounds >= total) assert.ok(await page.locator('#results-screen').isVisible(), path);
   }
 
   /** Hand-built game: wait for the play screen. */
@@ -59,6 +61,202 @@ const section = (name, fn) => sections.push([name, fn]);
 
   // ---- sections are registered below ------------------------------------
   //@@SECTIONS@@
+  section('home: learning paths tick off played games and the grown-up report reads the history', async ({ page, assert, base }) => {
+    await page.goto(base + '/index.html');
+    await page.evaluate(() => { localStorage.clear(); });
+    await page.reload();
+    await page.locator('#path-tabs [data-path="math"]').click();
+    assert.equal(await page.locator('#path-steps a.done').count(), 0);
+    assert.match(await page.locator('#path-next').textContent(), /Next up: Hear numbers/);
+    assert.match(await page.locator('#parent-open').click().then(() => page.locator('#parent-report').textContent()), /No rounds yet/);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => {
+      KlgProgress.record({ gameId: 'number-sounds', score: 10, total: 10 });
+      KlgProgress.record({ gameId: 'fractions', score: 2, total: 10 });
+      KlgProgress.record({ gameId: 'fractions', score: 3, total: 10 });
+      KlgProgress.record({ gameId: 'counting', score: 9, total: 10 });
+      KlgProgress.record({ gameId: 'counting', score: 10, total: 10 });
+    });
+    await page.reload();
+    await page.locator('#path-tabs [data-path="math"]').click();
+    assert.equal(await page.locator('#path-steps a.done').count(), 2, 'number sounds and counting have stars; fractions at 30% has none yet');
+    assert.match(await page.locator('#path-next').textContent(), /Next up: Shapes/);
+    assert.equal(await page.locator('#path-steps a.next-up').count(), 1);
+    await page.locator('#parent-open').click();
+    const report = await page.locator('#parent-report').textContent();
+    assert.match(report, /Needs practice:\s*Fractions/);
+    assert.match(report, /Ready for next/);
+    assert.match(report, /Counting/);
+    const stats = await page.evaluate(() => KlgProgress.gameStats('counting'));
+    assert.deepEqual(stats.recent, [90, 100]);
+    assert.ok(stats.byMode.default.plays === 2);
+    await page.keyboard.press('Escape');
+    // New games carry a NEW flag and appear under their subject tab
+    await page.locator('button[data-subject="science"]').click();
+    assert.ok(await page.locator('.game-card[data-game="my-body"]').isVisible());
+    assert.ok(await page.locator('.game-card[data-new] .klg-card-flag').count() >= 5, 'new games are flagged');
+    await page.evaluate(() => localStorage.clear());
+  });
+
+  section('layout: new and upgraded games fit a 320px phone', async ({ page, assert, go, noOverflow }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cat = require('../assets/js/catalogue.js');
+    const fresh = cat.GAMES.filter((g) => g.isNew).map((g) => g.id);
+    const upgraded = ['fractions', 'time', 'money', 'measurement', 'rounding-place-value', 'comparing-numbers', 'addition-subtraction', 'counting', 'patterns', 'calendar', 'science-quiz', 'solar-system', 'world-capitals', 'rhyming-words', 'opposites', 'spelling-bee', 'english-alphabets', 'shapes-colors', 'tamil-words', 'animal-habitats', 'baby-animals', 'reading-stories'];
+    for (const id of [...fresh, ...upgraded]) {
+      await go(`${id}/index.html`);
+      await noOverflow(id + ' start');
+      await page.locator('#start-btn').click();
+      await page.waitForTimeout(150);
+      await noOverflow(id + ' first question');
+    }
+    await page.setViewportSize({ width, height: 844 });
+  });
+
+  section('upgraded quiz games: every picture agrees with its answer', async ({ page, assert, playQuiz }) => {
+    const money = (c) => (c < 100 ? `${c}¢` : `$${(c / 100).toFixed(2)}`);
+    const cents = (t) => (/¢/.test(t) ? Number(t.replace(/\D/g, '')) : Math.round(Number(t.replace(/[^\d.]/g, '')) * 100));
+    const num = (t) => Number(String(t).replace(/,/g, ''));
+    const attrs = (sel, ...names) => page.locator(sel).first().evaluate((e, ns) => ns.map((n) => e.dataset[n]), names);
+
+    // Fractions: the shaded parts are the fraction (read a picture), and the picture answers match.
+    await playQuiz('fractions/index.html?type=identify', async ({ answer }) => {
+      const [n, d] = await attrs('.quiz-visual figure[data-num]', 'num', 'den');
+      assert.equal(`${n}/${d}`, answer);
+    });
+    await playQuiz('fractions/index.html?type=picture', async ({ prompt, answer }) => {
+      assert.equal(prompt.match(/shows (\d+\/\d+)/)[1], answer);
+      const [n, d] = await attrs('.quiz-choice-btn.correct figure[data-num]', 'num', 'den');
+      assert.equal(`${n}/${d}`, answer);
+    });
+    await playQuiz('fractions/index.html?type=add', async ({ prompt, answer }) => {
+      const parts = (await page.locator('.quiz-visual .kv-stacked').first().evaluate((f) => f.dataset.parts)).split(' ');
+      const [a, b] = prompt.match(/(\d+\/\d+)/g);
+      assert.deepEqual(parts, [a, b], 'the two bars are the two fractions');
+    });
+
+    // Time: the clock face shows the answer.
+    for (const level of [1, 2, 3]) {
+      await playQuiz(`time/index.html?type=clock&level=${level}`, async ({ prompt, answer }) => {
+        if (/What time/.test(prompt)) {
+          const [h, m] = await attrs('.quiz-visual .kv-clock', 'h', 'm');
+          assert.equal(`${h}:${String(m).padStart(2, '0')}`, answer);
+          if (level === 1) assert.ok(m === '0' || m === '30');
+        } else {
+          const [h, m] = await attrs('.quiz-choice-btn.correct .kv-clock', 'h', 'm');
+          assert.equal(`${h}:${String(m).padStart(2, '0')}`, answer);
+        }
+      }, 8);
+    }
+    await playQuiz('time/index.html?type=elapsed', async ({ prompt, answer }) => {
+      if (/How many minutes/.test(prompt)) return;
+      const [start, end] = await attrs('.quiz-visual .kv-timeline', 'start', 'end');
+      assert.ok(Number(end) > Number(start));
+      if (/How much time passes/.test(prompt)) {
+        const mins = Number(end) - Number(start);
+        const h = Math.floor(mins / 60), m = mins % 60;
+        assert.equal(h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`, answer);
+      }
+    }, 8);
+
+    // Money: coins drawn add up to the amount in the answer.
+    for (const level of [1, 2, 3]) {
+      await playQuiz(`money/index.html?type=coins&level=${level}`, async ({ prompt, answer }) => {
+        if (/in the picture/.test(prompt)) assert.equal(money(Number((await attrs('.quiz-visual .kv-tray', 'total'))[0])), answer);
+        else if (/Which coins make exactly/.test(prompt)) {
+          const target = cents(prompt.match(/exactly (\S+?)\?/)[1]);
+          assert.equal(Number((await attrs('.quiz-choice-btn.correct .kv-tray', 'total'))[0]), target);
+          const others = await page.locator('.quiz-choice-btn:not(.correct) .kv-tray').evaluateAll((ts) => ts.map((t) => Number(t.dataset.total)));
+          for (const o of others) assert.notEqual(o, target, 'wrong coin sets add up to something else');
+        } else assert.equal(cents(answer), Number((await attrs('.quiz-visual .kv-tray', 'total'))[0]), 'cents question shows the same amount');
+      }, 8);
+    }
+    await playQuiz('money/index.html?type=change', async ({ prompt, answer }) => {
+      const tags = await page.locator('.quiz-visual .kv-tag').evaluateAll((ts) => ts.map((t) => Number(t.dataset.cents)));
+      if (/change/.test(prompt)) {
+        const paid = Number((await attrs('.quiz-visual .kv-tray', 'total'))[0]);
+        assert.equal(money(paid - tags[0]), answer);
+      } else assert.equal(money(tags[0] + tags[1]), answer);
+    });
+
+    // Measurement: ruler, jug, thermometer and balance.
+    await playQuiz('measurement/index.html?mode=read', async ({ prompt, answer }) => {
+      if (/How long is/.test(prompt)) assert.equal(`${(await attrs('.quiz-visual .kv-ruler', 'value'))[0]} cm`, answer);
+      else if (/jug/.test(prompt)) assert.equal(`${(await attrs('.quiz-visual .kv-jug', 'value'))[0]} ml`, answer);
+      else if (/thermometer/.test(prompt)) assert.equal(`${(await attrs('.quiz-visual .kv-thermo', 'value'))[0]}°C`, answer);
+      else {
+        const heavier = (await attrs('.quiz-visual .kv-balance', 'heavier'))[0];
+        const emojis = await page.locator('.quiz-visual .kv-pan-emoji').allTextContents();
+        const want = /heavier/.test(prompt) ? (heavier === 'left' ? emojis[0] : emojis[1]) : (heavier === 'left' ? emojis[1] : emojis[0]);
+        assert.ok(answer.startsWith(want), `${answer} should start with ${want}`);
+      }
+    }, 12);
+
+    // Place value and rounding.
+    for (const level of [1, 2]) {
+      await playQuiz(`rounding-place-value/index.html?level=${level}`, async ({ prompt, answer }) => {
+        if (/Round/.test(prompt)) {
+          const n = num(prompt.match(/Round ([\d,]+)/)[1]);
+          const [v, lo, hi] = await attrs('.quiz-visual .kv-roundline', 'value', 'lo', 'hi');
+          assert.equal(Number(v), n);
+          assert.ok(Number(lo) <= n && n < Number(hi));
+          assert.ok([Number(lo), Number(hi)].includes(num(answer)), 'the rounded number is one of the two marks');
+        } else if (/value of the/.test(prompt)) assert.equal(Number((await attrs('.quiz-visual .kv-blocks', 'value'))[0]), num(prompt.match(/in ([\d,]+)/)[1]));
+        else if (/Which digit/.test(prompt)) assert.equal(Number((await attrs('.quiz-visual .kv-pvchart', 'value'))[0]), num(prompt.match(/of ([\d,]+)/)[1]));
+        else assert.equal(Number((await attrs('.quiz-visual .kv-blocks', 'value'))[0]), num(answer));
+      });
+    }
+
+    // Comparing numbers, adding, subtracting and counting.
+    await playQuiz('comparing-numbers/index.html?max=10&type=biggest', async ({ answer }) => {
+      assert.equal(await page.locator('.quiz-choice-btn.correct .kv-tenframes').evaluate((f) => f.dataset.value), answer);
+      const values = await page.locator('.quiz-choice-btn .kv-tenframes').evaluateAll((fs) => fs.map((f) => Number(f.dataset.value)));
+      assert.equal(Math.max(...values), Number(answer));
+    });
+    await playQuiz('comparing-numbers/index.html?max=100&type=symbol', async ({ prompt, answer }) => {
+      const [a, b] = prompt.match(/\d+/g).map(Number);
+      const values = await page.locator('.quiz-visual .kv-blocks').evaluateAll((fs) => fs.map((f) => Number(f.dataset.value)));
+      assert.deepEqual(values, [a, b]);
+      assert.equal(a < b ? '<' : a > b ? '>' : '=', answer);
+    });
+    await playQuiz('addition-subtraction/index.html?max=20', async ({ prompt, answer }) => {
+      const [a, op, b] = prompt.match(/(\d+) ([+−]) (\d+)/).slice(1);
+      const frame = await attrs('.quiz-visual .kv-tenframes', 'value', 'split', 'crossed');
+      if (op === '+') { assert.equal(Number(frame[0]), Number(a) + Number(b)); assert.equal(Number(frame[1]), Number(a)); }
+      else { assert.equal(Number(frame[0]), Number(a)); assert.equal(Number(frame[2]), Number(b)); }
+      assert.equal(Number(answer), op === '+' ? Number(a) + Number(b) : Number(a) - Number(b));
+    });
+    await playQuiz('counting/index.html?mode=tenframe&max=20', async ({ answer }) => {
+      assert.equal((await attrs('.quiz-visual .kv-tenframes', 'value'))[0], answer);
+    });
+    await playQuiz('counting/index.html?mode=dice', async ({ answer }) => {
+      assert.equal((await attrs('.quiz-visual .kv-dice', 'total'))[0], answer);
+      assert.equal(await page.locator('.quiz-visual .kv-pip').count(), Number(answer));
+    });
+
+    // Calendar grid.
+    await playQuiz('calendar/index.html?type=grid', async ({ prompt, answer }) => {
+      const [start, length] = (await attrs('.quiz-visual .kv-month', 'start', 'length')).map(Number);
+      const marked = await page.locator('.quiz-visual .kv-month td.on').allTextContents();
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      if (/What day of the week/.test(prompt)) assert.equal(days[(start + Number(marked[0]) - 1) % 7], answer);
+      else if (/How many days/.test(prompt)) assert.equal(Number(marked[1]) - Number(marked[0]), Number(answer));
+      else assert.equal(Number(marked[0]) + 7, Number(answer));
+      assert.ok(await page.locator('.quiz-visual .kv-month td:not(:empty)').count() === length, 'month has the right number of days');
+    });
+
+    // Solar system strip.
+    await playQuiz('solar-system/index.html?mode=order', async ({ prompt, answer }) => {
+      if (/from the Sun\?/.test(prompt) && /Which planet is/.test(prompt)) {
+        const ord = Number(prompt.match(/(\d)(?:st|nd|rd|th)/)[1]);
+        const idx = await page.locator('.quiz-visual .kv-pcell').evaluateAll((cs) => cs.findIndex((c) => c.classList.contains('marked')));
+        assert.equal(idx + 1, ord);
+        const names = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
+        assert.equal(names[idx], answer);
+      }
+    }, 12);
+  });
+
   section('map-explorer: the region tapped is the continent or ocean asked for', async ({ page, assert, startRound, finishRound, noOverflow }) => {
     const HOME = { kangaroo: 'oceania', koala: 'oceania', 'giant panda': 'asia', tiger: 'asia', lion: 'africa', giraffe: 'africa', zebra: 'africa', 'emperor penguin': 'antarctica', llama: 'south-america', bison: 'north-america', 'the Eiffel Tower': 'europe', 'the Statue of Liberty': 'north-america', 'the pyramids': 'africa', 'a Japanese castle': 'asia', 'an ancient Greek temple': 'europe' };
     const NAMES = { 'North America': 'north-america', 'South America': 'south-america', Europe: 'europe', Africa: 'africa', Asia: 'asia', Oceania: 'oceania', Antarctica: 'antarctica', 'Pacific Ocean': 'pacific', 'Atlantic Ocean': 'atlantic', 'Indian Ocean': 'indian', 'Arctic Ocean': 'arctic', 'Southern Ocean': 'southern' };
