@@ -9,9 +9,11 @@
     "test:e2e": "node tests/browser.cjs",
     "build": "node scripts/build.cjs",
     "sync:index": "node scripts/sync-index.cjs",
+    "new-game": "node scripts/new-game.cjs",
     "test:tamil": "node tests/tamil-browser.cjs",
     "test:tamil-games": "node tests/tamil-games-browser.cjs",
     "test:math": "node tests/math-games-browser.cjs",
+    "test:pictures": "node tests/picture-games-browser.cjs",
     "audio:tamil": "node scripts/fetch-tamil-audio.cjs"
   },
   "devDependencies": {

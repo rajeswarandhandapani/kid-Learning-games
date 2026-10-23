@@ -1,7 +1,7 @@
 /**
  * KlgShapes — flat shapes and solid shapes drawn as SVG.
  *
- *   polygon(name)        triangle | square | rectangle | pentagon | hexagon | octagon
+ *   polygon(name)        triangle | square | rectangle | pentagon | hexagon | octagon | circle
  *   solid(name)          cube | sphere | cylinder | cone | pyramid
  *   SIDES                { triangle: 3, … } sides (and corners) of each flat shape
  *   FACES                solids: { cube: { faces: 6, edges: 12, corners: 8 }, … }
@@ -41,7 +41,8 @@
 
   function polygon(name, { label } = {}) {
     const { f, svg } = frame(name, label, "kv-flat2d");
-    if (name === "rectangle") svg.appendChild(V.el("rect", { x: 12, y: 32, width: 96, height: 56, class: "kv-fill", rx: 2 }));
+    if (name === "circle") svg.appendChild(V.el("circle", { cx: 60, cy: 60, r: 44, class: "kv-fill" }));
+    else if (name === "rectangle") svg.appendChild(V.el("rect", { x: 12, y: 32, width: 96, height: 56, class: "kv-fill", rx: 2 }));
     else if (name === "square") svg.appendChild(V.el("rect", { x: 24, y: 24, width: 72, height: 72, class: "kv-fill", rx: 2 }));
     else {
       const n = SIDES[name];

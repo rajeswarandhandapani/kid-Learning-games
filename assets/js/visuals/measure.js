@@ -1,7 +1,8 @@
 /**
  * KlgMeasureVis — things to measure.
  *
- *   ruler(len, { unit, emoji, max })   an object laid against a ruler from 0
+ *   ruler(len, { unit, emoji, max, marker })   an object laid against a ruler from 0;
+ *                                      marker: true adds a movable line, figure.setMarker(v)
  *   balance(left, right, { leftEmoji, rightEmoji })  scales that tip to the heavier side
  *   jug(fill, max, { unit })           measuring jug filled to `fill`
  *   thermometer(temp, { min, max })    thermometer reading
@@ -12,7 +13,7 @@
   "use strict";
   const V = window.KlgMathVis;
 
-  function ruler(len, { unit = "cm", emoji = "✏️", max = Math.max(10, Math.ceil(len) + 1), label } = {}) {
+  function ruler(len, { unit = "cm", emoji = "✏️", max = Math.max(10, Math.ceil(len) + 1), label, marker = false } = {}) {
     const f = V.figure(label || "A " + emoji + " lined up on a ruler, from 0 to " + len + " " + unit, "kv-measure kv-ruler");
     f.dataset.value = String(len);
     const w = 320, pad = 16, scale = (w - 2 * pad) / max;
@@ -24,6 +25,16 @@
     for (let i = 0; i <= max; i++) {
       svg.appendChild(V.el("line", { x1: pad + i * scale, y1: 54, x2: pad + i * scale, y2: 54 + 16, class: "kv-tick-big" }));
       svg.appendChild(V.el("text", { x: pad + i * scale, y: 92, class: "kv-tl-label", "text-anchor": "middle" }, String(i)));
+    }
+    if (marker) {
+      const line = V.el("line", { x1: pad, y1: 8, x2: pad, y2: 100, class: "kv-marker-line" });
+      svg.appendChild(line);
+      f.setMarker = function (v) {
+        line.setAttribute("x1", pad + v * scale);
+        line.setAttribute("x2", pad + v * scale);
+        f.dataset.marker = String(v);
+      };
+      f.setMarker(0);
     }
     f.appendChild(svg);
     return f;

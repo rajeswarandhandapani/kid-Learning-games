@@ -31,6 +31,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  for(const id of games){
   // Hand-built activities are played through in tests/tamil-games-browser.cjs and tests/math-games-browser.cjs.
   if(['tamil-letter-chart','tamil-letter-pop','tamil-tracing','tamil-word-puzzle','tamil-memory','share-fairly','array-garden','multiples-hunt'].includes(id))continue;
+  // New hand-built picture games (marked in their <head>) are played in tests/picture-games-browser.cjs.
+  if(fs.readFileSync(path.join('games',id,'index.html'),'utf8').includes('name="klg-handbuilt"'))continue;
   await page.goto(`${base}/games/${id}/index.html`);await page.locator('#start-btn').click();
   if(id==='memory-match')continue;
   if(id==='tamil-sentence-words'||id==='tamil-missing-letters'){

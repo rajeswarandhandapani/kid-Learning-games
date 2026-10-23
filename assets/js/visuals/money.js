@@ -8,6 +8,7 @@
  *   sum(list)                  total in cents
  *   fmt(cents)                 "63¢" or "$1.15"
  *   greedy(cents)              fewest coins/notes for that amount
+ *   tag(emoji, name, cents)    a shop price label (data-cents holds the price)
  *
  * A tray carries data-total (cents) so tests can compare picture and answer.
  */
@@ -67,5 +68,12 @@
     return out;
   }
 
-  window.KlgMoneyVis = { coin, note, piece, tray, describe, sum, fmt, greedy, DENOMS, NAME };
+  function tag(emoji, name, cents) {
+    const t = V.figure(name + ", " + fmt(cents), "kv-tag");
+    t.dataset.cents = String(cents);
+    t.innerHTML = '<span class="kv-tag-pic" aria-hidden="true">' + emoji + '</span><span class="kv-tag-price" aria-hidden="true">' + fmt(cents) + "</span>";
+    return t;
+  }
+
+  window.KlgMoneyVis = { coin, note, piece, tray, describe, sum, fmt, greedy, tag, DENOMS, NAME, PLURAL };
 })();
