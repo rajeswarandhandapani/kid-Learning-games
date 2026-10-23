@@ -191,3 +191,31 @@ figure[class*="kv-"] { margin: 0 auto; max-width: 100%; }
 /* "Show me" hint (QuizEngine hintVisual) */
 .quiz-hint { margin: 0 auto 12px; text-align: center; }
 .quiz-hint-btn { border: 2px solid #b34c13; background: #fff7f0; color: #7a3406; border-radius: 999px; padding: 8px 18px; font-weight: 700; }
+
+/* Emoji clues and picture answers */
+.kv-clue { margin: 0 auto; text-align: center; font-size: 3.4rem; line-height: 1.2; letter-spacing: 4px; }
+.kv-emoji { font-size: 2.2rem; line-height: 1.1; }
+
+/* Solar system strip */
+.kv-solar { --k: 1; display: flex; align-items: flex-end; justify-content: center; gap: calc(6px * var(--k)); margin: 0 auto; flex-wrap: nowrap; }
+.kv-sun { font-size: calc(2.4rem * var(--k)); line-height: 1; align-self: center; }
+.kv-pcell { display: flex; flex-direction: column; align-items: center; padding: 3px 2px; border-radius: 10px; border: 3px solid transparent; }
+.kv-pcell.marked { border-color: #b64261; background: #fff0f4; }
+.kv-pslot { display: flex; align-items: center; justify-content: center; height: calc(56px * var(--k)); }
+.kv-pname { font-size: 0.65rem; font-weight: 800; color: #203341; min-height: 1em; }
+.kv-planet { display: inline-block; border-radius: 50%; width: calc(var(--s) * var(--k, 1)); height: calc(var(--s) * var(--k, 1)); background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 40%), var(--c); box-shadow: inset -4px -4px 8px #00000030; position: relative; }
+.kv-planet.ring::after { content: ""; position: absolute; left: -35%; right: -35%; top: 38%; height: 24%; border: 3px solid #b99c6a; border-radius: 50%; transform: rotate(-18deg); }
+.kv-pchoice { min-height: 74px; justify-content: center; }
+.kv-pchoice .kv-planet { --k: 1; }
+@media (max-width: 420px) { .kv-solar { --k: 0.72; } .kv-pname { font-size: 0.55rem; } }
+
+/* Shapes */
+.kv-shape svg { width: 100%; max-width: 150px; height: auto; display: block; margin: 0 auto; }
+.kv-fill { fill: #8fd3b0; stroke: #24754c; stroke-width: 4; stroke-linejoin: round; }
+.kv-face-a { fill: #9fb4f0; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-face-b { fill: #c9d6ff; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-face-c { fill: #7c97e6; stroke: #3f56b3; stroke-width: 3; stroke-linejoin: round; }
+.kv-edge { stroke: #3f56b3; stroke-width: 3; }
+.quiz-choice-btn.has-visual .kv-shape svg { max-width: 90px; }
+.quiz-choice-btn.has-visual .kv-scene { width: 100%; }
+.quiz-choice-btn.has-visual .kv-sitem { font-size: 1.3em !important; }

@@ -813,3 +813,6 @@ dialog h4 { font-size:15px; margin:18px 0 6px; }
   #parent-dialog { position:static; box-shadow:none; border:0; width:100%; }
   #parent-dialog .dialog-heading button, #parent-dialog .reset-button, #parent-dialog .parent-badges, .print-report { display:none !important; }
 }
+
+/* Long answer words stay whole next to the listen button on narrow phones */
+.quiz-choice-tile.has-listen .quiz-choice-btn { padding-left: 0.4rem; padding-right: 2.9rem; font-size: clamp(1.05rem, 4.6vw, 1.5rem); overflow-wrap: break-word; word-break: normal; hyphens: none; }
