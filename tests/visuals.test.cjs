@@ -47,4 +47,8 @@ test('place-value blocks split a number into hundreds, tens and ones', () => {
   const p = B.parts(n);
   assert.equal(p.h * 100 + p.t * 10 + p.o, n);
  }
+ for (let n = 0; n < 10000; n += 37) {
+  const p = B.parts(n);
+  assert.equal(p.th * 1000 + p.h * 100 + p.t * 10 + p.o, n);
+ }
 });
