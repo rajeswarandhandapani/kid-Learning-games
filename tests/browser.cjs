@@ -14,7 +14,7 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.goto(base);await page.evaluate(()=>document.fonts.ready);
  assert.equal(await page.locator('.game-card').count(),GAME_COUNT);
  await page.screenshot({path:'artifacts/home-desktop.png'});
- await page.locator('#game-search').fill('fractions');assert.equal(await page.locator('.game-tile:visible').count(),1);
+ await page.locator('#game-search').fill('fractions');assert.equal(await page.locator('.game-tile:visible').count(),CAT.GAMES.filter(g=>(g.name+' '+g.blurb).toLowerCase().includes('fractions')).length);
  await page.locator('#game-search').fill('unfindable');assert.ok(await page.locator('#empty-games').isVisible());
  await page.locator('#clear-filters').click();
  await page.getByRole('button',{name:'Favorite Counting',exact:true}).click();
