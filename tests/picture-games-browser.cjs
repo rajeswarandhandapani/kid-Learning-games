@@ -59,6 +59,185 @@ const section = (name, fn) => sections.push([name, fn]);
 
   // ---- sections are registered below ------------------------------------
   //@@SECTIONS@@
+  section('map-explorer: the region tapped is the continent or ocean asked for', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    const HOME = { kangaroo: 'oceania', koala: 'oceania', 'giant panda': 'asia', tiger: 'asia', lion: 'africa', giraffe: 'africa', zebra: 'africa', 'emperor penguin': 'antarctica', llama: 'south-america', bison: 'north-america', 'the Eiffel Tower': 'europe', 'the Statue of Liberty': 'north-america', 'the pyramids': 'africa', 'a Japanese castle': 'asia', 'an ancient Greek temple': 'europe' };
+    const NAMES = { 'North America': 'north-america', 'South America': 'south-america', Europe: 'europe', Africa: 'africa', Asia: 'asia', Oceania: 'oceania', Antarctica: 'antarctica', 'Pacific Ocean': 'pacific', 'Atlantic Ocean': 'atlantic', 'Indian Ocean': 'indian', 'Arctic Ocean': 'arctic', 'Southern Ocean': 'southern' };
+    for (const level of [1, 2, 3]) {
+      await startRound(`map-explorer/index.html?level=${level}`);
+      for (let i = 0; i < 8; i++) {
+        const task = await page.locator('#task').textContent();
+        const answer = await page.locator('#stage svg.kv-map').evaluate((s) => s.dataset.answer);
+        const continents = await page.locator('#stage svg [data-region]').evaluateAll((rs) => rs.map((r) => r.dataset.region));
+        assert.ok(continents.includes(answer), 'answer region is on the map');
+        assert.equal(await page.locator('#stage svg text').count(), level === 1 ? 7 : 0, 'names only at level 1');
+        const oceans = continents.filter((c) => ['pacific', 'atlantic', 'indian', 'arctic', 'southern'].includes(c));
+        assert.equal(oceans.length > 0, level === 3, 'oceans only at level 3');
+        if (/^Tap /.test(task)) {
+          const name = task.match(/^Tap (.+)\.$/)[1];
+          assert.equal(NAMES[name], answer, `${name} -> ${answer}`);
+        } else {
+          const what = (task.match(/Where does the (.+?) live\?/) || task.match(/Where can you find (.+?)\?/))[1];
+          const key = Object.keys(HOME).find((k) => k === what);
+          assert.equal(HOME[key], answer, `${what} lives in ${HOME[key]}`);
+          assert.ok(await page.locator('#stage .kv-clue').count());
+        }
+        if (i === 0) { const wrong = continents.find((c) => c !== answer && !oceans.includes(c)); await page.locator(`#stage [data-region="${wrong}"]`).first().focus(); await page.keyboard.press('Enter'); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+        await page.locator(`#stage [data-region="${answer}"]`).first().focus();
+        await page.keyboard.press('Enter');
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('map-explorer');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('weather-wear: helpful items match the weather and the scene names its season', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    const GOOD = { sunny: ['sun hat', 'sunglasses', 'shorts', 'sunscreen'], rainy: ['umbrella', 'rain boots', 'raincoat'], snowy: ['scarf', 'gloves', 'warm coat', 'snow boots'] };
+    for (const level of [1, 2]) {
+      await startRound(`weather-wear/index.html?level=${level}`);
+      let seasons = 0;
+      for (let i = 0; i < 6; i++) {
+        const task = await page.locator('#task').textContent();
+        if (/Which season/.test(task)) {
+          seasons += 1;
+          const season = await page.locator('#stage .kv-scene').evaluate((s) => document.querySelector('#stage .kv-scene').parentElement.querySelector('[data-season]').dataset.season);
+          const real = await page.evaluate(() => [...document.querySelectorAll('#stage .kv-scene')].map((e) => e.dataset.season)[0]);
+          assert.ok(['spring', 'summer', 'autumn', 'winter'].includes(real || season));
+          const answer = real;
+          const buttons = await page.locator('#stage button[data-season]').evaluateAll((bs) => bs.map((b) => b.dataset.season));
+          assert.equal(buttons.length, 4);
+          if (i === 1) { await page.locator(`#stage button[data-season]:not([data-season="${answer}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage button[data-season="${answer}"]`).click();
+        } else {
+          assert.match(task, /It is (sunny|rainy|snowy) today/);
+          const weather = task.match(/It is (\w+) today/)[1];
+          const scene = await page.locator('#stage .kv-scene').evaluate((s) => s.dataset.weather);
+          assert.equal(scene.slice(0, 4), weather.slice(0, 4), 'scene shows the weather named in the task');
+          const items = await page.locator('#stage .kv-itemcell').evaluateAll((bs) => bs.map((b) => ({ name: b.dataset.item, good: b.dataset.good === 'true' })));
+          assert.equal(items.length, 6);
+          assert.equal(items.filter((x) => x.good).length, 3);
+          for (const it of items) assert.equal(it.good, GOOD[scene].includes(it.name), `${it.name} is ${it.good ? '' : 'not '}needed in ${scene} weather`);
+          if (i === 0) { // choosing something unhelpful is gently corrected
+            await page.locator('#stage .kv-itemcell[data-good="false"]').first().click();
+            await page.getByRole('button', { name: 'Check my choices' }).click();
+            assert.equal(await page.locator('#next-btn').isHidden(), true);
+            await page.locator('#stage .kv-itemcell[data-good="false"]').first().click(); // un-pick
+          }
+          const goods = page.locator('#stage .kv-itemcell[data-good="true"]');
+          for (let k = 0; k < 3; k++) await goods.nth(k).click();
+          await page.getByRole('button', { name: 'Check my choices' }).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('weather-wear');
+        await page.locator('#next-btn').click();
+      }
+      assert.equal(seasons, level === 2 ? 3 : 0, 'season questions only at level 2');
+      await finishRound();
+    }
+  });
+
+  section('sort-it: every picture ends up in a group it belongs to', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`sort-it/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const bins = await page.locator('#stage .pk-bin').evaluateAll((bs) => bs.map((b) => b.dataset.bin));
+        assert.equal(bins.length, level === 1 ? 2 : 3);
+        const items = await page.locator('#stage .pk-item').evaluateAll((bs) => bs.map((b) => ({ id: b.dataset.id, bin: b.dataset.bin })));
+        assert.equal(items.length, level === 1 ? 6 : 6);
+        assert.equal(new Set(items.map((x) => x.id)).size, items.length, 'distinct pictures');
+        for (const b of bins) assert.ok(items.some((x) => x.bin === b), `group ${b} has a picture`);
+        if (i === 0) {
+          const it = items[0]; const wrong = bins.find((b) => b !== it.bin);
+          await page.locator(`#stage .pk-item[data-id="${it.id}"]`).click();
+          await page.locator(`#stage .pk-bin[data-bin="${wrong}"]`).click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+          assert.match(await page.locator('#feedback').textContent(), /does not go/);
+        }
+        for (const it of items) {
+          await page.locator(`#stage .pk-pool .pk-item[data-id="${it.id}"]`).click();
+          await page.locator(`#stage .pk-bin[data-bin="${it.bin}"]`).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#stage .pk-bin .pk-item').count(), items.length);
+        await noOverflow('sort-it');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('my-body: the part tapped is the part asked for; senses match their organ', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    const SENSE = { 'see a rainbow': 'eyes', 'hear music': 'ears', 'smell a rose': 'nose', 'taste a lemon': 'tongue', 'feel an ice cube': 'hands' };
+    for (const level of [1, 2]) {
+      await startRound(`my-body/index.html?level=${level}`);
+      const parts1 = ['head', 'eyes', 'ears', 'nose', 'mouth', 'hands', 'feet'];
+      for (let i = 0; i < 8; i++) {
+        const task = await page.locator('#task').textContent();
+        if (/helps you/.test(task)) {
+          const verb = task.match(/helps you (.+)\?/)[1];
+          const options = await page.locator('#stage button[data-part]').evaluateAll((bs) => bs.map((b) => b.dataset.part));
+          assert.equal(new Set(options).size, 4);
+          assert.ok(options.includes(SENSE[verb]));
+          if (i === 3) { await page.locator(`#stage button[data-part]:not([data-part="${SENSE[verb]}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage button[data-part="${SENSE[verb]}"]`).click();
+        } else {
+          const id = await page.locator('#stage svg.kv-child').evaluate((s) => s.dataset.target);
+          if (level === 1) assert.ok(parts1.includes(id), 'level 1 asks only the first seven parts: ' + id);
+          const n = await page.locator(`#stage [data-part="${id}"]`).count();
+          assert.ok(n >= 1 && n <= 2, `${id} is drawn once or as a pair`);
+          if (i === 0) {
+            const wrong = parts1.find((p) => p !== id);
+            await page.locator(`#stage [data-part="${wrong}"]`).first().focus();
+            await page.keyboard.press('Enter');
+            assert.equal(await page.locator('#next-btn').isHidden(), true);
+            assert.match(await page.locator('#feedback').textContent(), /Look for the/);
+          }
+          // keyboard path for the last one; click for the rest
+          if (i === 6) { await page.locator(`#stage [data-part="${id}"]`).last().focus(); await page.keyboard.press('Enter'); }
+          else await page.locator(`#stage [data-part="${id}"]`).first().dispatchEvent('click');
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('my-body');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('life-cycles: the next stage and the order follow the real life cycle', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    const CYCLES = { butterfly: ['Egg', 'Caterpillar', 'Chrysalis', 'Butterfly'], frog: ['Frogspawn', 'Tadpole', 'Frog'], chicken: ['Egg', 'Hatching', 'Chick', 'Hen'], 'apple tree': ['Seed', 'Sprout', 'Tree', 'Apple'], sunflower: ['Seed', 'Sprout', 'Plant', 'Flower'], person: ['Baby', 'Child', 'Adult', 'Older person'] };
+    for (const level of [1, 2]) {
+      await startRound(`life-cycles/index.html?level=${level}`);
+      for (let i = 0; i < 6; i++) {
+        const task = await page.locator('#task').textContent();
+        if (/what comes next/.test(task)) {
+          const cycle = await page.locator('#stage .kv-cyclerow').evaluate((r) => r.dataset.cycle);
+          const answer = await page.locator('#stage .kv-cyclerow').evaluate((r) => r.dataset.answer);
+          const shown = await page.locator('#stage .kv-cyclerow .kv-cyclecell:not(.kv-next) .kv-caption').allTextContents();
+          assert.deepEqual(shown, CYCLES[cycle].slice(0, shown.length), 'shown stages are the cycle in order');
+          assert.equal(answer, CYCLES[cycle][shown.length], 'answer is the very next stage');
+          const options = await page.locator('#stage button[data-stage]').evaluateAll((bs) => bs.map((b) => b.dataset.stage));
+          assert.equal(options.length, 4);
+          for (const o of options) if (o !== answer) assert.ok(!shown.includes(o), 'wrong picks are not earlier stages of the same cycle: ' + o);
+          if (i === 0) { await page.locator(`#stage button[data-stage]:not([data-stage="${answer}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage button[data-stage="${answer}"]`).click();
+        } else {
+          assert.equal(level, 2, 'order questions come at level 2');
+          const m = task.match(/life of the (.+?) in order/);
+          const names = CYCLES[m[1]];
+          for (let k = 0; k < names.length; k++) await page.locator(`#stage .pk-card[data-id="${k}"]`).click();
+          assert.deepEqual(await page.locator('#stage .pk-slot .kv-caption').allTextContents(), names);
+          await page.getByRole('button', { name: 'Check the order' }).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('life-cycles');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
   section('tamil-story-time: four panels, one question, picture answers', async ({ page, assert, startRound, finishRound, noOverflow }) => {
     for (const level of [1, 2]) {
       await startRound(`tamil-story-time/index.html?level=${level}`);

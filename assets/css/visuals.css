@@ -333,3 +333,29 @@ button.kv-swatch:disabled { opacity: 0.3; }
 .kv-tword.rec { text-decoration: underline dotted #b0701f; text-underline-offset: 4px; }
 .kv-english { font-size: 0.8rem; color: #60717a; }
 .kv-question { font-size: 1.25rem; font-weight: 800; text-align: center; margin: 4px 0; }
+
+/* Life cycles */
+.kv-cyclerow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+.kv-cyclecell { min-width: 70px; min-height: 84px; padding: 4px; border: 3px solid #dce4e9; border-radius: 12px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.kv-cyclecell.kv-next { border: 3px dashed #b64261; font-size: 2rem; font-weight: 800; color: #b64261; }
+.kv-picbtn .kv-storycard { max-width: 76px; }
+
+/* My body */
+.kv-child { width: min(220px, 70vw); height: auto; }
+.kv-child .pk-hot { cursor: pointer; }
+.kv-child .pk-hot:hover, .kv-child .pk-hot:focus-visible { fill: #ffe69a88; stroke: #b64261; stroke-width: 2; outline: none; }
+.kv-child .pk-hot.right { fill: #7bc67e99; stroke: #24754c; stroke-width: 2; }
+
+/* Weather & seasons */
+.kv-itemgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(360px, 100%); }
+.kv-itemcell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 92px; padding: 6px; border: 3px solid #dce4e9; border-radius: 14px; background: #fff; }
+.kv-itemcell.on { border-color: #4055b5; background: #eef1ff; box-shadow: 0 0 0 3px #9fb0ff; }
+
+/* Map explorer */
+.kv-map { width: min(380px, 100%); height: auto; }
+.kv-map .pk-hot { cursor: pointer; }
+.kv-map .pk-hot:hover, .kv-map .pk-hot:focus-visible { filter: brightness(1.12); stroke: #b64261; stroke-width: 2.5; outline: none; }
+.kv-map .pk-hot.right { fill: #7bc67e; stroke: #24754c; stroke-width: 2.5; }
+.kv-map .pk-hot.wrong { fill: #f2a1a1; }
+.kv-matchboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.kv-matchcell { overflow-wrap: anywhere; padding: 4px 6px; font-size: clamp(0.95rem, 4.4vw, 1.15rem); }

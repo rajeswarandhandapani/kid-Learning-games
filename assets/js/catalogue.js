@@ -35,7 +35,7 @@
     "english.vocabulary": "Picture words", "english.letters": "Letters & sounds", "english.rhyme": "Rhyming",
     "english.comprehension": "Understanding stories", "english.spelling": "Spelling", "english.phonics": "Phonics", "english.sight-words": "Sight words", "english.sentences": "Making sentences", "english.sequencing": "Story order",
     "world.feelings": "Feelings", "world.everyday": "Everyday things", "world.geography": "Countries & capitals",
-    "science.animals": "Animals", "science.space": "Space", "science.general": "Science facts",
+    "science.animals": "Animals", "science.space": "Space", "science.general": "Science facts", "science.life-cycles": "Life cycles", "science.body": "My body", "science.sorting": "Sorting & grouping", "science.weather": "Weather & seasons", "world.map": "World map",
     "math.number-names": "Number names", "math.counting": "Counting", "math.shapes": "Shapes", "math.colours": "Colours",
     "math.compare": "Comparing numbers", "math.add-sub": "Adding & subtracting", "math.skip-counting": "Skip counting",
     "math.calendar": "Calendar", "math.multiply": "Multiplying", "math.divide": "Dividing", "math.fractions": "Fractions",
@@ -113,6 +113,11 @@
     {"id":"tamil-picture-sentences","name":"படம் பார்த்து சொல்","icon":"🖼️","blurb":"Read a Tamil sentence and pick the picture it tells about.","level":2,"subject":"tamil","skills":["tamil.sentences"],"isNew":true},
     {"id":"tamil-english-match","name":"Tamil–English Match","icon":"🔗","blurb":"Match Tamil words to their pictures and English words.","level":2,"subject":"tamil","skills":["tamil.vocabulary"],"isNew":true},
     {"id":"tamil-story-time","name":"கதை நேரம்","icon":"📖","blurb":"Four-picture Tamil stories with listening questions.","level":3,"subject":"tamil","skills":["tamil.stories"],"isNew":true},
+    {"id":"life-cycles","name":"Life Cycles","icon":"🦋","blurb":"Put the stages of a butterfly, frog, plant or chicken in order.","level":2,"subject":"science","skills":["science.life-cycles"],"isNew":true},
+    {"id":"my-body","name":"My Body","icon":"🧍","blurb":"Tap body parts on the picture and match the five senses.","level":1,"subject":"science","skills":["science.body"],"isNew":true},
+    {"id":"sort-it","name":"Sort It!","icon":"🗂️","blurb":"Sort pictures: living or not, land, water or air, float or sink.","level":1,"subject":"science","skills":["science.sorting"],"isNew":true},
+    {"id":"weather-wear","name":"Weather & Seasons","icon":"☔","blurb":"Dress for the weather and name the season.","level":1,"subject":"science","skills":["science.weather"],"isNew":true},
+    {"id":"map-explorer","name":"Map Explorer","icon":"🗺️","blurb":"Find continents and oceans, and where animals and landmarks belong.","level":4,"subject":"science","skills":["world.map"],"isNew":true},
   ];
 
   var PATHS = {
@@ -179,10 +184,15 @@
       note: "Animals, feelings, planets and places.",
       steps: [
         { game: "baby-animals", label: "Animals" },
+        { game: "life-cycles", label: "Life cycles" },
         { game: "animal-habitats", label: "Animal homes" },
+        { game: "my-body", label: "My body" },
+        { game: "sort-it", label: "Sort it" },
+        { game: "weather-wear", label: "Weather" },
         { game: "everyday-tools", label: "Everyday things" },
         { game: "science-quiz", label: "Science" },
         { game: "solar-system", label: "Space" },
+        { game: "map-explorer", label: "World map" },
         { game: "world-capitals", label: "Countries" },
       ],
     },
