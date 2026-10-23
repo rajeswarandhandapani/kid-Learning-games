@@ -42,7 +42,7 @@
     "math.time": "Telling time", "math.money": "Money", "math.measure": "Measuring", "math.place-value": "Place value", "math.data": "Graphs & data", "math.misc": "Math",
     "tamil.letters": "Tamil letters", "tamil.vowels": "Tamil vowels", "tamil.uyirmei": "Compound letters",
     "tamil.vocabulary": "Tamil words", "tamil.writing": "Writing Tamil", "tamil.numbers": "Tamil numbers",
-    "tamil.sentences": "Tamil sentences", "tamil.spelling": "Tamil spelling",
+    "tamil.sentences": "Tamil sentences", "tamil.days-colours": "Days, months & colours", "tamil.stories": "Tamil stories", "tamil.spelling": "Tamil spelling",
   };
 
   var GAMES = [
@@ -109,6 +109,10 @@
     {"id":"sight-word-pop","name":"Sight Word Pop","icon":"🫧","blurb":"Hear a word and pop its bubble.","level":1,"subject":"english","skills":["english.sight-words"],"isNew":true},
     {"id":"sentence-builder","name":"Sentence Builder","icon":"🧩","blurb":"Put word tiles in order to make a sentence about the picture.","level":2,"subject":"english","skills":["english.sentences"],"isNew":true},
     {"id":"story-order","name":"Story Order","icon":"🎬","blurb":"Put the pictures in order: first, next, last.","level":1,"subject":"english","skills":["english.sequencing"],"isNew":true},
+    {"id":"tamil-days-colours","name":"நாட்கள் · நிறங்கள்","icon":"📅","blurb":"Days, months and colours in Tamil, with real voices.","level":1,"subject":"tamil","skills":["tamil.days-colours"],"isNew":true},
+    {"id":"tamil-picture-sentences","name":"படம் பார்த்து சொல்","icon":"🖼️","blurb":"Read a Tamil sentence and pick the picture it tells about.","level":2,"subject":"tamil","skills":["tamil.sentences"],"isNew":true},
+    {"id":"tamil-english-match","name":"Tamil–English Match","icon":"🔗","blurb":"Match Tamil words to their pictures and English words.","level":2,"subject":"tamil","skills":["tamil.vocabulary"],"isNew":true},
+    {"id":"tamil-story-time","name":"கதை நேரம்","icon":"📖","blurb":"Four-picture Tamil stories with listening questions.","level":3,"subject":"tamil","skills":["tamil.stories"],"isNew":true},
   ];
 
   var PATHS = {
@@ -123,8 +127,12 @@
         { game: "tamil-sound-blend", label: "Blend sounds" },
         { game: "tamil-first-letter", label: "First sounds" },
         { game: "tamil-listen-find", label: "Learn words" },
+        { game: "tamil-days-colours", label: "Days & colours" },
+        { game: "tamil-english-match", label: "Match words" },
         { game: "tamil-word-puzzle", label: "Build words" },
+        { game: "tamil-picture-sentences", label: "Read sentences" },
         { game: "tamil-sentence-words", label: "Write sentences" },
+        { game: "tamil-story-time", label: "Story time" },
       ],
     },
     math: {

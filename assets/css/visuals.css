@@ -298,3 +298,38 @@ figure[class*="kv-"] { margin: 0 auto; max-width: 100%; }
 .pk-slot { flex: 1 1 0; min-width: 0; width: auto; max-width: 92px; }
 .pk-slot .kv-caption { font-size: 0.62rem; }
 .pk-slot .kv-storycard .kv-emoji { font-size: 1.8rem !important; }
+
+/* Tamil days, months and colours */
+.kv-week, .kv-year { display: grid; gap: 6px; }
+.kv-week { grid-template-columns: repeat(7, 1fr); width: min(360px, 100%); }
+.kv-year { grid-template-columns: repeat(4, 1fr); width: min(300px, 100%); }
+.kv-cell2 { display: flex; align-items: center; justify-content: center; min-height: 48px; border: 3px solid #dce4e9; border-radius: 12px; background: #fff; font-weight: 800; font-size: 1.1rem; color: #203341; }
+button.kv-cell2:hover:not(:disabled) { border-color: #4055b5; }
+button.kv-cell2:disabled { opacity: 0.4; }
+.kv-cell2.lit { background: #ffe69a; border-color: #b64261; }
+.kv-swatches { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.kv-swatch { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #203341; display: inline-block; padding: 0; }
+button.kv-swatch:disabled { opacity: 0.3; }
+.kv-btn.tamil-glyph { font-size: 1.3rem; }
+
+/* Tamil sentences with tappable words */
+.kv-tamil-sentence { font-size: 1.45rem; line-height: 2.2; text-align: center; margin: 0; max-width: 100%; }
+.kv-tword { border: 0; background: transparent; padding: 2px 3px; border-radius: 8px; font: inherit; color: #203341; }
+.kv-tword:hover { background: #eef1ff; }
+.kv-tword.key { background: #ffe69a; font-weight: 800; box-shadow: 0 0 0 2px #b0701f; }
+
+/* Tamil–English match */
+.kv-matchboard { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: min(380px, 100%); }
+.kv-matchcol { display: flex; flex-direction: column; gap: 10px; }
+.kv-matchcell { min-height: 62px; font-size: 1.15rem; }
+.kv-matchcell.sel { background: #ffe69a; border-color: #b0701f; }
+.kv-matchcell.done { background: #e6f6e7; border-color: #24754c; color: #24754c; pointer-events: none; }
+
+/* Tamil story panels */
+.kv-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(400px, 100%); }
+.kv-panel { margin: 0; border: 3px solid #dce4e9; border-radius: 14px; background: #fff; padding: 8px; text-align: center; }
+.kv-panel-pic { font-size: 3rem; line-height: 1.2; }
+.kv-panel-cap { font-size: 0.98rem; line-height: 1.55; }
+.kv-tword.rec { text-decoration: underline dotted #b0701f; text-underline-offset: 4px; }
+.kv-english { font-size: 0.8rem; color: #60717a; }
+.kv-question { font-size: 1.25rem; font-weight: 800; text-align: center; margin: 4px 0; }

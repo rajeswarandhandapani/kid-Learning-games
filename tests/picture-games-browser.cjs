@@ -59,6 +59,122 @@ const section = (name, fn) => sections.push([name, fn]);
 
   // ---- sections are registered below ------------------------------------
   //@@SECTIONS@@
+  section('tamil-story-time: four panels, one question, picture answers', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`tamil-story-time/index.html?level=${level}`);
+      for (let i = 0; i < 4; i++) {
+        assert.equal(await page.locator('#stage .kv-panel').count(), 4);
+        for (const cap of await page.locator('#stage .kv-panel-cap').allTextContents()) assert.match(cap, /[\u0B80-\u0BFF]/, 'caption is Tamil');
+        assert.equal(await page.locator('#stage .kv-panel .kv-english:visible').count(), level === 1 ? 4 : 0, 'English help only at level 1');
+        const answers = await page.locator('#stage .kv-picbtn').evaluateAll((bs) => bs.map((b) => b.dataset.english));
+        assert.equal(answers.length, 4);
+        assert.equal(new Set(answers).size, 4);
+        // the story shows a picture of the answer, so a child can find it by reading
+        const { answer, emoji } = await page.locator('#stage .kv-panels').evaluate((g) => ({ answer: g.dataset.answer, emoji: g.dataset.answerEmoji }));
+        const pics = await page.locator('#stage .kv-panel-pic').allTextContents();
+        assert.ok(pics.includes(emoji), `${emoji} is drawn in one of the panels: ${pics}`);
+        if (i === 0) {
+          const wrong = answers.find((a) => a !== answer);
+          await page.locator(`#stage .kv-picbtn[data-english="${wrong}"]`).click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+        }
+        await page.locator(`#stage .kv-picbtn[data-english="${answer}"]`).click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('tamil-story-time');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('tamil-english-match: each Tamil word joins its own picture or English word', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`tamil-english-match/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const pairs = JSON.parse(await page.locator('#stage .kv-matchboard').evaluate((b) => b.dataset.pairs));
+        assert.equal(pairs.length, 4);
+        assert.equal(new Set(pairs.map((p) => p[1])).size, 4, 'four different words');
+        if (i === 0) { // a wrong pair shakes and keeps the board open
+          await page.locator(`#stage .kv-matchcol:first-child .kv-matchcell[data-english="${pairs[0][1]}"]`).click();
+          await page.locator(`#stage .kv-matchcol:last-child .kv-matchcell[data-english="${pairs[1][1]}"]`).click();
+          assert.equal(await page.locator('#stage .kv-matchcell.done').count(), 0);
+          assert.match(await page.locator('#feedback').textContent(), /Not that one/);
+        }
+        for (const [, english] of pairs) {
+          await page.locator(`#stage .kv-matchcol:first-child .kv-matchcell[data-english="${english}"]`).click();
+          await page.locator(`#stage .kv-matchcol:last-child .kv-matchcell[data-english="${english}"]`).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#stage .kv-matchcell.done').count(), 8);
+        await noOverflow('tamil-english-match');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('tamil-picture-sentences: the right picture is the sentence\'s own noun', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`tamil-picture-sentences/index.html?level=${level}`);
+      const bank = await page.evaluate(() => JSON.parse(JSON.stringify(TamilSentenceData.sentences)));
+      for (let i = 0; i < 8; i++) {
+        const id = await page.locator('#stage .kv-tamil-sentence').evaluate((p) => p.dataset.id);
+        const s = bank.find((x) => x.id === id);
+        if (level === 1) assert.ok(['animals', 'nature'].includes(s.category), 'level 1 sentences are animals and nature');
+        const shown = (await page.locator('#stage .kv-tamil-sentence').textContent()).replace(/\s+/g, ' ').trim();
+        assert.equal(shown, (s.before + s.word + s.after).replace(/\s+/g, ' ').trim(), 'whole sentence is displayed');
+        assert.equal(await page.locator('#stage .kv-tword.key').allTextContents().then((t) => t.join(' ')), s.word, 'key word is highlighted');
+        const options = await page.locator('#stage .kv-picbtn').evaluateAll((bs) => bs.map((b) => b.dataset.id));
+        assert.equal(options.length, 4);
+        assert.equal(new Set(options).size, 4);
+        const emojis = await page.locator('#stage .kv-picbtn').evaluateAll((bs) => bs.map((b) => b.textContent));
+        assert.equal(new Set(emojis).size, 4, 'four different pictures');
+        for (const o of options) if (o !== id) {
+          const other = bank.find((x) => x.id === o);
+          assert.ok(!(s.before + s.word + s.after).includes(other.word), `${other.word} must not appear in the sentence ${id}`);
+        }
+        if (i === 0) { await page.locator(`#stage .kv-picbtn[data-id]:not([data-id="${id}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+        await page.locator(`#stage .kv-picbtn[data-id="${id}"]`).click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('tamil-picture-sentences');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('tamil-days-colours: the picture lit up matches the Tamil name chosen', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const mode of ['days', 'months', 'colours']) {
+      await startRound(`tamil-days-colours/index.html?mode=${mode}`);
+      const data = await page.evaluate(() => JSON.parse(JSON.stringify(TamilDaysData)));
+      const items = mode === 'days' ? data.DAYS : mode === 'months' ? data.MONTHS : data.COLOURS;
+      const byTamil = Object.fromEntries(items.map((x) => [x.tamil, x.english]));
+      for (let i = 0; i < 8; i++) {
+        const task = await page.locator('#task').textContent();
+        if (/called in Tamil/.test(task)) {
+          const lit = await page.locator('#stage [data-english]').first().evaluate((e) => e.dataset.english);
+          assert.ok(items.some((x) => x.english === lit), 'picture is one of the items');
+          if (mode !== 'colours') assert.equal(await page.locator('#stage .kv-cell2.lit').count(), 1, 'exactly one cell lit');
+          const names = await page.locator('#stage button.tamil-glyph').evaluateAll((bs) => bs.map((b) => b.dataset.english));
+          assert.equal(new Set(names).size, 4);
+          if (i === 0) { await page.locator(`#stage button.tamil-glyph[data-english]:not([data-english="${lit}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage button.tamil-glyph[data-english="${lit}"]`).click();
+        } else {
+          const tamil = task.match(/“(.+?)”/)[1];
+          const english = byTamil[tamil];
+          assert.ok(english, 'the Tamil name is a known word: ' + tamil);
+          assert.equal(await page.locator('#stage [data-target]').first().evaluate((e) => e.dataset.target), english);
+          if (i === 0) { await page.locator(`#stage button[data-english]:not([data-english="${english}"])`).first().click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage button[data-english="${english}"]`).first().click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('tamil-days-colours');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
   section('sentence-builder: tiles in order read exactly as the sentence for the picture', async ({ page, assert, startRound, finishRound, noOverflow }) => {
     for (const level of [1, 2]) {
       await startRound(`sentence-builder/index.html?level=${level}`);
@@ -537,7 +653,6 @@ const section = (name, fn) => sections.push([name, fn]);
   }
   assert.deepEqual(errors, [], 'page errors: ' + errors.join('; '));
   assert.deepEqual(external, [], 'external requests: ' + external.join(', '));
-  fs.writeFileSync('artifacts/.pictures-ran', String(Date.now()));
   await browser.close();
   console.log(`PASS picture games (${sections.filter(([n]) => !only || n.includes(only)).length} sections); no errors or external requests.`);
 })().catch((e) => { console.error(e); process.exit(1); });

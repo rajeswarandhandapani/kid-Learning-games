@@ -52,7 +52,7 @@
       task(text, spoken) {
         $("task").textContent = text;
         lastTask = spoken === undefined ? text : spoken;
-        $("listen-btn").hidden = !canSpeak;
+        $("listen-btn").hidden = !canSpeak || !lastTask;
         if (opts.speak !== false) say(lastTask);
       },
       right(msg) {

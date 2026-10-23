@@ -50,7 +50,7 @@ const fakeAudio = () => {
   await page.goto(base);
   assert.equal(await page.locator('.game-card').count(), CAT.GAMES.length);
   await page.locator('#path-tabs [data-path="tamil"]').click();
-  assert.equal(await page.locator('.tamil-steps li').count(), 9);
+  assert.equal(await page.locator('.tamil-steps li').count(), CAT.PATHS.tamil.steps.length);
   await page.locator('#path-jump').click();
   assert.equal(await page.locator('.game-tile:visible').count(), TAMIL_COUNT);
   assert.equal(await page.locator('.subject-tabs [data-subject="tamil"]').getAttribute('aria-pressed'), 'true');

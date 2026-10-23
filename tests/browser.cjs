@@ -23,7 +23,7 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.locator('#level-filter').selectOption('4');assert.equal(await page.locator('.game-tile:visible').count(),LEVEL4);
  await page.locator('#parent-open').click();assert.ok(await page.locator('#parent-dialog').isVisible());await page.keyboard.press('Escape');
  await page.locator('#level-filter').selectOption('all');
- await page.locator('#game-search').fill('Picture Words');assert.equal(await page.locator('.game-tile:visible').count(),1);
+ await page.locator('#game-search').fill('Picture Words');assert.equal(await page.locator('.game-tile:visible').count(),CAT.GAMES.filter(g=>(g.name+' '+g.blurb).toLowerCase().includes('picture words')).length);
  await page.locator('#game-search').fill('');
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/home-mobile.png'});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
