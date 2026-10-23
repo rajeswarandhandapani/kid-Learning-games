@@ -43,3 +43,9 @@ test('every game page links the shared home button and loads progress before the
   if (q >= 0) assert.ok(p >= 0 && p < q, id + ' must load progress.js before quiz-engine.js');
  }
 });
+
+test('index.html game count and noscript list match the catalogue (run npm run sync:index)', () => {
+ const { synced } = require('../scripts/sync-index.cjs');
+ const html = fs.readFileSync('index.html', 'utf8');
+ assert.equal(synced(html), html);
+});

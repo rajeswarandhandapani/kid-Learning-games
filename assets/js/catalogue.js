@@ -29,6 +29,22 @@
     logic: { label: "🧩 Thinking skills" },
   };
 
+  /** Friendly names for the skill tags (the report falls back to the tag text). */
+  var SKILL_NAMES = {
+    "logic.memory": "Memory", "logic.patterns": "Patterns",
+    "english.vocabulary": "Picture words", "english.letters": "Letters & sounds", "english.rhyme": "Rhyming",
+    "english.comprehension": "Understanding stories", "english.spelling": "Spelling",
+    "world.feelings": "Feelings", "world.everyday": "Everyday things", "world.geography": "Countries & capitals",
+    "science.animals": "Animals", "science.space": "Space", "science.general": "Science facts",
+    "math.number-names": "Number names", "math.counting": "Counting", "math.shapes": "Shapes", "math.colours": "Colours",
+    "math.compare": "Comparing numbers", "math.add-sub": "Adding & subtracting", "math.skip-counting": "Skip counting",
+    "math.calendar": "Calendar", "math.multiply": "Multiplying", "math.divide": "Dividing", "math.fractions": "Fractions",
+    "math.time": "Telling time", "math.money": "Money", "math.measure": "Measuring", "math.place-value": "Place value",
+    "tamil.letters": "Tamil letters", "tamil.vowels": "Tamil vowels", "tamil.uyirmei": "Compound letters",
+    "tamil.vocabulary": "Tamil words", "tamil.writing": "Writing Tamil", "tamil.numbers": "Tamil numbers",
+    "tamil.sentences": "Tamil sentences", "tamil.spelling": "Tamil spelling",
+  };
+
   var GAMES = [
     {"id":"memory-match","name":"Memory Garden","icon":"🌻","blurb":"Find pairs. Grow your memory.","level":1,"subject":"logic","skills":["logic.memory"]},
     {"id":"picture-words","name":"Picture Words","icon":"🖼️","blurb":"Hear a word. Find its picture.","level":1,"subject":"english","skills":["english.vocabulary"]},
@@ -140,7 +156,7 @@
     },
   };
 
-  var api = { LEVELS: LEVELS, SUBJECTS: SUBJECTS, GAMES: GAMES, PATHS: PATHS,
+  var api = { LEVELS: LEVELS, SUBJECTS: SUBJECTS, GAMES: GAMES, PATHS: PATHS, SKILL_NAMES: SKILL_NAMES,
     byId: function (id) { return GAMES.filter(function (g) { return g.id === id; })[0] || null; } };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.KlgCatalogue = api;
