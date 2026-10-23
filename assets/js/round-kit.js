@@ -10,9 +10,10 @@
  *
  * ctx (passed to render):
  *   ctx.stage            element to draw into
- *   ctx.task(text)       sets (and, if enabled, speaks) the instruction
+ *   ctx.task(text, spoken)  sets the instruction; speaks `spoken` (default `text`)
  *   ctx.right(msg)       correct: cheer; scores a point if no earlier mistake
  *   ctx.wrong(msg)       gentle "try again": keeps the question open
+ *   ctx.hint(msg)        a nudge that does not count as a mistake
  *   ctx.reveal(msg)      show the answer after help: no point, moves on
  *   ctx.firstTry()       true until ctx.wrong() has been called
  *   ctx.index, ctx.total, ctx.say(text)
@@ -25,7 +26,7 @@
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
-  const canSpeak = "speechSynthesis" in window;
+  const canSpeak = !!window.speechSynthesis;
 
   function say(text) {
     if (!canSpeak || !text) return;
@@ -47,11 +48,12 @@
       index: 0,
       say,
       firstTry: () => mistakes === 0,
-      task(text) {
+      /** Shows `text`; reads `spoken` (default: the same text) aloud and on "Listen again". */
+      task(text, spoken) {
         $("task").textContent = text;
-        lastTask = text;
+        lastTask = spoken === undefined ? text : spoken;
         $("listen-btn").hidden = !canSpeak;
-        if (opts.speak !== false) say(text);
+        if (opts.speak !== false) say(lastTask);
       },
       right(msg) {
         if (closed) return;
@@ -61,6 +63,10 @@
         setFeedback((mistakes === 0 ? "Yes! " : "You got it! ") + (msg || ""), "good");
         if (window.KlgGameKit) KlgGameKit.cheer(nextBtn);
         showNext();
+      },
+      /** A nudge that is not a mistake (for example, pressing Check before finishing). */
+      hint(msg) {
+        if (!closed) setFeedback(msg, "try");
       },
       wrong(msg) {
         if (closed) return;

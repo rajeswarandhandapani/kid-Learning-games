@@ -33,7 +33,7 @@
   var SKILL_NAMES = {
     "logic.memory": "Memory", "logic.patterns": "Patterns",
     "english.vocabulary": "Picture words", "english.letters": "Letters & sounds", "english.rhyme": "Rhyming",
-    "english.comprehension": "Understanding stories", "english.spelling": "Spelling",
+    "english.comprehension": "Understanding stories", "english.spelling": "Spelling", "english.phonics": "Phonics", "english.sight-words": "Sight words", "english.sentences": "Making sentences", "english.sequencing": "Story order",
     "world.feelings": "Feelings", "world.everyday": "Everyday things", "world.geography": "Countries & capitals",
     "science.animals": "Animals", "science.space": "Space", "science.general": "Science facts",
     "math.number-names": "Number names", "math.counting": "Counting", "math.shapes": "Shapes", "math.colours": "Colours",
@@ -104,6 +104,11 @@
     {"id":"shape-detectives","name":"Shape Detectives","icon":"🔷","blurb":"Count sides, spot every shape and find the mirror twin.","level":2,"subject":"math","skills":["math.shapes"],"isNew":true},
     {"id":"measure-lab","name":"Measure Lab","icon":"📏","blurb":"Measure with a ruler, balance a scale and fill a jug.","level":3,"subject":"math","skills":["math.measure"],"isNew":true},
     {"id":"picture-graphs","name":"Picture Graphs","icon":"📊","blurb":"Read picture graphs, bar charts and tally marks.","level":2,"subject":"math","skills":["math.data"],"isNew":true},
+    {"id":"sound-it-out","name":"Sound It Out","icon":"🐱","blurb":"Blend sounds into words and build words from letters.","level":1,"subject":"english","skills":["english.phonics"],"isNew":true},
+    {"id":"word-families","name":"Word Families","icon":"🏠","blurb":"Sort picture words into the houses where they belong.","level":1,"subject":"english","skills":["english.rhyme","english.phonics"],"isNew":true},
+    {"id":"sight-word-pop","name":"Sight Word Pop","icon":"🫧","blurb":"Hear a word and pop its bubble.","level":1,"subject":"english","skills":["english.sight-words"],"isNew":true},
+    {"id":"sentence-builder","name":"Sentence Builder","icon":"🧩","blurb":"Put word tiles in order to make a sentence about the picture.","level":2,"subject":"english","skills":["english.sentences"],"isNew":true},
+    {"id":"story-order","name":"Story Order","icon":"🎬","blurb":"Put the pictures in order: first, next, last.","level":1,"subject":"english","skills":["english.sequencing"],"isNew":true},
   ];
 
   var PATHS = {
@@ -151,8 +156,13 @@
       steps: [
         { game: "english-alphabets", label: "Letters" },
         { game: "picture-words", label: "Picture words" },
+        { game: "sound-it-out", label: "Sound it out" },
+        { game: "word-families", label: "Word families" },
         { game: "rhyming-words", label: "Rhymes" },
+        { game: "sight-word-pop", label: "Sight words" },
         { game: "spelling-bee", label: "Spelling" },
+        { game: "sentence-builder", label: "Sentences" },
+        { game: "story-order", label: "Story order" },
         { game: "reading-stories", label: "Stories" },
       ],
     },

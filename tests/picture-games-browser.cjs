@@ -59,6 +59,163 @@ const section = (name, fn) => sections.push([name, fn]);
 
   // ---- sections are registered below ------------------------------------
   //@@SECTIONS@@
+  section('sentence-builder: tiles in order read exactly as the sentence for the picture', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`sentence-builder/index.html?level=${level}`);
+      for (let i = 0; i < 6; i++) {
+        const sentence = await page.locator('#stage figure.kv-clue').evaluate((f) => f.dataset.sentence);
+        const words = sentence.split(' ');
+        assert.ok(words.length >= (level === 1 ? 3 : 5) && words.length <= (level === 1 ? 4 : 7), 'sentence length fits the level: ' + sentence);
+        assert.match(words[0], /^[A-Z]/, 'starts with a capital');
+        assert.match(words[words.length - 1], /\.$/, 'ends with a full stop');
+        const tiles = await page.locator('#stage .pk-tile').allTextContents();
+        assert.deepEqual([...tiles].sort(), [...words].sort(), 'tiles are exactly the sentence words');
+        const clickWord = async (w) => {
+          const texts = await page.locator('#stage .pk-tile:visible').allTextContents();
+          await page.locator('#stage .pk-tile:visible').nth(texts.indexOf(w)).click();
+        };
+        if (i === 0) { // a wrong order clears the tiles and keeps the question open
+          for (const w of [...words].reverse()) await clickWord(w);
+          await page.getByRole('button', { name: 'Check my sentence' }).click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+          assert.equal(await page.locator('#stage .pk-aslot.full').count(), 0, 'tiles are cleared');
+        }
+        for (const w of words) await clickWord(w);
+        await page.getByRole('button', { name: 'Check my sentence' }).click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('sentence-builder');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('story-order: pictures placed in order are the story steps', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`story-order/index.html?level=${level}`);
+      for (let i = 0; i < 6; i++) {
+        const n = await page.locator('#stage .pk-card').count();
+        assert.ok(level === 1 ? n === 3 : n >= 4 && n <= 5, `${n} cards at level ${level}`);
+        const ids = (await page.locator('#stage .pk-card').evaluateAll((cs) => cs.map((c) => c.dataset.id))).sort();
+        assert.deepEqual(ids, [...Array(n).keys()].map(String));
+        await page.getByRole('button', { name: 'Check the order' }).click(); // nothing placed yet
+        assert.equal(await page.locator('#next-btn').isHidden(), true);
+        if (i === 0) { // swapped first two → wrong boxes are marked, question stays open
+          const wrongOrder = [1, 0, ...[...Array(n).keys()].slice(2)];
+          for (const id of wrongOrder) await page.locator(`#stage .pk-card[data-id="${id}"]`).click();
+          await page.getByRole('button', { name: 'Check the order' }).click();
+          assert.equal(await page.locator('#stage .pk-slot.wrong').count(), 2);
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+          await page.getByRole('button', { name: 'Start again' }).click();
+        }
+        for (let id = 0; id < n; id++) await page.locator(`#stage .pk-card[data-id="${id}"]`).click();
+        await page.getByRole('button', { name: 'Check the order' }).click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#stage .pk-slot.right').count(), n);
+        assert.match(await page.locator('#feedback').textContent(), /First:/);
+        await noOverflow('story-order');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('sight-word-pop: the word asked for is among the bubbles, and only that one pops', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      // No speech engine in this browser: the word is written in the instruction.
+      await page.addInitScript(() => { try { Object.defineProperty(window, 'speechSynthesis', { value: undefined, configurable: true }); } catch (e) {} });
+      await startRound(`sight-word-pop/index.html?level=${level}`);
+      for (let i = 0; i < 10; i++) {
+        const task = await page.locator('#task').textContent();
+        const word = task.match(/“(.+?)”/)?.[1];
+        assert.ok(word, 'the word is written when speech is unavailable: ' + task);
+        const bubbles = await page.locator('#stage .kv-bubble').evaluateAll((bs) => bs.map((b) => b.dataset.word));
+        assert.equal(bubbles.length, 6);
+        assert.equal(new Set(bubbles).size, 6, 'six different words');
+        assert.equal(bubbles.filter((b) => b === word).length, 1, 'the word appears once');
+        if (i === 0) {
+          const other = bubbles.find((b) => b !== word);
+          await page.locator(`#stage .kv-bubble[data-word="${other}"]`).click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+        }
+        await page.locator(`#stage .kv-bubble[data-word="${word}"]`).click();
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('sight-word-pop');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('word-families: every picture goes in the house its ending names', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`word-families/index.html?level=${level}`);
+      for (let i = 0; i < 5; i++) {
+        const bins = await page.locator('#stage .pk-bin').evaluateAll((bs) => bs.map((b) => b.dataset.bin));
+        assert.equal(bins.length, level === 1 ? 2 : 3);
+        const items = await page.locator('#stage .pk-item').evaluateAll((bs) => bs.map((b) => ({ id: b.dataset.id, bin: b.dataset.bin })));
+        for (const it of items) assert.ok(it.id.endsWith(it.bin), `${it.id} ends in -${it.bin}`);
+        if (i === 0) { // wrong house: item stays, feedback explains
+          const item = items[0];
+          const wrong = bins.find((b) => b !== item.bin);
+          await page.locator(`#stage .pk-item[data-id="${item.id}"]`).click();
+          await page.locator(`#stage .pk-bin[data-bin="${wrong}"]`).click();
+          assert.equal(await page.locator('#next-btn').isHidden(), true);
+          assert.match(await page.locator('#feedback').textContent(), /does not end/);
+        }
+        for (const it of items) {
+          await page.locator(`#stage .pk-pool .pk-item[data-id="${it.id}"]`).click();
+          await page.locator(`#stage .pk-bin[data-bin="${it.bin}"]`).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        assert.equal(await page.locator('#stage .pk-bin .pk-item').count(), items.length, 'all pictures are in houses');
+        await noOverflow('word-families');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
+  section('sound-it-out: the letters shown make the word in the picture', async ({ page, assert, startRound, finishRound, noOverflow }) => {
+    for (const level of [1, 2]) {
+      await startRound(`sound-it-out/index.html?level=${level}`);
+      for (let i = 0; i < 8; i++) {
+        const task = await page.locator('#task').textContent();
+        if (/Sound it out/.test(task)) {
+          const word = await page.locator('#stage .kv-letters').evaluate((r) => r.dataset.word);
+          const shown = await page.locator('#stage .kv-letter').allTextContents();
+          assert.equal(shown.join(''), word, 'letters shown spell the word');
+          if (level === 1) assert.equal(shown.length, 3);
+          const wrong = (await page.locator('#stage [data-word].kv-picbtn').evaluateAll((bs) => bs.map((b) => b.dataset.word))).find((w) => w !== word);
+          if (i === 0) { await page.locator(`#stage .kv-picbtn[data-word="${wrong}"]`).click(); assert.equal(await page.locator('#next-btn').isHidden(), true); }
+          await page.locator(`#stage .kv-picbtn[data-word="${word}"]`).click();
+        } else {
+          const word = await page.locator('#stage figure.kv-clue').evaluate((f) => f.dataset.word);
+          let rest = word;
+          const slots = await page.locator('#stage .pk-aslot').count();
+          const tiles = await page.locator('#stage .pk-tile').allTextContents();
+          assert.equal(tiles.length, slots + 1, 'one spare letter');
+          if (i === 1) { // an incomplete answer gets a hint
+            await page.getByRole('button', { name: 'Check my word' }).click();
+            assert.equal(await page.locator('#next-btn').isHidden(), true);
+          }
+          while (rest) {
+            const options = (await page.locator('#stage .pk-tile:visible').allTextContents());
+            const t = options.filter((x) => rest.startsWith(x)).sort((a, b) => b.length - a.length)[0];
+            assert.ok(t, `a tile for "${rest}" among ${options}`);
+            await page.locator('#stage .pk-tile:visible', { hasText: new RegExp('^' + t + '$') }).first().click();
+            rest = rest.slice(t.length);
+          }
+          await page.getByRole('button', { name: 'Check my word' }).click();
+        }
+        await page.locator('#next-btn').waitFor({ state: 'visible' });
+        await noOverflow('sound-it-out');
+        await page.locator('#next-btn').click();
+      }
+      await finishRound();
+    }
+  });
+
   section('picture-graphs: the graphs show the numbers the answers are checked against', async ({ page, assert, startRound, finishRound, noOverflow }) => {
     for (const level of [1, 2, 3]) {
       await startRound(`picture-graphs/index.html?level=${level}`);

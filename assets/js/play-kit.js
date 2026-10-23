@@ -77,7 +77,10 @@
       const ok = item.bin === bin.id;
       if (ok) {
         const el = itemEls[item.id];
-        el.disabled = true;
+        // Not a disabled button: taps on placed pictures must still reach the house.
+        el.classList.add("placed");
+        el.tabIndex = -1;
+        el.setAttribute("aria-disabled", "true");
         el.setAttribute("aria-pressed", "false");
         binEls[bin.id].content.appendChild(el);
         placedIds.push(item.id);
@@ -86,6 +89,9 @@
         const el = itemEls[item.id];
         el.classList.add("pk-shake");
         setTimeout(() => el.classList.remove("pk-shake"), 400);
+        // The picture goes back to the pool: pick it up again to try another house.
+        el.setAttribute("aria-pressed", "false");
+        selected = null;
       }
       if (onPlace) onPlace(item, bin, ok);
     }
@@ -93,7 +99,7 @@
       const el = h("button", "pk-item", { type: "button", "aria-pressed": "false", "data-id": item.id, "data-bin": item.bin });
       fill(el, item);
       if (item.label) el.setAttribute("aria-label", item.label);
-      el.addEventListener("click", () => select(item));
+      el.addEventListener("click", () => { if (!el.classList.contains("placed")) select(item); });
       // Pointer drag as an extra: drop on whichever bin is under the finger.
       el.addEventListener("pointerdown", (e) => {
         if (e.pointerType === "mouse" && e.button !== 0) return;

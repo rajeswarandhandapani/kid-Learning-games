@@ -100,7 +100,7 @@
     const check = Object.assign(document.createElement("button"), { type: "button", className: "kv-btn primary", textContent: "Check ✓" });
     check.setAttribute("aria-label", "Check the order");
     check.addEventListener("click", () => {
-      if (!board.isFull()) return ctx.wrong("Put all three pizzas in the boxes first.");
+      if (!board.isFull()) return ctx.hint("Put all three pizzas in the boxes first.");
       if (board.check()) {
         ctx.right("Smallest to biggest: " + order.map((id) => q.items[id].join("/")).join(" < ") + ".");
         check.disabled = clear.disabled = true;

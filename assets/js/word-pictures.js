@@ -26,7 +26,7 @@
     book: "📖", cup: "🥤", box: "📦", drum: "🥁", gift: "🎁", sun: "☀️", moon: "🌙", star: "⭐", rain: "🌧️", cloud: "☁️", snow: "❄️", fire: "🔥",
     // nature
     tree: "🌳", sea: "🌊", lake: "🏞️", shell: "🐚", flower: "🌸", leaf: "🍃", hill: "⛰️", hut: "🛖", town: "🏘️", clown: "🤡", chain: "⛓️", pail: "🪣",
-    mail: "✉️", wall: "🧱", block: "🧱", game: "🎮", flame: "🔥", mop: "🧹", fan: "🪭", dot: "⚫", ten: "🔟", man: "👨", hug: "🤗",
+    mail: "✉️", wall: "🧱", block: "🧱", game: "🎮", flame: "🔥", dot: "⚫", ten: "🔟", man: "👨", hug: "🤗",
     // body
     hand: "✋", foot: "🦶", eye: "👀", ear: "👂", nose: "👃", mouth: "👄", tooth: "🦷",
     // actions & feelings (used by opposites)
