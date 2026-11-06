@@ -93,7 +93,8 @@
       if (q.kind === "home") {
         const [emoji, name, home] = q.target;
         answerId = home;
-        const isAnimal = HOMES.indexOf(q.target) < 10;
+        // By name, not by object: a review round hands back a saved copy of the question.
+        const isAnimal = HOMES.findIndex((h) => h[1] === name) < 10;
         ctx.task(isAnimal ? `Where does the ${name} live? Tap its continent.` : `Where can you find ${name}? Tap its continent.`);
         shown = document.createElement("figure");
         shown.className = "kv-clue";

@@ -31,7 +31,7 @@ fs.mkdirSync(dir, { recursive: true });
 
 const levelLinks = (opt.levels || '').split('|').filter(Boolean);
 const modeLinks = (opt.modes || '').split('|').filter(Boolean).map(m => m.split(':'));
-const scripts = ['sounds.js', 'progress.js', 'game-kit.js', 'math-visuals.js', ...(opt.scripts ? opt.scripts.split(',') : []), 'round-kit.js'];
+const scripts = ['sounds.js', 'catalogue.js', 'progress.js', 'game-kit.js', 'math-visuals.js', ...(opt.scripts ? opt.scripts.split(',') : []), 'round-kit.js'];
 const links = (container, param, items, fallbackIndex) => items.length
  ? `        <div id="${container}" class="d-flex flex-wrap justify-content-center gap-2 mb-3">\n${items.map((it, i) => {
    const [value, label] = Array.isArray(it) ? it : [String(i + 1), it];

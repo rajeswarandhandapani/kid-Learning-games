@@ -802,6 +802,17 @@ body { font-family:'Segoe UI','Learning Emoji','Noto Sans Tamil',Arial,sans-seri
 .step-chip { position:absolute; bottom:8px; right:10px; background:#b34c13; color:#fff; border-radius:999px; padding:1px 8px; font-size:11px; font-weight:800; }
 .path-next { margin-top:12px !important; font-weight:700; color:var(--ink) !important; }
 .report-summary { background:#f5f8fa; border-radius:12px; padding:12px 14px; }
+.report-note { font-size:14px; margin:0 0 6px; }
+.report-tricky td small { display:block; color:var(--ink); opacity:.7; }
+.klg-review-card { background:#e8f3ff; border:1px solid #c6dcf3; border-radius:16px; }
+.klg-review-card[hidden] { display:none; }
+.klg-review-card .card-body { padding:24px; }
+.klg-review-eyebrow { color:#1f5fa8; }
+.klg-review-card #review-count { font-size:20px; margin:12px 0!important; }
+.klg-review-card #review-note { font-size:13px; }
+.klg-review-card #review-link { font-size:14px; padding:9px 18px!important; border-radius:10px; background:#1f5fa8; }
+.klg-review-intro { background:#e8f3ff; border-radius:12px; padding:12px 14px; font-weight:700; color:#174a84; }
+.klg-review-links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:18px; }
 dialog h4 { font-size:15px; margin:18px 0 6px; }
 .report-table { width:100%; border-collapse:collapse; font-size:14px; }
 .report-table th, .report-table td { text-align:left; padding:6px 6px; border-bottom:1px solid #e6edf0; vertical-align:middle; }

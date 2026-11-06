@@ -237,7 +237,6 @@ function generateSpellingQuestion(words) {
     const pool = remaining.length ? remaining : words;
     const entry = pool[randomInt(0, pool.length - 1)];
 
-    if (hasSpeech) speak(entry.word);
     return {
       visual: spellingPicture(entry.emoji),
       prompt: hasSpeech ? "🔊 Tap to hear the word" : entry.clue.charAt(0).toUpperCase() + entry.clue.slice(1),
@@ -314,10 +313,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const quiz = new QuizEngine({
     totalQuestions: Math.min(15, words.length),
     timePerQuestion: 120,
-    generateQuestion: (askedSet) => {
-      const q = generate(askedSet);
+    generateQuestion: generate,
+    prepareQuestion: (q) => {
       currentSpeech = q.speech || null;
-      return q;
+      if (currentSpeech && hasSpeech) speak(currentSpeech);
     },
     onFinish: ({ score, total, elapsedMs }) => {
       const timeEl = document.getElementById("results-time");

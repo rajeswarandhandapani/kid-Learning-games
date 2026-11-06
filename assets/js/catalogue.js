@@ -7,6 +7,7 @@
  *   subject math | english | tamil | science | logic
  *   skills  "subject.skill" tags; the grown-up report groups by them
  *   isNew   shows a NEW ribbon on the card
+ *   v3      one of the hands-on picture games the Picture Pro badge counts
  * PATHS lists game ids in the order a child should meet them.
  *
  * Works in the browser (window.KlgCatalogue) and in node tests (require).
@@ -97,27 +98,27 @@
     {"id":"solar-system","name":"Solar System","icon":"🪐","blurb":"Planet order, moons & space facts","level":4,"subject":"science","skills":["science.space"]},
     {"id":"science-quiz","name":"Science Quiz","icon":"🔬","blurb":"Animals, body, plants & matter","level":4,"subject":"science","skills":["science.general"]},
     {"id":"world-capitals","name":"World Capitals","icon":"🌎","blurb":"Match countries to their capital cities","level":4,"subject":"science","skills":["world.geography"]},
-    {"id":"clock-setter","name":"Set the Clock","icon":"🕰️","blurb":"Drag the clock hands to show the time.","level":2,"subject":"math","skills":["math.time"],"isNew":true},
-    {"id":"fraction-pizza","name":"Pizza Fractions","icon":"🍕","blurb":"Shade slices, match equal fractions and put pizzas in order.","level":3,"subject":"math","skills":["math.fractions"],"isNew":true},
-    {"id":"coin-shop","name":"Coin Shop","icon":"🪙","blurb":"Pay the exact price with coins and notes.","level":3,"subject":"math","skills":["math.money"],"isNew":true},
-    {"id":"block-builder","name":"Block Builder","icon":"🧊","blurb":"Build numbers with hundreds, tens and ones blocks.","level":2,"subject":"math","skills":["math.place-value"],"isNew":true},
-    {"id":"shape-detectives","name":"Shape Detectives","icon":"🔷","blurb":"Count sides, spot every shape and find the mirror twin.","level":2,"subject":"math","skills":["math.shapes"],"isNew":true},
-    {"id":"measure-lab","name":"Measure Lab","icon":"📏","blurb":"Measure with a ruler, balance a scale and fill a jug.","level":3,"subject":"math","skills":["math.measure"],"isNew":true},
-    {"id":"picture-graphs","name":"Picture Graphs","icon":"📊","blurb":"Read picture graphs, bar charts and tally marks.","level":2,"subject":"math","skills":["math.data"],"isNew":true},
-    {"id":"sound-it-out","name":"Sound It Out","icon":"🐱","blurb":"Blend sounds into words and build words from letters.","level":1,"subject":"english","skills":["english.phonics"],"isNew":true},
-    {"id":"word-families","name":"Word Families","icon":"🏠","blurb":"Sort picture words into the houses where they belong.","level":1,"subject":"english","skills":["english.rhyme","english.phonics"],"isNew":true},
-    {"id":"sight-word-pop","name":"Sight Word Pop","icon":"🫧","blurb":"Hear a word and pop its bubble.","level":1,"subject":"english","skills":["english.sight-words"],"isNew":true},
-    {"id":"sentence-builder","name":"Sentence Builder","icon":"🧩","blurb":"Put word tiles in order to make a sentence about the picture.","level":2,"subject":"english","skills":["english.sentences"],"isNew":true},
-    {"id":"story-order","name":"Story Order","icon":"🎬","blurb":"Put the pictures in order: first, next, last.","level":1,"subject":"english","skills":["english.sequencing"],"isNew":true},
-    {"id":"tamil-days-colours","name":"நாட்கள் · நிறங்கள்","icon":"📅","blurb":"Days, months and colours in Tamil, with real voices.","level":1,"subject":"tamil","skills":["tamil.days-colours"],"isNew":true},
-    {"id":"tamil-picture-sentences","name":"படம் பார்த்து சொல்","icon":"🖼️","blurb":"Read a Tamil sentence and pick the picture it tells about.","level":2,"subject":"tamil","skills":["tamil.sentences"],"isNew":true},
-    {"id":"tamil-english-match","name":"Tamil–English Match","icon":"🔗","blurb":"Match Tamil words to their pictures and English words.","level":2,"subject":"tamil","skills":["tamil.vocabulary"],"isNew":true},
-    {"id":"tamil-story-time","name":"கதை நேரம்","icon":"📖","blurb":"Four-picture Tamil stories with listening questions.","level":3,"subject":"tamil","skills":["tamil.stories"],"isNew":true},
-    {"id":"life-cycles","name":"Life Cycles","icon":"🦋","blurb":"Put the stages of a butterfly, frog, plant or chicken in order.","level":2,"subject":"science","skills":["science.life-cycles"],"isNew":true},
-    {"id":"my-body","name":"My Body","icon":"🧍","blurb":"Tap body parts on the picture and match the five senses.","level":1,"subject":"science","skills":["science.body"],"isNew":true},
-    {"id":"sort-it","name":"Sort It!","icon":"🗂️","blurb":"Sort pictures: living or not, land, water or air, float or sink.","level":1,"subject":"science","skills":["science.sorting"],"isNew":true},
-    {"id":"weather-wear","name":"Weather & Seasons","icon":"☔","blurb":"Dress for the weather and name the season.","level":1,"subject":"science","skills":["science.weather"],"isNew":true},
-    {"id":"map-explorer","name":"Map Explorer","icon":"🗺️","blurb":"Find continents and oceans, and where animals and landmarks belong.","level":4,"subject":"science","skills":["world.map"],"isNew":true},
+    {"id":"clock-setter","name":"Set the Clock","icon":"🕰️","blurb":"Drag the clock hands to show the time.","level":2,"subject":"math","skills":["math.time"],"isNew":true,"v3":true},
+    {"id":"fraction-pizza","name":"Pizza Fractions","icon":"🍕","blurb":"Shade slices, match equal fractions and put pizzas in order.","level":3,"subject":"math","skills":["math.fractions"],"isNew":true,"v3":true},
+    {"id":"coin-shop","name":"Coin Shop","icon":"🪙","blurb":"Pay the exact price with coins and notes.","level":3,"subject":"math","skills":["math.money"],"isNew":true,"v3":true},
+    {"id":"block-builder","name":"Block Builder","icon":"🧊","blurb":"Build numbers with hundreds, tens and ones blocks.","level":2,"subject":"math","skills":["math.place-value"],"isNew":true,"v3":true},
+    {"id":"shape-detectives","name":"Shape Detectives","icon":"🔷","blurb":"Count sides, spot every shape and find the mirror twin.","level":2,"subject":"math","skills":["math.shapes"],"isNew":true,"v3":true},
+    {"id":"measure-lab","name":"Measure Lab","icon":"📏","blurb":"Measure with a ruler, balance a scale and fill a jug.","level":3,"subject":"math","skills":["math.measure"],"isNew":true,"v3":true},
+    {"id":"picture-graphs","name":"Picture Graphs","icon":"📊","blurb":"Read picture graphs, bar charts and tally marks.","level":2,"subject":"math","skills":["math.data"],"isNew":true,"v3":true},
+    {"id":"sound-it-out","name":"Sound It Out","icon":"🐱","blurb":"Blend sounds into words and build words from letters.","level":1,"subject":"english","skills":["english.phonics"],"isNew":true,"v3":true},
+    {"id":"word-families","name":"Word Families","icon":"🏠","blurb":"Sort picture words into the houses where they belong.","level":1,"subject":"english","skills":["english.rhyme","english.phonics"],"isNew":true,"v3":true},
+    {"id":"sight-word-pop","name":"Sight Word Pop","icon":"🫧","blurb":"Hear a word and pop its bubble.","level":1,"subject":"english","skills":["english.sight-words"],"isNew":true,"v3":true},
+    {"id":"sentence-builder","name":"Sentence Builder","icon":"🧩","blurb":"Put word tiles in order to make a sentence about the picture.","level":2,"subject":"english","skills":["english.sentences"],"isNew":true,"v3":true},
+    {"id":"story-order","name":"Story Order","icon":"🎬","blurb":"Put the pictures in order: first, next, last.","level":1,"subject":"english","skills":["english.sequencing"],"isNew":true,"v3":true},
+    {"id":"tamil-days-colours","name":"நாட்கள் · நிறங்கள்","icon":"📅","blurb":"Days, months and colours in Tamil, with real voices.","level":1,"subject":"tamil","skills":["tamil.days-colours"],"isNew":true,"v3":true},
+    {"id":"tamil-picture-sentences","name":"படம் பார்த்து சொல்","icon":"🖼️","blurb":"Read a Tamil sentence and pick the picture it tells about.","level":2,"subject":"tamil","skills":["tamil.sentences"],"isNew":true,"v3":true},
+    {"id":"tamil-english-match","name":"Tamil–English Match","icon":"🔗","blurb":"Match Tamil words to their pictures and English words.","level":2,"subject":"tamil","skills":["tamil.vocabulary"],"isNew":true,"v3":true},
+    {"id":"tamil-story-time","name":"கதை நேரம்","icon":"📖","blurb":"Four-picture Tamil stories with listening questions.","level":3,"subject":"tamil","skills":["tamil.stories"],"isNew":true,"v3":true},
+    {"id":"life-cycles","name":"Life Cycles","icon":"🦋","blurb":"Put the stages of a butterfly, frog, plant or chicken in order.","level":2,"subject":"science","skills":["science.life-cycles"],"isNew":true,"v3":true},
+    {"id":"my-body","name":"My Body","icon":"🧍","blurb":"Tap body parts on the picture and match the five senses.","level":1,"subject":"science","skills":["science.body"],"isNew":true,"v3":true},
+    {"id":"sort-it","name":"Sort It!","icon":"🗂️","blurb":"Sort pictures: living or not, land, water or air, float or sink.","level":1,"subject":"science","skills":["science.sorting"],"isNew":true,"v3":true},
+    {"id":"weather-wear","name":"Weather & Seasons","icon":"☔","blurb":"Dress for the weather and name the season.","level":1,"subject":"science","skills":["science.weather"],"isNew":true,"v3":true},
+    {"id":"map-explorer","name":"Map Explorer","icon":"🗺️","blurb":"Find continents and oceans, and where animals and landmarks belong.","level":4,"subject":"science","skills":["world.map"],"isNew":true,"v3":true},
   ];
 
   var PATHS = {

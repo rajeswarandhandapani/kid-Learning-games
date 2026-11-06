@@ -130,8 +130,8 @@
       id: "picture-pro",
       emoji: "🖼️",
       name: "Picture Pro",
-      hint: "Try 10 of the newest picture games",
-      earned: function (s) { return catalogue().filter(function (g) { return g.isNew && s.games[g.id]; }).length >= 10; },
+      hint: "Try 10 of the hands-on picture games",
+      earned: function (s) { return catalogue().filter(function (g) { return g.v3 && s.games[g.id]; }).length >= 10; },
     },
     {
       id: "path-finder",
@@ -552,6 +552,45 @@
       var groups = dueGroups(data.items);
       var due = groups.reduce(function (sum, g) { return sum + g.count; }, 0);
       return { due: due, waiting: data.items.length - due, cleared: data.cleared, groups: groups };
+    },
+
+    /**
+     * Prepares a game's start screen for review: says what is happening and
+     * removes the level and mode links, which would leave the review.
+     */
+    showIntro: function (count) {
+      var start = document.getElementById("start-screen");
+      if (!start) return;
+      start.querySelectorAll('[id$="-links"], .quiz-settings, #best-time-note, #quiz-info').forEach(function (el) { el.hidden = true; el.style.display = "none"; });
+      var intro = document.getElementById("klg-review-intro") || document.createElement("p");
+      intro.id = "klg-review-intro";
+      intro.className = "klg-review-intro";
+      intro.textContent = "🔁 Review time! " + count + (count === 1 ? " tricky question" : " tricky questions") + " to try again. No timer, no rush.";
+      var button = document.getElementById("start-btn");
+      if (!intro.parentNode && button) button.parentNode.insertBefore(intro, button);
+    },
+
+    /** "Next game" (when more is due) and "home" links for the end of a review round. */
+    finishLinks: function () {
+      var box = document.createElement("div");
+      box.className = "klg-review-links";
+      var next = dueGroups(loadReview().items)[0];
+      var game = next && window.KlgCatalogue && window.KlgCatalogue.byId(next.gameId);
+      if (next) {
+        var more = document.createElement("a");
+        more.id = "klg-review-next";
+        more.className = "btn btn-lg btn-primary fw-bold";
+        more.href = "../../" + next.href;
+        more.textContent = "Next: " + (game ? game.name : "another game") + " →";
+        box.appendChild(more);
+      }
+      var home = document.createElement("a");
+      home.id = "klg-review-home";
+      home.className = "btn btn-lg btn-outline-secondary fw-bold";
+      home.href = "../../index.html";
+      home.textContent = "🏠 Back to all games";
+      box.appendChild(home);
+      return box;
     },
 
     /** The hardest saved questions for the grown-up report, most missed first. */

@@ -1,6 +1,6 @@
 /**
  * Landing page behaviour: the player card (rank, XP, streak, badges), the
- * daily challenge, per-card stars and the "surprise me" button.
+ * review card, daily challenge, per-card stars and the "surprise me" button.
  *
  * The game list comes from catalogue.js (window.KlgCatalogue): the level
  * sections, subject tabs, learning paths and the grown-up report are all
@@ -130,6 +130,37 @@
     }
   }
 
+
+  /** The Review card appears only when missed questions are ready for another try. */
+  function renderReviewCard() {
+    var card = document.getElementById("review-card");
+    if (!card) return;
+    var review = KlgProgress.review.summary();
+    card.hidden = review.due === 0;
+    if (!review.due) return;
+    document.getElementById("review-count").textContent =
+      review.due + (review.due === 1 ? " question" : " questions") + " ready for another try";
+    var games = review.groups.length;
+    document.getElementById("review-note").textContent =
+      "From " + games + (games === 1 ? " game" : " games") + ". No timer, and your stars are safe.";
+    document.getElementById("review-link").setAttribute("href", review.groups[0].href);
+  }
+
+  /** For the grown-up report: the questions this child has missed most often. */
+  function trickyHtml() {
+    var cat = window.KlgCatalogue;
+    var list = KlgProgress.review.tricky(10);
+    if (!list.length) return "";
+    var waiting = KlgProgress.review.summary();
+    var html = "<h4>🔁 Tricky questions</h4><p class=\"report-note\">" + (waiting.due + waiting.waiting) +
+      " saved for review, " + waiting.cleared + " mastered so far.</p>" +
+      '<table class="report-table report-tricky"><thead><tr><th>Question</th><th>Answer</th><th>Missed</th></tr></thead><tbody>';
+    list.forEach(function (item) {
+      var game = cat.byId(item.gameId);
+      html += "<tr><td>" + esc(item.prompt) + (game ? " <small>" + esc(game.name) + "</small>" : "") + "</td><td>" + esc(item.answer || "–") + "</td><td>" + item.misses + "×</td></tr>";
+    });
+    return html + "</tbody></table>";
+  }
 
   function esc(text) {
     return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -316,6 +347,7 @@
       });
       html += "</tbody></table>";
     });
+    html += trickyHtml();
     html += '<button type="button" class="print-report" id="print-report">Print this report</button>';
     box.innerHTML = html;
     document.getElementById("print-report").addEventListener("click", function () { window.print(); });
@@ -366,6 +398,7 @@
     renderPlayer(summary);
     decorateCards(summary);
     renderDaily(summary);
+    renderReviewCard();
     renderPaths(summary);
     wireButtons();
     document.getElementById("parent-open").addEventListener("click", renderReport);

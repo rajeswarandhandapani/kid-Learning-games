@@ -44,6 +44,19 @@ test('every game page links the shared home button and loads progress before the
  }
 });
 
+test('every game page loads the catalogue before progress, or catalogue badges can never be earned', () => {
+ for (const id of folders) {
+  const html = fs.readFileSync(path.join('games', id, 'index.html'), 'utf8');
+  const c = html.indexOf('catalogue.js'), p = html.indexOf('progress.js');
+  assert.ok(c >= 0 && c < p, id + ' must load catalogue.js before progress.js');
+ }
+ assert.match(fs.readFileSync('scripts/new-game.cjs', 'utf8'), /'catalogue\.js', 'progress\.js'/, 'new games must load it too');
+});
+
+test('the Picture Pro badge can still be earned', () => {
+ assert.ok(cat.GAMES.filter((g) => g.v3).length >= 10);
+});
+
 test('index.html game count and noscript list match the catalogue (run npm run sync:index)', () => {
  const { synced } = require('../scripts/sync-index.cjs');
  const html = fs.readFileSync('index.html', 'utf8');
