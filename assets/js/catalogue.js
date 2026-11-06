@@ -81,7 +81,7 @@
     {"id":"multiply-pictures","name":"Picture Multiplication","icon":"🍪","blurb":"Groups, arrays and frog hops — see ×.","level":2,"subject":"math","skills":["math.multiply"]},
     {"id":"divide-pictures","name":"Picture Division","icon":"🍰","blurb":"Share it out, group it up, find leftovers.","level":2,"subject":"math","skills":["math.divide"]},
     {"id":"share-fairly","name":"Share It Fairly","icon":"🧺","blurb":"Deal treats onto plates. Is it fair?","level":2,"subject":"math","skills":["math.divide"]},
-    {"id":"multiplication","name":"Multiplication Tables","icon":"✖️","blurb":"25 timed questions on tables 1-11","level":3,"subject":"math","skills":["math.multiply"]},
+    {"id":"multiplication","name":"Multiplication Tables","icon":"✖️","blurb":"25 timed questions on tables 1-12","level":3,"subject":"math","skills":["math.multiply"]},
     {"id":"division","name":"Division","icon":"➗","blurb":"Share it out &mdash; facts & remainders","level":3,"subject":"math","skills":["math.divide"]},
     {"id":"fractions","name":"Fractions","icon":"🍕","blurb":"Pictures, equivalents, comparing & adding","level":3,"subject":"math","skills":["math.fractions"]},
     {"id":"time","name":"Time & Elapsed Time","icon":"🕒","blurb":"Read clocks & work out end times","level":3,"subject":"math","skills":["math.time"]},
