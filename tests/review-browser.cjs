@@ -241,6 +241,9 @@ const readQuestion = () => {
   await clear();
   await page.reload();
   assert.equal(await page.locator('#review-card').isVisible(), false, 'hidden with nothing saved');
+  await page.evaluate(() => localStorage.setItem('klg-stage', '2'));
+  await page.reload();
+  assert.equal(await page.locator('#review-card').isVisible(), false, 'hidden with nothing saved');
   await page.evaluate(() => localStorage.setItem('klg-review-v1', JSON.stringify({ epoch: 1, cleared: 4, items: [
    { id: 'counting|max=10|x', gameId: 'counting', query: 'max=10', snapshot: { prompt: 'a' }, step: 0, due: '2000-01-01', misses: 3, prompt: 'How many <apples>?', answer: '7' },
    { id: 'opposites||y', gameId: 'opposites', query: '', snapshot: { prompt: 'b' }, step: 0, due: '2000-01-01', misses: 1, prompt: 'Opposite of hot?', answer: 'cold' },

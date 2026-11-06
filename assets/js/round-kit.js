@@ -205,7 +205,7 @@
         const finishScreen = $("finish-screen");
         const heading = finishScreen.querySelector("h1, h2");
         if (heading) heading.textContent = "Review complete!";
-        finishScreen.querySelectorAll('a[href$="index.html"]').forEach((a) => {
+        finishScreen.querySelectorAll('a[href*="index.html"]').forEach((a) => {
           if (!a.closest("#finish-summary")) a.style.display = "none";
         });
       } else {

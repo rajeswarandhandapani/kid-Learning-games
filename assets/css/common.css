@@ -644,35 +644,8 @@ button,a,input,select { -webkit-tap-highlight-color:transparent; }
 .quiz-tools button { border:1px solid #dce4e9; border-radius:10px; padding:8px 16px; background:#fff; color:var(--ink); }
 .skip-link { position:fixed; top:-100px; left:16px; z-index:100; background:#fff; padding:15px; }
 .skip-link:focus { top:10px; }
-.app-header { height:86px; background:#fff; border-bottom:1px solid #e3e9ed; display:flex; align-items:center; gap:30px; padding:0 42px; }
-.brand { font-weight:800; font-size:23px; letter-spacing:-.8px; text-decoration:none; color:#203e45; white-space:nowrap; }
-.brand>span:last-child { font-weight:500; }
-.brand-mark { background:#e1ee79; border-radius:12px; padding:5px 11px; margin-right:8px; font-size:28px; }
-.header-note { color:var(--muted); font-size:14px; flex:1; }
 .parent-link { border:1px solid #d8e1e6; border-radius:30px; padding:8px 20px; background:#fff; color:var(--ink); font-size:14px; }
-.app-layout { display:grid; grid-template-columns:220px minmax(0,1fr); max-width:1680px; margin:auto; }
-.app-sidebar { padding:38px 20px; border-right:1px solid #e3e9ed; background:#fff; }
-.sidebar-label,.eyebrow { font-size:12px; font-weight:800; letter-spacing:1.7px; }
-.sidebar-label { color:#72828a; font-size:10px; margin:0 12px 20px; }
-.app-sidebar>a { display:block; padding:14px 16px; margin-bottom:8px; border-radius:10px; color:#52636b; text-decoration:none; font-weight:600; font-size:14px; }
-.app-sidebar>a.side-active { background:#eaf2ef; color:#235947; }
-.sidebar-note { margin-top:55px; padding:22px 15px; background:#f7f9f4; border:1px solid #e5ebdf; border-radius:15px; }
-.sidebar-note>span { display:block; font-size:32px; margin-bottom:14px; }
-.sidebar-note strong { display:block; font-size:16px; line-height:1.5; }
-.sidebar-note p { font-size:14px; color:var(--muted); margin:10px 0 0; }
-.sidebar-foot { display:block; margin:26px 12px; color:#72828a; font-size:12px; }
-.home-main { padding:34px 40px; min-width:0; }
-.welcome { background:#214d49; color:white; padding:32px 38px; border-radius:22px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-.welcome .eyebrow { color:#d4e897; }
-.welcome h1 { font-weight:750; font-size:clamp(28px,3vw,42px); line-height:1.16; letter-spacing:-1.4px; margin:16px 0; }
-.welcome h1 span { color:#e4ef92; }
-.welcome p { color:#d4e3df; max-width:460px; font-size:15px; }
 .primary-link { display:inline-flex; align-items:center; gap:24px; padding:11px 18px; background:#e7f299; color:#263c31; font-weight:700; font-size:14px; text-decoration:none; border-radius:10px; }
-.welcome-sticker { background:#e7f299; color:#214d49; padding:22px 25px; border-radius:16px; transform:rotate(7deg); margin:0 20px; min-width:180px; box-shadow:8px 8px 0 #153d38; }
-.welcome-sticker>span { float:right; font-size:36px; }
-.welcome-sticker b { display:block; font-size:34px; line-height:1.02; letter-spacing:-1px; }
-.welcome-sticker small { display:block; margin-top:14px; font-size:8px; font-weight:800; letter-spacing:.8px; }
-.dashboard-row { display:grid; grid-template-columns:1.4fr 1fr; gap:18px; margin-top:22px; }
 .learning-home .klg-player-card { background:white; color:var(--ink); border:1px solid #e0e7eb; box-shadow:none; border-radius:16px; }
 .learning-home .klg-player-card .card-body { padding:20px!important; }
 .learning-home .klg-player-rank { background:#fff3d8; border-radius:14px; padding:12px; font-size:30px; }
@@ -683,15 +656,6 @@ button,a,input,select { -webkit-tap-highlight-color:transparent; }
 .learning-home #player-stats { width:100%; display:grid!important; grid-template-columns:repeat(4,1fr); }
 .learning-home .klg-player-stat { padding:3px; font-size:14px; }
 .learning-home .klg-player-stat .small { font-size:11px; color:var(--muted); }
-.learning-home #player-badges { display:none; }
-.learning-home .klg-daily-card { background:#fff2df; border:1px solid #eddcc1; border-radius:16px; }
-.learning-home .klg-daily-card .card-body { padding:24px; }
-.learning-home #daily-name { font-size:20px; margin:12px 0!important; }
-.learning-home #daily-note { font-size:13px; }
-.learning-home #daily-link { font-size:14px; padding:9px 18px!important; border-radius:10px; background:#98522b!important; }
-.library-heading { display:flex; justify-content:space-between; align-items:center; gap:15px; margin:12px 0 22px; }
-.library-heading .eyebrow { color:#6c7d83; font-size:10px; }
-.library-heading h2 { font-size:28px; font-weight:750; letter-spacing:-.7px; margin:8px 0 0; }
 .surprise-button { background:#fff; border:1px solid #dce4e9; border-radius:10px; padding:9px 16px; font-size:14px; font-weight:600; color:var(--ink); }
 .search-row { display:flex; gap:18px; align-items:center; }
 .search-box { display:flex; align-items:center; border:1px solid #d9e2e7; background:white; border-radius:10px; flex:1; padding:0 15px; }
@@ -703,9 +667,6 @@ button,a,input,select { -webkit-tap-highlight-color:transparent; }
 .subject-tabs button { border:1px solid #dce4e9; background:#fff; border-radius:30px; padding:8px 16px; color:#52636b; font-size:13px; font-weight:600; }
 .subject-tabs button[aria-pressed=true] { color:#fff; background:#254d48; border-color:#254d48; }
 .filter-status { font-size:12px; color:var(--muted); margin:12px 0 20px; }
-.learning-home .klg-level-heading { background:none; border:0; padding:0; gap:10px; margin:25px 0 12px; }
-.learning-home .klg-level-heading h2 { font-size:19px; }
-.learning-home .klg-level-heading .text-muted { margin-left:auto; font-size:12px; }
 .learning-home .klg-level-pill { font-size:9px; border-radius:6px; padding:6px 8px; }
 .learning-home section>.row { justify-content:flex-start!important; --bs-gutter-x:18px; --bs-gutter-y:18px; }
 .learning-home .game-card { position:relative; border:1px solid #e0e7eb; box-shadow:0 3px 0 #e5ebee; border-radius:16px; }
@@ -758,31 +719,13 @@ body { font-family:'Segoe UI','Learning Emoji','Noto Sans Tamil',Arial,sans-seri
 .quiz-question.tamil-word,.tamil-glyph,.tamil-glyph .fw-bold,.quiz-question.tamil-glyph { font-family:'Noto Sans Tamil','Learning Emoji',sans-serif; }
 @font-face { font-family:'Noto Sans Tamil'; src:url('../fonts/NotoSansTamil.ttf') format('truetype'); font-weight:100 900; font-display:swap; unicode-range:U+0B80-0BFF,U+200C-200D,U+25CC; }
 
-.learning-home .welcome { padding:24px 32px; }
-.learning-home .welcome h1 { font-size:36px; margin:12px 0; }
-.learning-home .welcome-sticker { padding:18px 22px; }
-.learning-home .welcome-sticker b { font-size:30px; }
 @media(min-width:1101px) { .learning-home .home-main { padding-top:26px; } .learning-home .welcome p { max-width:560px; } }
 @media(max-width:760px) { .learning-home .welcome h1 { font-size:30px; } .learning-home .welcome { padding:24px; } .surprise-button { white-space:nowrap; font-size:12px; padding:8px 12px; } }
-.learning-home #player-badges.parent-badges { display:grid; gap:10px; }
 .parent-badge { padding:10px 12px; background:#edf4ef; border-radius:10px; font-size:14px; }
 
 /* Tamil learning path (home) and Tamil subject cards */
 .learning-home [data-subject=tamil] .game-card-icon { background:#ffe9ec; font-family:'Noto Sans Tamil','Learning Emoji',sans-serif; }
 .subject-tabs .tamil-tab { font-family:'Segoe UI','Noto Sans Tamil',sans-serif; }
-.tamil-path { margin:22px 0 8px; padding:22px 24px; border-radius:18px; background:#fff7f0; border:1px solid #f0dcc8; }
-.tamil-path-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
-.tamil-path .eyebrow { color:#98522b; font-family:'Segoe UI','Noto Sans Tamil',sans-serif; }
-.tamil-path h2 { font-size:24px; font-weight:750; margin:6px 0 4px; letter-spacing:-.5px; }
-.tamil-path p { color:var(--muted); font-size:14px; margin:0; }
-.tamil-steps { list-style:none; padding:0; margin:18px 0 0; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(132px,1fr); gap:10px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x proximity; }
-.tamil-steps li { scroll-snap-align:start; }
-.tamil-steps a { position:relative; display:flex; flex-direction:column; gap:4px; height:100%; padding:14px 12px 12px; background:#fff; border:1px solid #ecdccd; border-radius:14px; text-decoration:none; color:var(--ink); }
-.tamil-steps a:hover { border-color:#98522b; }
-.tamil-steps .step-n { position:absolute; top:8px; right:10px; font-size:11px; font-weight:800; color:#98522b; }
-.tamil-steps .step-icon { font-size:28px; line-height:1.2; }
-.tamil-steps b { font-size:14px; }
-.tamil-steps small { font-size:12px; color:var(--muted); }
 @media(max-width:760px) { .tamil-path { padding:18px 16px; } .tamil-path h2 { font-size:20px; } }
 
 /* Finish panel for hand-built activities (assets/js/game-kit.js) */
@@ -794,13 +737,6 @@ body { font-family:'Segoe UI','Learning Emoji','Noto Sans Tamil',Arial,sans-seri
 
 
 /* Learning paths (catalogue-driven) and the grown-up report */
-.path-tabs { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-.path-tabs button[data-path] { border:1px solid #e0cdb9; background:#fff; border-radius:999px; padding:8px 14px; font-weight:700; color:var(--ink); }
-.path-tabs button[data-path][aria-pressed="true"] { background:#203e45; border-color:#203e45; color:#fff; }
-.tamil-steps a.done { border-color:#24754c; background:#f2faf4; }
-.tamil-steps a.next-up { border:2px solid #b34c13; box-shadow:0 4px 14px #b34c1326; }
-.step-tick { position:absolute; bottom:8px; right:10px; color:#24754c; font-weight:800; }
-.step-chip { position:absolute; bottom:8px; right:10px; background:#b34c13; color:#fff; border-radius:999px; padding:1px 8px; font-size:11px; font-weight:800; }
 .path-next { margin-top:12px !important; font-weight:700; color:var(--ink) !important; }
 .report-summary { background:#f5f8fa; border-radius:12px; padding:12px 14px; }
 .report-note { font-size:14px; margin:0 0 6px; }
@@ -935,4 +871,187 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 @media(max-height:640px) {
   .kid-game #start-screen .game-card-icon, .kid-game #start-screen .typing-emblem { width:60px; height:60px; font-size:36px; border-radius:18px; margin-bottom:4px!important; }
   .kid-game #start-btn.kid-play { min-height:64px; font-size:1.7rem; margin:6px auto!important; }
+}
+
+/* The home page. Every view fits one job, with the first thing to tap at the top. */
+.learning-home { min-height:100vh; display:flex; flex-direction:column; }
+.kid-top { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:8px; padding:8px 12px; background:#fff; box-shadow:0 3px 0 var(--kid-line); }
+.kid-logo { flex:1; min-width:0; display:flex; align-items:center; gap:8px; min-height:48px; color:var(--kid-ink); text-decoration:none; font-size:1.2rem; }
+.kid-logo span { flex:none; font-size:1.9rem; line-height:1; }
+.kid-logo b { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:800; }
+.kid-chip { flex:none; display:inline-flex; align-items:center; min-height:48px; padding:6px 12px; border-radius:16px; background:var(--kid-bg); border:2px solid var(--kid-line); color:var(--kid-ink); font-size:1.05rem; font-weight:800; text-decoration:none; white-space:nowrap; }
+.kid-chip:hover { color:var(--kid-ink); background:#fff1cf; }
+.kid-top .klg-mute-btn { position:static; flex:none; width:48px; height:48px; min-height:48px; padding:0; border:2px solid var(--kid-line); border-radius:50%; background:#fff; font-size:1.35rem; box-shadow:none; }
+.kid-main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:10px 12px 8px; }
+.kid-title { display:flex; align-items:center; justify-content:center; gap:10px; margin:2px 0 10px; }
+.kid-title h1, .kid-world-head h1 { flex:0 1 auto; min-width:0; margin:0; font-size:1.5rem; font-weight:800; text-align:center; outline:none; }
+.kid-title-back h1 { flex:1; }
+.kid-title-back::after { content:''; flex:none; width:40px; }
+.kid-say { flex:none; width:44px; height:44px; min-height:44px; padding:0; border:2px solid var(--kid-line); border-radius:50%; background:#fff; font-size:1.15rem; line-height:1; color:var(--kid-ink); box-shadow:0 2px 0 var(--kid-line); }
+.kid-say:active { transform:translateY(2px); box-shadow:none; }
+.kid-back { flex:none; display:inline-flex; align-items:center; min-height:48px; padding:6px 12px; border:2px solid var(--kid-line); border-radius:14px; background:#fff; color:var(--kid-ink); font-size:1rem; font-weight:800; text-decoration:none; white-space:nowrap; }
+.kid-quiet { display:block; min-height:48px; margin:10px auto 0; padding:10px 18px; border:0; border-radius:14px; background:transparent; color:var(--kid-muted); font-size:1rem; font-weight:700; text-align:center; text-decoration:underline; text-underline-offset:3px; width:fit-content; }
+
+/* Age tiles */
+.kid-ages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; max-width:640px; margin:0 auto; }
+.kid-age { position:relative; }
+.kid-age-btn { width:100%; min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:10px; border:0; border-radius:24px; color:#fff; font-size:2.1rem; font-weight:800; box-shadow:0 6px 0 #00000033; }
+.kid-age-btn:active { transform:translateY(4px); box-shadow:0 2px 0 #00000033; }
+.kid-age-pic { font-size:3.2rem; line-height:1.1; }
+.kid-age[data-level="1"] .kid-age-btn { background:var(--kid-science); }
+.kid-age[data-level="2"] .kid-age-btn { background:var(--kid-math); }
+.kid-age[data-level="3"] .kid-age-btn { background:var(--kid-english); }
+.kid-age[data-level="4"] .kid-age-btn { background:var(--kid-logic); }
+.kid-age .kid-say { position:absolute; right:8px; top:8px; }
+
+/* Play next */
+.kid-next-wrap { position:relative; margin-bottom:12px; }
+.kid-play-next { display:flex; align-items:center; gap:12px; min-height:104px; padding:12px 60px 12px 16px; border-radius:26px; background:var(--kid-accent); color:#fff; text-decoration:none; box-shadow:0 6px 0 #00000040; }
+.kid-play-next:hover { color:#fff; filter:brightness(1.06); }
+.kid-play-next:active { transform:translateY(4px); box-shadow:0 2px 0 #00000040; }
+.kid-play-arrow { flex:none; display:flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:#fff; color:var(--kid-accent); font-size:1.9rem; }
+.kid-play-words { flex:1; min-width:0; display:flex; flex-direction:column; }
+.kid-play-words b { font-size:1.65rem; font-weight:800; line-height:1.1; }
+.kid-play-words small { font-size:1.05rem; font-weight:600; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.kid-play-pic { flex:none; font-size:2.6rem; line-height:1; font-family:var(--kid-font); }
+.kid-next-wrap .kid-say { position:absolute; right:10px; top:50%; margin-top:-22px; }
+.kid-next-wrap .kid-play-pic { display:none; }
+
+/* Try again */
+.learning-home .klg-review-card { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; padding:12px 14px; border:3px solid #1f5fbf; border-radius:20px; background:#e3efff; font-size:1.05rem; }
+.learning-home .klg-review-card[hidden] { display:none; }
+.kid-review-go { flex:none; display:inline-flex; align-items:center; min-height:52px; padding:8px 14px; border-radius:16px; background:#1f5fbf; color:#fff; font-weight:800; text-decoration:none; white-space:nowrap; box-shadow:0 3px 0 #00000040; }
+.kid-review-go:hover { color:#fff; }
+.learning-home #review-note { font-size:.95rem; }
+
+/* Subject tiles */
+.kid-worlds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.kid-world { position:relative; }
+.kid-world[data-world=favorites] { --kid-accent:#a21caf; }
+.kid-world-link { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:124px; padding:10px; border-radius:24px; background:var(--kid-accent); color:#fff; text-decoration:none; box-shadow:0 6px 0 #00000033; }
+.kid-world-link:hover { color:#fff; filter:brightness(1.06); }
+.kid-world-link:active { transform:translateY(4px); box-shadow:0 2px 0 #00000033; }
+.kid-world-icon { font-size:3rem; line-height:1.15; font-family:var(--kid-font); font-weight:800; }
+.kid-world-link b { font-size:1.3rem; font-weight:800; line-height:1.15; text-align:center; }
+.kid-world .kid-say { position:absolute; right:6px; top:6px; border-color:transparent; }
+.kid-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+.kid-soft { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60px; padding:8px 12px; border:3px solid var(--kid-line); border-radius:18px; background:#fff; color:var(--kid-ink); font-size:1.05rem; font-weight:800; text-align:center; text-decoration:none; line-height:1.2; box-shadow:0 3px 0 var(--kid-line); }
+.kid-soft:hover { color:var(--kid-ink); background:#fffdf5; }
+.kid-soft small { font-size:.9rem; color:var(--kid-muted); font-weight:700; }
+
+/* Subject view */
+.kid-world-head { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:20px; background:var(--kid-accent); color:#fff; }
+.kid-world-head:not([data-subject]) { background:#a21caf; }
+.kid-world-head h1 { flex:1; font-size:1.45rem; font-family:var(--kid-font); }
+.kid-world-head .kid-back { border-color:transparent; }
+.kid-world-head .kid-say { border-color:transparent; }
+.path-next { min-height:1.4em; margin:10px 2px; font-size:1.05rem; font-weight:800; text-align:center; color:var(--kid-ink); }
+.kid-empty { padding:24px 14px; border-radius:18px; background:#fff; font-size:1.2rem; font-weight:700; text-align:center; }
+.kid-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; padding-bottom:6px; }
+.kid-cards[hidden] { display:none; }
+.learning-home .game-tile { position:relative; min-width:0; }
+.learning-home .game-tile > a { display:block; height:100%; }
+.learning-home .game-card { position:relative; height:100%; border:3px solid transparent; border-radius:22px; background:#fff; box-shadow:0 5px 0 var(--kid-accent); }
+.learning-home .game-card:hover { transform:none; box-shadow:0 5px 0 var(--kid-accent); border-color:var(--kid-accent-soft); }
+.learning-home .game-card .card-body { display:flex; flex-direction:column; align-items:center; padding:12px 8px 58px!important; text-align:center!important; }
+.learning-home .game-card-icon { display:flex; align-items:center; justify-content:center; width:72px; height:72px; margin:0 0 8px!important; border-radius:20px; background:var(--kid-accent-soft)!important; font-size:42px; line-height:1; font-family:var(--kid-font); }
+.learning-home .game-card h3 { margin:0 0 4px; color:var(--kid-ink)!important; font-size:1.1rem; font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.kid-blurb { display:none; margin:0 0 4px; font-size:15px; line-height:1.35; color:var(--kid-muted); }
+.learning-home .klg-card-stars { position:static; margin-top:auto; font-size:1rem; line-height:1.2; text-align:center; letter-spacing:1px; color:var(--kid-muted); opacity:1!important; }
+.learning-home .game-tile .kid-say { position:absolute; left:8px; bottom:8px; }
+.learning-home .favorite-button { top:auto; right:8px; bottom:8px; width:44px; height:44px; min-height:44px; padding:0; border:2px solid var(--kid-line); background:#fff; color:#a21caf; font-size:1.4rem; line-height:1; box-shadow:0 2px 0 var(--kid-line); }
+.learning-home .klg-card-flag { position:absolute; top:6px; right:6px; bottom:auto; padding:2px 8px; border-radius:999px; background:#a21caf; color:#fff; font-size:.75rem; font-weight:800; letter-spacing:0; box-shadow:none; transform:none; }
+.learning-home .game-card.done { background:#f4fbf6; }
+.learning-home .game-card.done h3::before { content:'✓ '; color:var(--kid-science); }
+.learning-home .game-card.next-up { border-color:var(--kid-accent); }
+.kid-next-chip { position:absolute; top:6px; left:6px; padding:2px 8px; border-radius:999px; background:var(--kid-accent); color:#fff; font-size:.8rem; font-weight:800; }
+.kid-world-foot { margin-top:14px; }
+.kid-stage-row { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+.kid-stage-row .kid-soft { flex-direction:row; min-width:120px; }
+.kid-stage-now { font-size:1.15rem; font-weight:800; white-space:nowrap; }
+
+/* My stars */
+.learning-home .klg-player-card { border:0; border-radius:22px; background:#fff; color:var(--kid-ink); box-shadow:0 5px 0 var(--kid-line); }
+.learning-home .klg-player-card .card-body { padding:16px!important; }
+.learning-home .klg-player-rank { padding:10px; border-radius:18px; background:var(--kid-bg); font-size:2.6rem; line-height:1; }
+.learning-home #player-rank-name { font-size:1.4rem; }
+.learning-home #player-xp-caption { font-size:15px; color:var(--kid-muted); }
+.learning-home .klg-player-card .klg-xp-track { height:12px; }
+.learning-home .klg-player-card .klg-xp-fill { background:var(--kid-science); }
+.learning-home .klg-player-stat { font-size:1.05rem; font-weight:800; }
+.learning-home .klg-player-stat .small { font-size:15px; color:var(--kid-muted); }
+.kid-subhead { margin:16px 0 10px; font-size:1.25rem; font-weight:800; }
+.kid-badges { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:10px; }
+.kid-badges .klg-badge-chip { display:flex; flex-direction:column; align-items:center; gap:2px; width:auto; height:auto; min-height:92px; padding:8px 4px; border:0; border-radius:16px; background:#fff; color:var(--kid-ink); font-size:15px; text-align:center; line-height:1.15; box-shadow:0 3px 0 var(--kid-line); filter:none; opacity:1; }
+.kid-badge-pic { font-size:2rem; line-height:1.1; }
+.kid-badges .klg-badge-chip.locked { background:#f3ecd9; color:var(--kid-muted); }
+.kid-badges .klg-badge-chip.locked .kid-badge-pic { filter:grayscale(1); opacity:.55; }
+
+/* All games */
+.learning-home .search-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.learning-home .search-box { flex:1 1 220px; display:flex; align-items:center; min-height:52px; padding:0 12px; border:3px solid var(--kid-line); border-radius:16px; background:#fff; }
+.learning-home .search-box input { width:100%; min-width:0; min-height:44px; padding:8px; border:0; background:transparent; color:var(--kid-ink); font-size:1.05rem; }
+.learning-home .level-select { display:flex; align-items:center; gap:8px; color:var(--kid-ink); font-size:1rem; font-weight:800; }
+.learning-home .level-select select { min-height:52px; padding:8px; border:3px solid var(--kid-line); border-radius:16px; background:#fff; color:var(--kid-ink); font-size:1rem; }
+.learning-home .subject-tabs { margin:12px 0 6px; }
+.learning-home .subject-tabs button { min-height:48px; padding:8px 14px; border:3px solid var(--kid-line); border-radius:999px; background:#fff; color:var(--kid-ink); font-size:1rem; font-weight:700; }
+.learning-home .subject-tabs button[aria-pressed=true] { background:var(--kid-ink); border-color:var(--kid-ink); color:#fff; }
+.learning-home .filter-status { margin:8px 2px 12px; color:var(--kid-muted); font-size:1rem; font-weight:700; }
+#empty-games button, .reset-button, .print-report { min-height:48px; }
+
+/* Footer: quietly at the bottom, for the grown-ups. */
+.learning-home .home-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 14px; width:100%; max-width:1100px; margin:0 auto; padding:6px 12px 12px; border:0; color:var(--kid-muted); font-size:15px; text-align:center; }
+.learning-home .parent-link { margin:0; padding:10px 14px; border:0; background:transparent; font-size:1rem; }
+dialog a { min-height:44px; }
+
+@media(min-width:700px) {
+  .kid-main { padding:16px 20px 8px; }
+  .kid-worlds { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+  .kid-world-link { min-height:150px; }
+  .kid-world-icon { font-size:3.6rem; }
+  .kid-world-link b { font-size:1.5rem; }
+  .kid-ages { grid-template-columns:repeat(4,minmax(0,1fr)); max-width:none; }
+  .kid-age-btn { min-height:220px; }
+  .kid-next-wrap .kid-play-pic { display:flex; }
+  .kid-play-next { min-height:116px; padding:12px 70px 12px 20px; }
+  .kid-row { max-width:640px; margin-left:auto; margin-right:auto; }
+  .kid-title h1 { font-size:1.9rem; }
+  .kid-cards { grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:16px; }
+  .kid-blurb { display:block; }
+  .learning-home .game-card h3 { font-size:1.2rem; }
+}
+@media(max-height:640px) and (max-width:699px) {
+  .kid-play-next { min-height:84px; padding-top:8px; padding-bottom:8px; }
+  .kid-play-arrow { width:52px; height:52px; font-size:1.5rem; }
+  .kid-title { margin-bottom:6px; }
+  .kid-title h1 { font-size:1.25rem; }
+  .kid-age-btn { min-height:118px; font-size:1.7rem; }
+  .kid-age-pic { font-size:2.4rem; }
+}
+@media(max-width:480px) {
+  .kid-logo b { display:none; }
+  .learning-home .search-row { flex-direction:column; align-items:stretch; }
+  .learning-home .search-box { flex:none; }
+  .learning-home .level-select select { flex:1; }
+}
+
+/* The end of a round */
+.kid-next-game { display:flex; align-items:center; justify-content:center; width:100%; max-width:420px; min-height:72px; padding:10px 16px; border-radius:22px; background:var(--kid-accent); color:#fff; font-size:1.3rem; font-weight:800; line-height:1.15; text-align:center; text-decoration:none; box-shadow:0 5px 0 #00000040; }
+.kid-next-game:hover { color:#fff; filter:brightness(1.06); }
+.kid-next-game:active { transform:translateY(4px); box-shadow:0 1px 0 #00000040; }
+.kid-game .results-card .d-flex.justify-content-center { flex-wrap:wrap; gap:10px!important; margin:12px 0!important; }
+.kid-game #play-again-btn, .kid-game #play-again, .kid-game .kid-finish-home { display:inline-flex; align-items:center; justify-content:center; flex:1 1 130px; max-width:205px; min-height:56px; padding:8px 12px!important; border:3px solid var(--kid-accent)!important; border-radius:18px; background:#fff!important; color:var(--kid-accent)!important; font-size:1.1rem; font-weight:800; }
+
+/* Small and tall screens */
+.kid-play-pic { display:flex; align-items:center; justify-content:center; width:72px; height:72px; border-radius:20px; background:#fff; }
+@media(max-width:380px) {
+  .kid-age-pic, .kid-world-icon { margin-right:38px; }
+}
+@media(min-width:700px) and (min-height:900px) {
+  .kid-world-link { min-height:220px; }
+  .kid-world-icon { font-size:4.6rem; }
+  .kid-world-link b { font-size:1.8rem; }
+  .kid-age-btn { min-height:300px; font-size:2.8rem; }
+  .kid-age-pic { font-size:4.4rem; }
+  .kid-ages { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }

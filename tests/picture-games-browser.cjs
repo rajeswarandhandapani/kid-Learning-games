@@ -63,10 +63,10 @@ const section = (name, fn) => sections.push([name, fn]);
   //@@SECTIONS@@
   section('home: learning paths tick off played games and the grown-up report reads the history', async ({ page, assert, base }) => {
     await page.goto(base + '/index.html');
-    await page.evaluate(() => { localStorage.clear(); });
+    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('klg-stage', '1'); });
+    await page.goto(base + '/index.html#world/math');
     await page.reload();
-    await page.locator('#path-tabs [data-path="math"]').click();
-    assert.equal(await page.locator('#path-steps a.done').count(), 0);
+    assert.equal(await page.locator('.game-tile:not([hidden]) .game-card.done').count(), 0);
     assert.match(await page.locator('#path-next').textContent(), /Next up: Hear numbers/);
     assert.match(await page.locator('#parent-open').click().then(() => page.locator('#parent-report').textContent()), /No rounds yet/);
     await page.keyboard.press('Escape');
@@ -78,10 +78,9 @@ const section = (name, fn) => sections.push([name, fn]);
       KlgProgress.record({ gameId: 'counting', score: 10, total: 10 });
     });
     await page.reload();
-    await page.locator('#path-tabs [data-path="math"]').click();
-    assert.equal(await page.locator('#path-steps a.done').count(), 2, 'number sounds and counting have stars; fractions at 30% has none yet');
-    assert.match(await page.locator('#path-next').textContent(), /Next up: Shapes/);
-    assert.equal(await page.locator('#path-steps a.next-up').count(), 1);
+    assert.equal(await page.locator('.game-tile:not([hidden]) .game-card.done').count(), 2, 'number sounds and counting have stars; fractions at 30% has none yet');
+    assert.match(await page.locator('#path-next').textContent(), /Next up: Number bonds/);
+    assert.equal(await page.locator('.game-tile:not([hidden]) .game-card.next-up').count(), 1);
     await page.locator('#parent-open').click();
     const report = await page.locator('#parent-report').textContent();
     assert.match(report, /Needs practice:\s*Fractions/);
@@ -92,6 +91,8 @@ const section = (name, fn) => sections.push([name, fn]);
     assert.ok(stats.byMode.default.plays === 2);
     await page.keyboard.press('Escape');
     // New games carry a NEW flag and appear under their subject tab
+    await page.goto(base + '/index.html#all');
+    await page.reload();
     await page.locator('button[data-subject="science"]').click();
     assert.ok(await page.locator('.game-card[data-game="my-body"]').isVisible());
     assert.ok(await page.locator('.game-card[data-new] .klg-card-flag').count() >= 5, 'new games are flagged');

@@ -96,6 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
     locked = true;
     document.getElementById('memory-screen').classList.add('d-none');
     document.getElementById('start-screen').classList.remove('d-none');
+    // The size menu may be folded away under More ways to play.
+    const fold = sizeSelect.closest('details');
+    if (fold) fold.open = true;
     sizeSelect.focus();
   });
 });

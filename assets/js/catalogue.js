@@ -16,18 +16,18 @@
   "use strict";
 
   var LEVELS = {
-    1: { name: "First Steps", emoji: "🐣", ages: "Ages 3–5", note: "listening, counting and letters" },
-    2: { name: "Building Blocks", emoji: "🧱", ages: "Ages 5–7", note: "reading, adding and first multiplying" },
-    3: { name: "Level Up", emoji: "🚀", ages: "Ages 7–9", note: "tables, fractions, time and money" },
-    4: { name: "Brain Boost", emoji: "🧠", ages: "Ages 9+", note: "bigger numbers and the wider world" },
+    1: { name: "First Steps", emoji: "🐣", ages: "Ages 3–5", short: "3–5", say: "Ages three to five", note: "listening, counting and letters" },
+    2: { name: "Building Blocks", emoji: "🧱", ages: "Ages 5–7", short: "5–7", say: "Ages five to seven", note: "reading, adding and first multiplying" },
+    3: { name: "Level Up", emoji: "🚀", ages: "Ages 7–9", short: "7–9", say: "Ages seven to nine", note: "tables, fractions, time and money" },
+    4: { name: "Brain Boost", emoji: "🧠", ages: "Ages 9+", short: "9+", say: "Ages nine and up", note: "bigger numbers and the wider world" },
   };
 
   var SUBJECTS = {
-    math: { label: "🔢 Math" },
-    english: { label: "📚 English" },
-    tamil: { label: "அ Tamil · தமிழ்" },
-    science: { label: "🌍 Science & world" },
-    logic: { label: "🧩 Thinking skills" },
+    math: { label: "🔢 Math", kid: "Numbers", icon: "🔢", say: "Numbers" },
+    english: { label: "📚 English", kid: "English", icon: "🔤", say: "English" },
+    tamil: { label: "அ Tamil · தமிழ்", kid: "தமிழ்", icon: "அ", say: "Tamil" },
+    science: { label: "🌍 Science & world", kid: "Our World", icon: "🌍", say: "Our world" },
+    logic: { label: "🧩 Thinking skills", kid: "Puzzles", icon: "🧩", say: "Puzzles" },
   };
 
   /** Friendly names for the skill tags (the report falls back to the tag text). */
@@ -51,13 +51,13 @@
     {"id":"picture-words","name":"Picture Words","icon":"🖼️","blurb":"Hear a word. Find its picture.","level":1,"subject":"english","skills":["english.vocabulary"]},
     {"id":"feelings-faces","name":"Feelings Faces","icon":"😊","blurb":"Listen to a story. Choose a face.","level":1,"subject":"science","skills":["world.feelings"]},
     {"id":"everyday-tools","name":"What Do We Use?","icon":"🪥","blurb":"Find the tool for each little job.","level":1,"subject":"science","skills":["world.everyday"]},
-    {"id":"number-sounds","name":"Number Sounds","icon":"🔊","blurb":"Hear the number, tap the numeral","level":1,"subject":"math","skills":["math.number-names"]},
+    {"id":"number-sounds","name":"Number Sounds","icon":"🗣️","blurb":"Hear the number, tap the numeral","level":1,"subject":"math","skills":["math.number-names"]},
     {"id":"counting","name":"Counting","icon":"🍎","blurb":"Count the pictures, tap the number","level":1,"subject":"math","skills":["math.counting"]},
     {"id":"shapes-colors","name":"Shapes & Colors","icon":"🔷","blurb":"Name shapes, colors, sides & corners","level":1,"subject":"math","skills":["math.shapes","math.colours"]},
-    {"id":"english-alphabets","name":"English Alphabets","icon":"🔤","blurb":"Hear, match & order letters A&ndash;Z","level":1,"subject":"english","skills":["english.letters"]},
-    {"id":"tamil-alphabets","name":"Tamil Alphabets","icon":"அ","blurb":"Read or listen &mdash; vowels, consonants & more","level":1,"subject":"tamil","skills":["tamil.letters"]},
-    {"id":"rhyming-words","name":"Rhyming Words","icon":"🎵","blurb":"Cat, hat, bat &mdash; find the rhyme","level":1,"subject":"english","skills":["english.rhyme"]},
-    {"id":"baby-animals","name":"Baby Animals","icon":"🐣","blurb":"A baby cow is a&hellip;? Name them all!","level":1,"subject":"science","skills":["science.animals"]},
+    {"id":"english-alphabets","name":"English Alphabets","icon":"🔤","blurb":"Hear, match & order letters A–Z","level":1,"subject":"english","skills":["english.letters"]},
+    {"id":"tamil-alphabets","name":"Tamil Alphabets","icon":"அ","blurb":"Read or listen — vowels, consonants & more","level":1,"subject":"tamil","skills":["tamil.letters"]},
+    {"id":"rhyming-words","name":"Rhyming Words","icon":"🎵","blurb":"Cat, hat, bat — find the rhyme","level":1,"subject":"english","skills":["english.rhyme"]},
+    {"id":"baby-animals","name":"Baby Animals","icon":"🐣","blurb":"A baby cow is a…? Name them all!","level":1,"subject":"science","skills":["science.animals"]},
     {"id":"tamil-letter-chart","name":"Tamil Letter Chart","icon":"அ","blurb":"Tap any of 247 letters to hear a real voice.","level":1,"subject":"tamil","skills":["tamil.letters"]},
     {"id":"tamil-listen-find","name":"Listen & Find","icon":"👂","blurb":"Hear a Tamil word. Tap its picture.","level":1,"subject":"tamil","skills":["tamil.vocabulary"]},
     {"id":"tamil-letter-pop","name":"Letter Bubbles","icon":"🫧","blurb":"Hear a Tamil letter. Pop its bubble!","level":1,"subject":"tamil","skills":["tamil.letters"]},
@@ -69,7 +69,7 @@
     {"id":"reading-stories","name":"Story Detectives","icon":"📖","blurb":"Read a little story. Find the clues.","level":2,"subject":"english","skills":["english.comprehension"]},
     {"id":"comparing-numbers","name":"Comparing Numbers","icon":"⚖️","blurb":"Biggest, smallest & the < > = signs","level":2,"subject":"math","skills":["math.compare"]},
     {"id":"addition-subtraction","name":"Addition & Subtraction","icon":"➕","blurb":"Facts within 10, 20 or two-digit","level":2,"subject":"math","skills":["math.add-sub"]},
-    {"id":"patterns","name":"Patterns & Skip Counting","icon":"🔁","blurb":"2, 4, 6&hellip; what comes next?","level":2,"subject":"logic","skills":["logic.patterns","math.skip-counting"]},
+    {"id":"patterns","name":"Patterns & Skip Counting","icon":"🔁","blurb":"2, 4, 6… what comes next?","level":2,"subject":"logic","skills":["logic.patterns","math.skip-counting"]},
     {"id":"opposites","name":"Opposites","icon":"↔️","blurb":"Opposite words & words that match","level":2,"subject":"english","skills":["english.vocabulary"]},
     {"id":"calendar","name":"Calendar","icon":"📅","blurb":"Days of the week & months of the year","level":2,"subject":"math","skills":["math.calendar"]},
     {"id":"tamil-words","name":"Tamil Words","icon":"🐘","blurb":"Match pictures & meanings to Tamil words","level":2,"subject":"tamil","skills":["tamil.vocabulary"]},
@@ -82,7 +82,7 @@
     {"id":"divide-pictures","name":"Picture Division","icon":"🍰","blurb":"Share it out, group it up, find leftovers.","level":2,"subject":"math","skills":["math.divide"]},
     {"id":"share-fairly","name":"Share It Fairly","icon":"🧺","blurb":"Deal treats onto plates. Is it fair?","level":2,"subject":"math","skills":["math.divide"]},
     {"id":"multiplication","name":"Multiplication Tables","icon":"✖️","blurb":"25 timed questions on tables 1-12","level":3,"subject":"math","skills":["math.multiply"]},
-    {"id":"division","name":"Division","icon":"➗","blurb":"Share it out &mdash; facts & remainders","level":3,"subject":"math","skills":["math.divide"]},
+    {"id":"division","name":"Division","icon":"➗","blurb":"Share it out — facts & remainders","level":3,"subject":"math","skills":["math.divide"]},
     {"id":"fractions","name":"Fractions","icon":"🍕","blurb":"Pictures, equivalents, comparing & adding","level":3,"subject":"math","skills":["math.fractions"]},
     {"id":"time","name":"Time & Elapsed Time","icon":"🕒","blurb":"Read clocks & work out end times","level":3,"subject":"math","skills":["math.time"]},
     {"id":"money","name":"Money & Making Change","icon":"💰","blurb":"Count coins & make change","level":3,"subject":"math","skills":["math.money"]},
@@ -223,8 +223,92 @@
     },
   };
 
+  function byId(id) {
+    return GAMES.filter(function (g) { return g.id === id; })[0] || null;
+  }
+
+  /** Where a game sits on its subject's learning path, or Infinity when it is not on one. */
+  function pathStep(game) {
+    var path = PATHS[game.subject];
+    if (!path) return Infinity;
+    for (var i = 0; i < path.steps.length; i++) {
+      if (path.steps[i].game === game.id) return i;
+    }
+    return Infinity;
+  }
+
+  /**
+   * The levels a child at this stage plays in this subject. Few games are written
+   * for 9+ alone, so that stage also gets the 7–9 games. A subject with nothing at
+   * a stage falls back to the nearest easier level, then the nearest harder one.
+   */
+  function levelsFor(stage, subject) {
+    var levels = Object.keys(LEVELS).map(Number);
+    if (!levels.includes(Number(stage))) return levels;
+    var n = Number(stage);
+    var wanted = n === 4 ? [4, 3] : [n];
+    var has = function (level) {
+      return GAMES.some(function (g) { return g.level === level && (!subject || g.subject === subject); });
+    };
+    if (wanted.some(has)) return wanted.filter(has);
+    var nearest = levels.slice().sort(function (a, b) {
+      var da = Math.abs(a - n), db = Math.abs(b - n);
+      return da - db || a - b;
+    }).filter(has)[0];
+    return nearest ? [nearest] : levels;
+  }
+
+  /**
+   * The games to show for a stage (1–4, or anything else for every age), easiest
+   * first in learning-path order, then the games that are not on a path.
+   */
+  function gamesFor(stage, subject) {
+    var levels = levelsFor(stage, subject);
+    return GAMES.map(function (game, index) { return { game: game, index: index }; })
+      .filter(function (x) { return levels.includes(x.game.level) && (!subject || x.game.subject === subject); })
+      .sort(function (a, b) {
+        var pa = pathStep(a.game), pb = pathStep(b.game);
+        if (pa !== pb) return pa - pb;
+        return a.index - b.index;
+      })
+      .map(function (x) { return x.game; });
+  }
+
+  function starsOf(game, stats) {
+    return (stats && stats[game.id] && stats[game.id].bestStars) || 0;
+  }
+
+  /** The game to offer next: the first without a star, or the one with the fewest stars. */
+  function firstToPlay(list, stats) {
+    var fresh = list.filter(function (g) { return !starsOf(g, stats); })[0];
+    if (fresh) return fresh;
+    return list.slice().sort(function (a, b) { return starsOf(a, stats) - starsOf(b, stats); })[0] || null;
+  }
+
+  /** Play next: stays in the preferred subject until every game there has a star. */
+  function nextFor(stage, stats, prefer) {
+    var subjects = Object.keys(SUBJECTS);
+    if (prefer && subjects.includes(prefer)) subjects = [prefer].concat(subjects.filter(function (s) { return s !== prefer; }));
+    for (var i = 0; i < subjects.length; i++) {
+      var fresh = gamesFor(stage, subjects[i]).filter(function (g) { return !starsOf(g, stats); })[0];
+      if (fresh) return fresh;
+    }
+    return firstToPlay(gamesFor(stage, subjects[0]), stats);
+  }
+
+  /** The game after this one: same subject and stage, later on the list, and without a star if possible. */
+  function nextAfter(id, stage, stats) {
+    var game = byId(id);
+    if (!game) return null;
+    var list = gamesFor(stage, game.subject);
+    if (!list.includes(game)) list = gamesFor(game.level, game.subject);
+    var at = list.indexOf(game);
+    var others = list.slice(at + 1).concat(list.slice(0, Math.max(at, 0))).filter(function (g) { return g !== game; });
+    return others.filter(function (g) { return !starsOf(g, stats); })[0] || others[0] || null;
+  }
+
   var api = { LEVELS: LEVELS, SUBJECTS: SUBJECTS, GAMES: GAMES, PATHS: PATHS, SKILL_NAMES: SKILL_NAMES,
-    byId: function (id) { return GAMES.filter(function (g) { return g.id === id; })[0] || null; } };
+    byId: byId, pathStep: pathStep, levelsFor: levelsFor, gamesFor: gamesFor, nextFor: nextFor, nextAfter: nextAfter };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.KlgCatalogue = api;
 })(typeof window !== "undefined" ? window : globalThis);

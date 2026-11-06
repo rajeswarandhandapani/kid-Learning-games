@@ -187,6 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $('typing-results').hidden = true;
     $('start-screen').hidden = false;
     finished = true;
+    // "Change topic" must show the topics, which may be folded under More ways to play.
+    const fold = $('sentence-category').closest('details');
+    if (fold) fold.open = true;
     $('start-btn').focus();
   }
 

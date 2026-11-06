@@ -192,6 +192,7 @@ function solve({ size, start, goal, rocks }) {
    d.items.forEach((it) => { it.due = '2000-01-01'; });
    localStorage.setItem('klg-review-v1', JSON.stringify(d));
   });
+  await page.evaluate(() => localStorage.setItem('klg-stage', '2'));
   await page.goto(`${base}/index.html`);
   assert.ok(await page.locator('#review-card').isVisible(), 'the home card appears');
   await page.locator('#review-link').click();
@@ -215,6 +216,7 @@ function solve({ size, start, goal, rocks }) {
   await go(page, 'memory-match/index.html');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.locator('.kid-more summary').click();
   await page.locator('#memory-size').selectOption('15');
   await page.locator('#start-btn').click();
   const cards = page.locator('.memory-card');

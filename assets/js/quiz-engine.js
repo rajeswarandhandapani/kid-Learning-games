@@ -624,6 +624,7 @@ class QuizEngine {
       if (time) time.textContent = 'Practice complete · every little step counts.';
     }
     this._recordProgress();
+    if (window.KlgShell) KlgShell.addNextGame(this.el.resultsScreen);
   }
 
   _finishReview() {
@@ -645,7 +646,7 @@ class QuizEngine {
     const again = document.getElementById('play-again-btn');
     if (again) { again.hidden = true; again.style.display = 'none'; }
     // The review's own links say where to go next, so the usual "More games" link would repeat them.
-    this.el.resultsScreen.querySelectorAll('a[href$="index.html"]').forEach((a) => { a.style.display = 'none'; });
+    this.el.resultsScreen.querySelectorAll('a[href*="index.html"]').forEach((a) => { a.style.display = 'none'; });
     document.getElementById('klg-review-links')?.remove();
     const links = KlgProgress.review.finishLinks();
     links.id = 'klg-review-links';

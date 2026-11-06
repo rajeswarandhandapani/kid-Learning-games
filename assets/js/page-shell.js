@@ -132,6 +132,44 @@
     if (useful && [...settings.keys()].length) more.open = true;
   }
 
+  /* ---------- end of a round ---------- */
+
+  /**
+   * Puts the three ways forward straight after the score: ▶ Next game, Play again
+   * and Home. A long list of missed questions then comes below them, not above.
+   */
+  function addNextGame(screen) {
+    if (!screen || !game || !window.KlgCatalogue || !window.KlgProgress) return;
+    const again = screen.querySelector("#play-again-btn, #play-again");
+    const row = again ? again.parentNode : null;
+    if (!row) return;
+    const chosen = stage();
+    const next = KlgCatalogue.nextAfter(game.id, chosen || game.level, KlgProgress.summary().games);
+    let link = screen.querySelector(".kid-next-game");
+    if (!next) {
+      if (link) link.remove();
+    } else {
+      if (!link) {
+        link = make("a", "kid-next-game");
+        row.prepend(link);
+      }
+      link.href = "../" + next.id + "/index.html";
+      link.textContent = "▶ Next game: " + next.name;
+      link.dataset.next = next.id;
+    }
+    const review = screen.querySelector("#results-review");
+    if (review) review.before(row);
+  }
+
+  function buildFinishLinks() {
+    document.querySelectorAll("#results-screen a, #finish-screen a").forEach((link) => {
+      if (link.getAttribute("href") !== "../../index.html") return;
+      link.textContent = "🏠 Home";
+      link.classList.add("kid-finish-home");
+      if (game) link.setAttribute("href", "../../index.html#world/" + game.subject);
+    });
+  }
+
   /* ---------- play screen ---------- */
   function shortenProgress(node) {
     const first = node.firstChild;
@@ -191,6 +229,7 @@
     buildStartScreen();
     buildPlayHeader();
     buildPrompt();
+    buildFinishLinks();
   }
 
   /** The chosen age band, or null before one is chosen. */
@@ -202,7 +241,7 @@
     }
   }
 
-  window.KlgShell = { say, canSpeak, game, stage };
+  window.KlgShell = { say, canSpeak, game, stage, addNextGame };
 
   // Game scripts come first in the page, so their own start-up has already run.
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

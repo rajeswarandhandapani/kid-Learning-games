@@ -53,6 +53,7 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
   await page.evaluate(() => localStorage.setItem('klg-review-v1', JSON.stringify({ epoch: 1, cleared: 0, items: [
     { id: 'counting||x', gameId: 'counting', query: '', snapshot: { prompt: 'How many?', correctAnswer: 3, choices: [3, 4], dedupeKey: 'x' }, step: 0, due: '2000-01-01', misses: 1 },
   ] })));
+  await page.evaluate(() => localStorage.setItem('klg-stage', '2'));
   await page.goto(base + '/index.html');
   assert.ok(await page.locator('#review-card').isVisible(), 'the review card shows offline');
   await page.locator('#review-link').click();

@@ -71,6 +71,7 @@
       if (typeof confetti === "function" && !reduced()) confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
     }
     if (el) {
+      if (window.KlgShell) KlgShell.addNextGame(el.closest("#finish-screen, #results-screen"));
       el.replaceChildren();
       const big = document.createElement("div");
       big.className = "tg-finish-score";
