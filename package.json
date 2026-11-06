@@ -19,6 +19,7 @@
     "test:review": "node tests/review-browser.cjs",
     "test:levels": "node tests/number-levels-browser.cjs",
     "test:newgames": "node tests/new-games-browser.cjs",
+    "test:ux": "node tests/ux-browser.cjs",
     "audio:tamil": "node scripts/fetch-tamil-audio.cjs"
   },
   "devDependencies": {

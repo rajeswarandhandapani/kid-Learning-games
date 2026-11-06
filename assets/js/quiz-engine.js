@@ -309,6 +309,8 @@ class QuizEngine {
     this._startTimer();
     this.questionStartMs = Date.now();
     this.el.questionText.focus({ preventScroll: true });
+    // The last answer may have scrolled the page down to Next.
+    if (window.scrollY > 0) window.scrollTo(0, 0);
     if (this.listenButton.hidden === false) this._speakQuestion();
     this.onQuestionShown(this.currentQuestion);
   }
@@ -490,7 +492,10 @@ class QuizEngine {
       this.nextButton.textContent = this.currentIndex === this.totalQuestions ? last : 'Next question →';
       this.nextButton.hidden = false;
       this.nextButton.focus({ preventScroll: true });
+      // On a short screen the feedback and Next can land below the fold, which looks stuck.
+      this.nextButton.scrollIntoView({ block: 'nearest' });
     } else {
+      this.feedback.scrollIntoView({ block: 'nearest' });
       this.transitionTimer = setTimeout(() => this._nextQuestion(), isCorrect ? this.correctDelay : Math.max(this.incorrectDelay, 3500));
     }
   }

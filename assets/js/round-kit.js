@@ -146,12 +146,16 @@
       const f = $("feedback");
       f.textContent = text;
       f.className = "mg-feedback " + (kind || "");
+      // A nudge is no use below the fold.
+      if (text) f.scrollIntoView({ block: "nearest" });
     }
 
     function showNext() {
       nextBtn.textContent = index + 1 === total ? (reviewing ? "All done →" : "See my stars →") : "Next →";
       nextBtn.hidden = false;
       nextBtn.focus({ preventScroll: true });
+      // On a short screen the feedback and Next can land below the fold, which looks stuck.
+      nextBtn.scrollIntoView({ block: "nearest" });
     }
 
     function show() {
@@ -167,6 +171,8 @@
       ctx.stage.replaceChildren();
       current = reviewing ? reviewing.items[index].snapshot.q : opts.make(index, asked);
       opts.render(current, ctx);
+      // The last answer may have scrolled the page down to Next.
+      if (window.scrollY > 0) window.scrollTo(0, 0);
     }
 
     function start() {
