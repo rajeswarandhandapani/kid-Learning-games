@@ -165,6 +165,13 @@
       hint: "Clear a tricky question in a review round",
       earned: function (s, ctx) { return !!(ctx && ctx.cleared > 0); },
     },
+    {
+      id: "bee-champion",
+      emoji: "🏆",
+      name: "Bee Champion",
+      hint: "Win a mock spelling bee",
+      earned: function (s, ctx) { return !!(ctx && ctx.beeChampion); },
+    },
   ];
 
   /** Badges a review round may unlock. Its score says nothing about "perfect" or speed. */
@@ -359,7 +366,7 @@
     data.games[gameId] = g;
 
     var stats = derived(data);
-    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs, improved: isBest && previousPlays > 0 };
+    var context = { score: score, total: total, bestStreak: bestStreak, elapsedMs: elapsedMs, improved: isBest && previousPlays > 0, beeChampion: !!result.beeChampion };
     var newBadges = [];
     BADGES.forEach(function (badge) {
       if (!data.badges[badge.id] && badge.earned(stats, context)) {
@@ -660,6 +667,7 @@
       try {
         localStorage.removeItem(KEY);
         localStorage.removeItem(REVIEW_KEY);
+        localStorage.removeItem("klg-bee-v1");
       } catch (e) {
         /* nothing to do */
       }

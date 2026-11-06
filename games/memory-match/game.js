@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const status = document.getElementById('memory-status');
   const feedback = document.getElementById('memory-feedback');
   const sizeSelect = document.getElementById('memory-size');
+  // The level buttons choose the garden size.
+  const wantedPairs = new URLSearchParams(location.search).get('pairs');
+  if ([...sizeSelect.options].some((option) => option.value === wantedPairs)) sizeSelect.value = wantedPairs;
   const pictures = [
     ['🌻', 'sunflower'], ['🦋', 'butterfly'], ['🐞', 'ladybug'], ['🌈', 'rainbow'],
     ['🍓', 'strawberry'], ['🐝', 'bee'], ['🌷', 'tulip'], ['🍄', 'mushroom'],

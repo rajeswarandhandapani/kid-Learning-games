@@ -12,7 +12,12 @@
   const A = window.KlgTamilAudio;
   const T = window.TamilSentenceData;
   const full = (s) => (s.before + s.word + s.after).trim();
-  const BANK = T.sentences.filter((s) => full(s).split(/\s+/).length >= 3);
+  // Level 1 keeps to sentences of exactly three words.
+  const shortest = new URLSearchParams(location.search).get("level") === "1";
+  const BANK = T.sentences.filter((s) => {
+    const words = full(s).split(/\s+/).length;
+    return shortest ? words === 3 : words >= 3;
+  });
 
   KlgRound.run({
     total: 8,

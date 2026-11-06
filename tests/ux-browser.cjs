@@ -12,6 +12,8 @@ const SIZES = [[320, 568], [390, 844], [810, 1080], [1080, 810], [1366, 900]];
 const gamesUsing = (needle) => fs.readdirSync('games')
  .filter((id) => fs.existsSync(`games/${id}/game.js`) && fs.readFileSync(`games/${id}/game.js`, 'utf8').includes(needle));
 const QUIZ = gamesUsing('new QuizEngine');
+// Spelling Bee opens on its training, and its quiz has its own address. tests/bee-browser.cjs covers the training.
+const quizUrl = (id) => `${base}/games/${id}/index.html${id === 'spelling-bee' ? '?level=1' : ''}`;
 const ROUND = gamesUsing('KlgRound.run');
 
 const sections = [];
@@ -48,7 +50,7 @@ section('next and feedback stay on screen after an answer', async ({ newPage, fa
  for (const [w, h] of SIZES) {
   const { page, close } = await newPage(w, h);
   for (const id of QUIZ) {
-   await page.goto(`${base}/games/${id}/index.html`);
+   await page.goto(quizUrl(id));
    await page.locator('#start-btn').click();
    await page.locator('.quiz-choice-btn').first().waitFor();
    await page.locator('.quiz-choice-btn').first().click();
@@ -87,7 +89,12 @@ section('start screens have one clear thing to do', async ({ newPage, fail }) =>
    const play = await page.evaluate(inView, '#start-btn');
    if (!play.ok) fail(`${id} at ${w}x${h}: Play ${play.why}`);
    const r = await page.evaluate(() => ({
-    words: document.getElementById('start-screen').innerText.trim().split(/\s+/).length,
+    // The level buttons are numbers and pictures, not reading, so they do not count.
+    words: (() => {
+     const start = document.getElementById('start-screen');
+     const levels = start.querySelector('.kid-levels');
+     return start.innerText.replace(levels ? levels.innerText : '', '').trim().split(/\s+/).length;
+    })(),
     label: document.getElementById('start-btn').textContent.trim(),
     scrolls: document.documentElement.scrollWidth > innerWidth + 1,
     home: document.querySelector('.navbar-brand').textContent.trim(),
@@ -130,7 +137,7 @@ section('the question and every answer fit on the screen', async ({ newPage, fai
  for (const [w, h] of SIZES.slice(1)) {
   const { page, close } = await newPage(w, h);
   for (const id of QUIZ) {
-   await page.goto(`${base}/games/${id}/index.html`);
+   await page.goto(quizUrl(id));
    await page.locator('#start-btn').click();
    await page.locator('.quiz-choice-btn').first().waitFor();
    const r = await page.evaluate(() => ({
@@ -139,7 +146,8 @@ section('the question and every answer fit on the screen', async ({ newPage, fai
     total: document.getElementById('total-questions').textContent,
     top: document.getElementById('question-text').getBoundingClientRect().top,
    }));
-   if (r.bottom > h + 1) fail(`${id} at ${w}x${h}: answers end at ${Math.round(r.bottom)}`);
+   // Story Detectives has a story to read first, so scrolling is expected. The next check covers Next.
+   if (r.bottom > h + 1 && id !== 'reading-stories') fail(`${id} at ${w}x${h}: answers end at ${Math.round(r.bottom)}`);
    if (r.number !== '1' || !Number(r.total)) fail(`${id}: the question counter was lost`);
   }
   for (const id of ROUND) {
@@ -162,21 +170,33 @@ const readableWords = () => document.body.innerText.split(/\s+/).filter((w) => /
 const placesToTap = () => [...document.querySelectorAll('a,button,select,input,summary')]
  .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !e.matches('.kid-say, .skip-link'); }).length;
 
-section('the first visit reaches a game in three taps', async ({ newPage, assert }) => {
+section('after a long story, Next and feedback are on screen', async ({ newPage, fail }) => {
  for (const [w, h] of SIZES) {
-  const { page, close } = await newPage(w, h, { stage: null });
+  const { page, close } = await newPage(w, h);
+  await page.goto(`${base}/games/reading-stories/index.html?level=2`);
+  await page.locator('#start-btn').click();
+  for (let i = 0; i < 4; i++) {
+   await page.locator('.quiz-choice-btn:not([disabled])').first().click();
+   for (const selector of ['.quiz-next', '#quiz-feedback']) {
+    const seen = await page.evaluate(inView, selector);
+    if (!seen.ok) fail(`long story at ${w}x${h}: ${selector} ${seen.why}`);
+   }
+   await page.locator('.quiz-next').click();
+  }
+  await close();
+ }
+});
+
+section('the first visit reaches a game in two taps, with no age question', async ({ newPage, assert }) => {
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
   await page.goto(home);
-  assert.ok(await page.locator('.kid-age-btn').first().isVisible(), 'the first visit asks for an age');
-  const allFour = await page.evaluate(() => [...document.querySelectorAll('.kid-age-btn')].every((b) => b.getBoundingClientRect().bottom <= innerHeight));
-  assert.ok(allFour, `all four age tiles fit at ${w}x${h}`);
-  await page.locator('.kid-age-btn[data-stage="1"]').click();
+  assert.match(await page.locator('body').innerText(), /What shall we play/);
+  assert.doesNotMatch(await page.locator('body').innerText(), /How old/);
   await page.locator('#play-next').click();
   await page.waitForURL(/games\/number-sounds/);
   await page.locator('#start-btn').click();
   await page.locator('.quiz-choice-btn').first().waitFor();
-  await page.goto(home);
-  assert.equal(await page.locator('.kid-age-btn:visible').count(), 0, 'the age is remembered');
-  assert.equal(await page.locator('#age-chip').textContent(), '🐣 3–5');
   await close();
  }
 });
@@ -203,36 +223,29 @@ section('the home view is short and simple', async ({ newPage, fail }) => {
  }
 });
 
-section('a subject shows only the games for this age', async ({ newPage, fail, assert }) => {
+section('a subject shows all of its games, easiest first', async ({ newPage, fail, assert }) => {
  for (const [w, h] of SIZES) {
   const { page, close } = await newPage(w, h);
-  for (const stage of ['1', '2', '3', '4']) {
-   await page.evaluate((s) => localStorage.setItem('klg-stage', s), stage).catch(() => {});
-   for (const subject of Object.keys(cat.SUBJECTS)) {
-    await page.goto(`${home}#world/${subject}`);
-    await page.reload();
-    await page.evaluate((s) => localStorage.setItem('klg-stage', s), stage);
-    await page.reload();
-    const want = cat.gamesFor(Number(stage), subject).map((g) => g.id);
-    const shown = await page.locator('.game-tile:visible').evaluateAll((tiles) => tiles
-     .map((t) => ({ id: t.dataset.game, order: Number(t.style.order) })).sort((a, b) => a.order - b.order).map((t) => t.id));
-    assert.deepEqual(shown, want, `${subject} at stage ${stage}`);
-    if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) fail(`${subject} at ${w}x${h}: sideways scroll`);
-    for (const small of await page.evaluate(tooSmall)) fail(`${subject} at ${w}x${h}: ${small}`);
-   }
-  }
-  if (w >= 320) {
-   await page.evaluate(() => localStorage.setItem('klg-stage', '2'));
-   await page.goto(`${home}#world/math`);
+  for (const subject of Object.keys(cat.SUBJECTS)) {
+   await page.goto(`${home}#world/${subject}`);
    await page.reload();
-   const lefts = await page.locator('.game-tile:visible').evaluateAll((tiles) => [...new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().left)))]);
-   if (lefts.length < 2) fail(`subject at ${w}x${h}: only ${lefts.length} column`);
+   const want = cat.gamesFor(subject).map((g) => g.id);
+   const shown = await page.locator('.game-tile:visible').evaluateAll((tiles) => tiles
+    .map((t) => ({ id: t.dataset.game, order: Number(t.style.order) })).sort((a, b) => a.order - b.order).map((t) => t.id));
+   assert.deepEqual(shown, want, subject);
+   assert.match(await page.locator('.game-tile:visible .kid-card-ages').first().textContent(), /^Ages \d/);
+   if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) fail(`${subject} at ${w}x${h}: sideways scroll`);
+   for (const small of await page.evaluate(tooSmall)) fail(`${subject} at ${w}x${h}: ${small}`);
   }
+  await page.goto(`${home}#world/math`);
+  await page.reload();
+  const lefts = await page.locator('.game-tile:visible').evaluateAll((tiles) => [...new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().left)))]);
+  if (lefts.length < 2) fail(`subject at ${w}x${h}: only ${lefts.length} column`);
   await close();
  }
 });
 
-section('getting around: back, home, easier and harder', async ({ newPage, assert }) => {
+section('getting around: back and home', async ({ newPage, assert }) => {
  const { page, close } = await newPage(390, 844);
  await page.goto(home);
  await page.locator('.kid-world-link[href="#world/tamil"]').click();
@@ -248,31 +261,17 @@ section('getting around: back, home, easier and harder', async ({ newPage, asser
  await page.waitForFunction(() => document.body.dataset.world === 'tamil');
  await page.goBack();
  await page.waitForFunction(() => document.body.dataset.view === 'home');
- // Easier and harder move through the ages, and stop at the ends.
- await page.goto(`${home}#world/math`);
+ // An old link to the age page lands on home.
+ await page.goto(`${home}#age`);
  await page.reload();
- assert.equal(await page.locator('#stage-now').textContent(), '🧱 5–7');
- await page.locator('#stage-easier').click();
- assert.equal(await page.locator('#stage-now').textContent(), '🐣 3–5');
- assert.equal(await page.locator('#stage-easier').isVisible(), false, 'no easier than the youngest');
- assert.deepEqual(await page.locator('.game-tile:visible').evaluateAll((t) => t.length), cat.gamesFor(1, 'math').length);
- await page.reload();
- assert.equal(await page.locator('#age-chip').textContent(), '🐣 3–5', 'the change is remembered');
- for (let i = 0; i < 3; i++) await page.locator('#stage-harder').click();
- assert.equal(await page.locator('#stage-harder').isVisible(), false, 'no harder than the oldest');
- // A deep link before an age is chosen asks for the age, then carries on.
- await page.evaluate(() => localStorage.removeItem('klg-stage'));
- await page.goto(`${home}#world/english`);
- await page.reload();
- await page.locator('.kid-age-btn[data-stage="2"]').click();
- await page.waitForFunction(() => document.body.dataset.world === 'english');
- // A grown-up can open the full list without choosing.
- await page.evaluate(() => localStorage.removeItem('klg-stage'));
+ assert.equal(await page.evaluate(() => document.body.dataset.view), 'home');
+ // The full list, with its filter by age.
  await page.goto(`${home}#all`);
  await page.reload();
  assert.equal(await page.locator('.game-tile:visible').count(), cat.GAMES.length);
+ await page.locator('#level-filter').selectOption('4');
+ assert.equal(await page.locator('.game-tile:visible').count(), cat.GAMES.filter((g) => g.levels.some((l) => l.band === 4)).length, 'games with a 9+ level');
  // Favourites have their own tile.
- await page.evaluate(() => localStorage.setItem('klg-stage', '2'));
  await page.goto(`${home}#world/favorites`);
  await page.reload();
  assert.ok(await page.locator('#world-empty').isVisible(), 'an empty favourites page says what to do');
@@ -286,17 +285,101 @@ section('getting around: back, home, easier and harder', async ({ newPage, asser
  await close();
 });
 
+section('every level of every game opens, starts and is marked', async ({ newPage, fail }) => {
+ const { page, close } = await newPage(390, 844);
+ for (const game of cat.GAMES) {
+  for (const level of game.levels) {
+   await page.goto(`${base}/games/${game.id}/index.html${level.query ? '?' + level.query : ''}`);
+   const r = await page.evaluate(() => ({
+    bands: [...document.querySelectorAll('.kid-level')].map((a) => Number(a.dataset.band)),
+    current: [...document.querySelectorAll('.kid-level[aria-current=true]')].map((a) => Number(a.dataset.band)),
+    fold: !!document.querySelector('.kid-more[open]'),
+   }));
+   if (r.bands.join() !== game.levels.map((l) => l.band).join()) fail(`${game.id}: buttons ${r.bands}`);
+   if (r.current.join() !== String(level.band)) fail(`${game.id} ?${level.query}: marked ${r.current}, wanted ${level.band}`);
+   if (r.fold) fail(`${game.id} ?${level.query}: choosing a level should not open the settings`);
+   await page.locator('#start-btn').click();
+   await page.waitForTimeout(30);
+   if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) fail(`${game.id} ?${level.query}: sideways scroll`);
+   const started = await page.evaluate(() => document.getElementById('start-screen').classList.contains('d-none') || document.getElementById('start-screen').hidden);
+   if (!started) fail(`${game.id} ?${level.query}: Play did nothing`);
+  }
+ }
+ await close();
+});
+
+section('a chosen level is remembered, and carries over to the next game', async ({ newPage, assert }) => {
+ const { page, close } = await newPage(390, 844);
+ await page.goto(`${base}/games/counting/index.html`);
+ assert.equal(await page.locator('.kid-level[aria-current=true]').getAttribute('data-band'), '1', 'the default is marked');
+ await page.locator('.kid-level[data-band="2"]').click();
+ await page.waitForURL(/max=20/);
+ assert.equal(await page.locator('.kid-level[aria-current=true]').getAttribute('data-band'), '2');
+ // Coming back with no settings goes back to that level.
+ await page.goto(`${base}/games/counting/index.html`);
+ await page.waitForURL(/max=20/);
+ // A game not played yet opens at the same age.
+ await page.goto(`${base}/games/shapes-colors/index.html`);
+ await page.waitForURL(/mode=shape/);
+ assert.equal(await page.locator('.kid-level[aria-current=true]').getAttribute('data-band'), '2');
+ // Going back to the game's default level sticks, even though its address has no settings.
+ await page.goto(`${base}/games/counting/index.html?max=20`);
+ await page.locator('.kid-level[data-band="1"]').click();
+ await page.waitForFunction(() => !location.search);
+ await page.goto(`${base}/games/counting/index.html`);
+ await page.waitForTimeout(100);
+ assert.equal(await page.evaluate(() => location.search), '');
+ // The closest age is used when a game does not have the one chosen.
+ await page.goto(`${base}/games/fractions/index.html?level=4`);
+ await page.locator('.kid-level[data-band="4"]').click();
+ await page.goto(`${base}/games/picture-words/index.html`);
+ await page.waitForURL(/level=2/);
+ // A topic set in the address is kept when the level changes, and a review shows no levels.
+ await page.goto(`${base}/games/fractions/index.html?type=compare`);
+ assert.match(await page.locator('.kid-level[data-band="2"]').getAttribute('href'), /type=compare&level=1/);
+ assert.ok(await page.locator('.kid-more[open]').count(), 'a topic still opens the settings');
+ await close();
+ // Blocked storage: the levels still work for the visit.
+ const blocked = await newPage(390, 844, { init: () => { Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } }); } });
+ await blocked.page.goto(`${base}/games/counting/index.html`);
+ await blocked.page.locator('.kid-level[data-band="2"]').click();
+ await blocked.page.waitForURL(/max=20/);
+ await blocked.close();
+});
+
+section('the new levels use the harder questions', async ({ newPage, assert }) => {
+ const { page, close } = await newPage(390, 844);
+ const q = (name) => require(`../games/${name}/questions.js`);
+ const prompt = () => page.locator('#question-text').textContent();
+ await page.goto(`${base}/games/feelings-faces/index.html?level=2`);
+ await page.locator('#start-btn').click();
+ const story = (await prompt()).trim();
+ assert.ok(q('feelings-faces').MOMENTS_2.some((m) => m[0] === story), story);
+ await page.goto(`${base}/games/reading-stories/index.html?level=2`);
+ await page.locator('#start-btn').click();
+ const long = (await prompt());
+ assert.ok(q('reading-stories').STORIES_2.some((s) => long.includes(s[1])), long);
+ await page.goto(`${base}/games/everyday-tools/index.html?level=2`);
+ await page.locator('#start-btn').click();
+ const tool = (await prompt()).trim();
+ assert.ok(q('everyday-tools').QUESTIONS_2.some((x) => x[0] === tool), tool);
+ await page.goto(`${base}/games/memory-match/index.html?pairs=15`);
+ assert.equal(await page.locator('#memory-size').inputValue(), '15');
+ await page.locator('#start-btn').click();
+ assert.equal(await page.locator('.memory-card').count(), 30);
+ await page.goto(`${base}/games/baby-animals/index.html?level=1`);
+ await page.locator('#start-btn').click();
+ assert.equal(await page.locator('#total-questions').textContent(), '8');
+ await close();
+});
+
 section('every speaker says the right words', async ({ newPage, assert }) => {
- const { page, close } = await newPage(390, 844, { stage: null, init: () => {
+ const { page, close } = await newPage(390, 844, { init: () => {
   window.__said = [];
   window.speechSynthesis.speak = (u) => window.__said.push(u.text);
  } });
  const said = async () => page.evaluate(() => window.__said[window.__said.length - 1]);
  await page.goto(home);
- await page.locator('.kid-age[data-level="1"] .kid-say').click();
- assert.equal(await said(), 'Ages three to five');
- assert.equal(await page.locator('.kid-age-btn:visible').count(), 4, 'a speaker does not choose the tile');
- await page.locator('.kid-age-btn[data-stage="2"]').click();
  for (const [key, words] of Object.entries({ math: 'Numbers', tamil: 'Tamil', science: 'Our world', logic: 'Puzzles' })) {
   await page.locator(`.kid-world[data-subject="${key}"] .kid-say`).click();
   assert.equal(await said(), words);
@@ -320,15 +403,13 @@ section('every speaker says the right words', async ({ newPage, assert }) => {
 });
 
 section('it still works with storage blocked', async ({ newPage, assert }) => {
- const { page, close } = await newPage(390, 844, { stage: null, init: () => {
+ const { page, close } = await newPage(390, 844, { init: () => {
   Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } });
  } });
  await page.goto(home);
- await page.locator('.kid-age-btn[data-stage="1"]').click();
- await page.locator('#play-next').waitFor({ timeout: 3000 }); // the choice lasts for the visit
  await page.locator('.kid-world-link[href="#world/math"]').click();
  await page.waitForFunction(() => document.body.dataset.view === 'world');
- assert.equal(await page.locator('.game-tile:visible').count(), cat.gamesFor(1, 'math').length);
+ assert.equal(await page.locator('.game-tile:visible').count(), cat.gamesFor('math').length);
  await page.locator('.game-tile:visible a').first().click();
  await page.locator('#start-btn').click();
  await page.locator('.quiz-choice-btn').first().waitFor();
@@ -336,7 +417,7 @@ section('it still works with storage blocked', async ({ newPage, assert }) => {
 });
 
 section('it can all be done from a keyboard', async ({ newPage, assert }) => {
- const { page, close } = await newPage(1080, 810, { stage: null });
+ const { page, close } = await newPage(1080, 810);
  await page.goto(home);
  const tabTo = async (selector) => {
   for (let i = 0; i < 40; i++) {
@@ -345,9 +426,6 @@ section('it can all be done from a keyboard', async ({ newPage, assert }) => {
   }
   throw new Error('could not Tab to ' + selector);
  };
- await tabTo('.kid-age-btn[data-stage="1"]');
- await page.keyboard.press('Enter');
- await page.waitForFunction(() => document.body.dataset.view === 'home');
  await tabTo('#play-next');
  await page.keyboard.press('Enter');
  await page.waitForURL(/games\//);
@@ -392,7 +470,7 @@ section('text can be read against its background', async ({ newPage, fail }) => 
  for (const key of Object.keys(cat.SUBJECTS)) {
   await page.goto(`${home}#world/${key}`);
   await page.reload();
-  await check(key, ['#world-title', '.game-tile:not([hidden]) h3', '.game-tile:not([hidden]) .kid-blurb', '.path-next', '.game-tile:not([hidden]) .klg-card-stars', '.kid-next-chip', '#stage-now', '.kid-quiet']);
+  await check(key, ['#world-title', '.game-tile:not([hidden]) h3', '.game-tile:not([hidden]) .kid-blurb', '.path-next', '.game-tile:not([hidden]) .klg-card-stars', '.kid-next-chip', '.kid-card-ages', '.kid-quiet']);
  }
  await page.goto(`${home}#me`);
  await page.reload();
@@ -402,7 +480,7 @@ section('text can be read against its background', async ({ newPage, fail }) => 
  await check('all', ['.kid-title h1', '.filter-status', '.subject-tabs button[aria-pressed=false]', '.level-select']);
  for (const id of ['counting', 'opposites', 'tamil-words', 'solar-system', 'patterns']) {
   await page.goto(`${base}/games/${id}/index.html`);
-  await check(id, ['#start-btn', '.navbar-brand', '.kid-game-name', '#start-screen h1', '.kid-more summary', '#start-screen .quiz-intro-listen']);
+  await check(id, ['#start-btn', '.kid-level:not([aria-current=true])', '.kid-level[aria-current=true]', '.navbar-brand', '.kid-game-name', '#start-screen h1', '.kid-more summary', '#start-screen .quiz-intro-listen']);
   await page.locator('#start-btn').click();
   await page.locator('.quiz-choice-btn').first().waitFor();
   await check(id + ' play', ['.quiz-tools > button', '.quiz-progress-text', '.quiz-score-pill', '.quiz-question']);
@@ -411,7 +489,7 @@ section('text can be read against its background', async ({ newPage, fail }) => 
 });
 
 section('the end of a round offers the next game', async ({ newPage, assert }) => {
- const { page, close } = await newPage(390, 844, { stage: '1' });
+ const { page, close } = await newPage(390, 844);
  await page.goto(`${base}/games/counting/index.html?max=5`);
  await page.locator('#start-btn').click();
  const total = Number(await page.locator('#total-questions').textContent());
@@ -421,7 +499,7 @@ section('the end of a round offers the next game', async ({ newPage, assert }) =
  }
  const next = page.locator('.kid-next-game');
  await next.waitFor();
- const want = cat.nextAfter('counting', '1', await page.evaluate(() => KlgProgress.summary().games));
+ const want = cat.nextAfter('counting', await page.evaluate(() => KlgProgress.summary().games));
  assert.match(await next.textContent(), new RegExp(want.name));
  const order = await page.evaluate(() => {
   const y = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect().top : Infinity; };
@@ -461,15 +539,11 @@ section('the end of a round offers the next game', async ({ newPage, assert }) =
  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
  const failures = [];
  const pageErrors = [];
- /** stage: the age already chosen, or null for a first visit. Only seeded once, so a test can change it. */
- const newPage = async (width, height, { stage = '2', init } = {}) => {
+ const newPage = async (width, height, { init } = {}) => {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce', serviceWorkers: 'block' });
   const page = await context.newPage();
   page.on('pageerror', (e) => pageErrors.push(`${width}x${height} ${page.url()}: ${e.message}`));
   await page.addInitScript(exposeRound);
-  await page.addInitScript((seed) => {
-   try { if (seed && !sessionStorage.getItem('seeded')) { localStorage.setItem('klg-stage', seed); sessionStorage.setItem('seeded', '1'); } } catch (e) { /* blocked */ }
-  }, stage);
   if (init) await page.addInitScript(init);
   return { page, context, close: () => context.close() };
  };

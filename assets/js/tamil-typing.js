@@ -14,11 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let finished = false;
   let results = [];
   let composing = false;
+  // Level 1 uses only sentences whose answer word is short.
+  const shortWords = new URLSearchParams(location.search).get('level') === '1';
 
   function available() {
     return data.sentences.filter(item =>
       ($('sentence-category').value === 'all' || item.category === $('sentence-category').value) &&
-      (mode === 'word' || data.letters(item.word).length > 1)
+      (mode === 'word' || data.letters(item.word).length > 1) &&
+      (!shortWords || data.letters(item.word).length <= 3)
     );
   }
 

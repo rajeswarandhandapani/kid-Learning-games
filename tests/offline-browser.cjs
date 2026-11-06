@@ -40,11 +40,11 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
   assert.match(await page.locator('#offline-status').textContent(), /Saved on this device/);
   await page.keyboard.press('Escape');
 
-  for (const path of ['fractions/index.html?type=picture&level=1', 'time/index.html?level=3', 'clock-setter/index.html?level=2', 'map-explorer/index.html', 'tamil-days-colours/index.html?mode=colours', 'tamil-story-time/index.html', 'memory-match/index.html']) {
+  for (const path of ['fractions/index.html?type=picture&level=1', 'time/index.html?level=3', 'clock-setter/index.html?level=2', 'map-explorer/index.html', 'tamil-days-colours/index.html?mode=colours', 'tamil-story-time/index.html', 'memory-match/index.html', 'spelling-bee/index.html', 'spelling-bee/index.html?level=2']) {
     await page.goto(`${base}/games/${path}`);
     await page.locator('#start-btn').click();
     await page.waitForTimeout(300);
-    const playing = await page.locator('.quiz-choice-btn, #stage button, #stage [role=button], .memory-card').count();
+    const playing = await page.locator('.quiz-choice-btn, #stage button, #stage [role=button], .memory-card, .bee-key').count();
     assert.ok(playing > 0, `${path} plays offline`);
     console.log('PASS offline:', path);
   }

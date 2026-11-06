@@ -54,7 +54,7 @@ const fakeAudio = () => {
   await page.reload();
   await page.locator('.kid-world-link[href="#world/tamil"]').click();
   await page.waitForFunction(() => document.body.dataset.world === 'tamil');
-  assert.equal(await page.locator('.game-tile:visible').count(), CAT.gamesFor(1, 'tamil').length);
+  assert.equal(await page.locator('.game-tile:visible').count(), CAT.gamesFor('tamil').length);
   assert.ok(CAT.PATHS.tamil.steps.every((step) => CAT.byId(step.game)), 'every Tamil path step is a real game');
   await page.goto(`${base}/index.html#all`);
   await page.locator('.subject-tabs [data-subject="tamil"]').click();

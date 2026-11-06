@@ -1,5 +1,5 @@
 const {chromium}=require('playwright');
-const CAT=require('../assets/js/catalogue.js');const GAME_COUNT=CAT.GAMES.length;const LEVEL4=CAT.GAMES.filter(g=>g.level===4).length;
+const CAT=require('../assets/js/catalogue.js');const GAME_COUNT=CAT.GAMES.length;const LEVEL4=CAT.GAMES.filter(g=>g.levels.some(l=>l.band===4)).length;
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -34,7 +34,8 @@ const base=process.env.BASE_URL||'http://localhost:4173';
   if(['tamil-letter-chart','tamil-letter-pop','tamil-tracing','tamil-word-puzzle','tamil-memory','share-fairly','array-garden','multiples-hunt'].includes(id))continue;
   // New hand-built picture games (marked in their <head>) are played in tests/picture-games-browser.cjs.
   if(fs.readFileSync(path.join('games',id,'index.html'),'utf8').includes('name="klg-handbuilt"'))continue;
-  await page.goto(`${base}/games/${id}/index.html`);await page.locator('#start-btn').click();
+  // Spelling Bee opens on its training (tests/bee-browser.cjs); its quiz has its own address.
+  await page.goto(`${base}/games/${id}/index.html${id==='spelling-bee'?'?level=1':''}`);await page.locator('#start-btn').click();
   if(id==='memory-match')continue;
   if(id==='tamil-sentence-words'||id==='tamil-missing-letters'){
     assert.ok(await page.locator('#tamil-answer').isVisible());

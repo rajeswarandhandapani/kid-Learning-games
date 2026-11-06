@@ -209,6 +209,96 @@ test('Spelling Bee words and generated wrong spellings', () => {
  }
 });
 
+test('the harder levels are big enough, and fair', () => {
+ const f = bank('feelings-faces');
+ enough(f.MOMENTS_2, 10, 'feelings');
+ unique(f.MOMENTS_2.map((m) => m[0]), 'feelings');
+ const names = f.FEELINGS_2.map((x) => x[1]);
+ for (const [story, feeling] of f.MOMENTS_2) {
+  assert.ok(names.includes(feeling), story);
+  assert.ok(!story.toLowerCase().includes(feeling), `${story} gives away the answer`);
+ }
+ picturesDrawable(f.FEELINGS_2.map((x) => x[0]), 'feelings');
+
+ const t = bank('everyday-tools');
+ enough(t.QUESTIONS_2, 10, 'tools');
+ unique(t.QUESTIONS_2.map((q) => q[0]), 'tools');
+ for (const [prompt, ...keys] of t.QUESTIONS_2) {
+  assert.equal(new Set(keys).size, 4, prompt);
+  for (const key of keys) assert.ok(t.TOOLS[key], `${prompt}: no picture for ${key}`);
+ }
+ picturesDrawable(Object.values(t.TOOLS), 'tools');
+
+ const h = bank('animal-habitats');
+ enough(h.HABITATS_2, 10, 'habitats');
+ unique(h.HABITATS_2.map((r) => r[1]), 'habitats');
+ const places = new Set(h.HABITATS.map((r) => r[2]));
+ assert.deepEqual([...new Set(h.HABITATS_2.map((r) => r[2]))].sort(), [...places].sort(), 'every home appears');
+ for (const [, animal, home, why, fair = []] of h.HABITATS_2) {
+  assert.ok(places.has(home) && why, animal);
+  assert.ok(!fair.includes(home), animal);
+ }
+ picturesDrawable(h.HABITATS_2.map((r) => r[0]), 'habitats');
+
+ const r = bank('reading-stories');
+ enough(r.STORIES_2, 8, 'stories');
+ unique(r.STORIES_2.map((x) => x[0]), 'stories');
+ for (const [story, question, right, wrong, why, pic] of r.STORIES_2) {
+  assert.ok(question && why && pic, story);
+  assert.equal(new Set([right, ...wrong]).size, 4, story);
+  assert.ok(story.split(/[.!?]\s/).length >= 3, `${story} is not a longer story`);
+ }
+ picturesDrawable(r.STORIES_2.map((x) => x[5]), 'stories');
+
+ const s = bank('stay-safe');
+ enough(s.SITUATIONS_2, 8, 'safety');
+ unique(s.SITUATIONS_2.map((x) => x[1]), 'safety');
+ for (const [, story, safe, unsafe, why] of s.SITUATIONS_2) {
+  assert.equal(unsafe.length, 2, story);
+  assert.ok(!unsafe.includes(safe) && why, story);
+ }
+ picturesDrawable(s.SITUATIONS_2.map((x) => x[0]), 'safety');
+
+ const w = bank('who-am-i');
+ enough(w.RIDDLES_2, 8, 'riddles');
+ unique(w.RIDDLES_2.map((x) => x[0][1]), 'riddles');
+ for (const [answer, clues, others] of w.RIDDLES_2) {
+  assert.equal(clues.length, 3, answer[1]);
+  assert.equal(others.length, 3, answer[1]);
+  assert.ok(!others.some((o) => o[1] === answer[1]), answer[1]);
+  for (const clue of clues) assert.ok(!clue.toLowerCase().includes(answer[1].toLowerCase()), `${answer[1]}: ${clue}`);
+  picturesDrawable([answer[0], ...others.map((o) => o[0])], 'riddles');
+ }
+
+ const p = bank('punctuation-pals');
+ unique(p.SENTENCES_2.map((x) => x[0]), 'punctuation');
+ for (const mark of ['.', '?', '!']) enough(p.SENTENCES_2.filter((x) => x[1] === mark), 8 / 3, 'punctuation ' + mark);
+
+ const q = bank('science-quiz');
+ const easy = Object.keys(q.BANK).flatMap((topic) => q.EASY[topic].map((i) => q.BANK[topic][i]));
+ assert.ok(easy.every(Boolean), 'an easy question is missing');
+ enough(easy, 15, 'easy science');
+ unique(easy.map((x) => x.q), 'easy science');
+
+ const pw = fs.readFileSync('games/picture-words/game.js', 'utf8');
+ const words = pw.slice(pw.indexOf('PICTURE_WORDS_2 = ['), pw.indexOf('const WORD_LIST'));
+ const rows = [...words.matchAll(/\['([^']+)','([^']+)','([^']+)'\]/g)];
+ enough(rows, 10, 'picture words');
+ unique(rows.map((m) => m[2]), 'picture words');
+ for (const group of new Set(rows.map((m) => m[3]))) assert.ok(rows.filter((m) => m[3] === group).length >= 4, group);
+ picturesDrawable(rows.map((m) => m[1]), 'picture words');
+});
+
+test('the shorter Tamil levels still have enough to play, with no new Tamil', () => {
+ const context = { window: {} };
+ vm.runInNewContext(fs.readFileSync('assets/js/tamil-sentences-data.js', 'utf8'), context);
+ const T = context.window.TamilSentenceData;
+ const full = (s) => (s.before + s.word + s.after).trim();
+ enough(T.sentences.filter((s) => T.letters(s.word).length <= 3), 10, 'short answer words');
+ enough(T.sentences.filter((s) => T.letters(s.word).length > 1 && T.letters(s.word).length <= 3), 10, 'short missing letters');
+ enough(T.sentences.filter((s) => full(s).split(/\s+/).length === 3), 8, 'three-word sentences');
+});
+
 test('World Capitals', () => {
  const { COUNTRIES } = bank('world-capitals');
  enough(COUNTRIES, 15, 'countries');

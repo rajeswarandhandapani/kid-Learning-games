@@ -10,6 +10,7 @@ npm start                 # http://localhost:4173
 npm test                  # progress and storage regression tests
 npx playwright install chromium
 npm run test:e2e          # keep the local server running in another terminal
+npm run test:bee          # Spelling Bee training: rules, words and every screen size
 npm run build            # validates game links and copies static assets to site-output/
 npm run test:tamil-games  # plays every Tamil activity with recorded audio (server running)
 npm run test:math         # plays the visual × and ÷ games; checks every picture matches its answer
@@ -28,7 +29,8 @@ npm run test:offline      # visits once, goes offline, then plays games from the
 
 ## Learning experience
 
-- A child chooses an age once, then taps **Play next** or a picture tile to see that subject's games for that age. Every tile and card has a speaker that says its name, so no reading is needed. The whole home page is built from one list, `assets/js/catalogue.js`.
+- Nobody is asked their age. A child taps **Play next** or a picture tile to see that subject's games, easiest first. Each game has its own row of age buttons (🐣 3–5, 🧱 5–7, 🚀 7–9, 🧠 9+), listing only the ages it suits.
+- The level chosen in a game is remembered for that game, and a game not played yet opens at the closest age, so a child only has to choose once. Levels are listed in `GAME_LEVELS` in `assets/js/catalogue.js`.
 - Five **learning paths** (Math, English, Tamil, Science & world, Thinking skills) put each subject's games in a sensible order. Each game shows a ✓ once it has a star, and a *Next up* chip points at the first one without.
 - **All games** (`#all`) has search and filters by subject and age, for grown-ups and older children. A heart saves a favorite.
 - The **For grown-ups** panel has a progress report: stars, the last five scores and the last-played date for every skill, plus *Needs practice* and *Ready for next* lists. It stays on this browser and has a print button.
@@ -52,14 +54,13 @@ The home page has one job per view. The address hash picks the view, so the Back
 
 | View | Address | What it shows |
 | ---- | ------- | ------------- |
-| Age | `#age` | Four big tiles (3–5, 5–7, 7–9, 9+). Shown first until an age is chosen, then remembered as `klg-stage` |
 | Home | none | **▶ Play next**, **🔁 Try again** when questions are due, and six picture tiles |
-| Subject | `#world/math` | That subject's games for this age in path order, with **Easier** and **Harder** buttons |
+| Subject | `#world/math` | All of that subject's games, easiest first, each showing the ages it suits |
 | Favorites | `#world/favorites` | Games marked with a heart |
 | My stars | `#me` | Rank, XP, streak and badges |
 | All games | `#all` | Search and filters over all 80 games |
 
-The age is a filter and not a child profile, and progress is still shared on one device. `gamesFor`, `nextFor` and `nextAfter` in `catalogue.js` choose the games. The 9+ stage also gets the 7–9 games, because few games are written for 9+ alone, and a subject with nothing at an age falls back to the nearest level.
+Nobody is asked their age, and progress is shared on one device. `gamesFor`, `nextFor` and `nextAfter` in `catalogue.js` choose the games.
 
 `assets/js/page-shell.js` (`KlgShell`) loads last on every game page and needs no per-game code:
 
@@ -542,20 +543,56 @@ into reading practice, like Number Sounds.
 
 ## Spelling Bee
 
-Speech synthesis says a word out loud (tap the 🔊 to repeat it) and the
-child picks the correct spelling from four choices. Three levels via the
-start-screen buttons or `?level=1|2|3`: short phonetic words (cat, ship),
-longer everyday words (banana, school) and tricky spellings (because,
-knight, scissors) — 45 words per level, 15 questions per round.
+Training for a real spelling bee, aimed at a 3rd grader. Without settings in the
+address the page is the training (`bee-coach.js`). With `?level=1|2|3` or
+`?review=1` it is the older "pick the right spelling" quiz (`game.js`), kept
+because written and online bees test spelling that way. The two modes share one
+page, and each removes the other's screens at start-up so ids stay unique.
 
-Wrong choices are misspellings generated in code, ordered by how
-convincing they are: sound-alike substitutions kids actually write
-(freind, elefant, becauze, enuff), dropped unstressed vowels (choclate),
-doubling errors (scisors, beautifull), dropped silent e, and
-adjacent-letter swaps as filler. A generated misspelling is never allowed
-to be a real word — "meet" must not offer "meat" — checked against all
-game words plus a homophone list. Without speech synthesis the prompt
-degrades to the word's emoji and a clue ("🐱 a pet that says meow").
+| Mode | What it does |
+| --- | --- |
+| ▶ Play | Today's 10 words: words due first, then new ones |
+| 🔔 Mock Bee | A full bee on stage against animal rivals, Classroom (8 spellers) or School (12, with vocabulary rounds) |
+| 🧩 Patterns | 25 spelling rules, each with a 5-word practice |
+| 🗣️ Grown-up | The word and its clues on screen for a grown-up to read; the child spells out loud, because real bees are spoken |
+| 📋 My words | Progress, which words to learn first, the bee's date and a daily goal, and the school's own word list |
+
+**Words.** 603 words in `bee-words.js`. Training and the Mock Bee start with `BEE_LIST`,
+the 50 words on the 2026-2027 One Bee Study Words for Third Grade sheet from Scripps,
+supplied by a parent. The next level is our own Stretch tier (grades 4 to 6), then
+Champion (the last rounds), with Core as more third-grade practice. Those tiers stand in
+for the Two Bee and Three Bee lists, which were not supplied: paste the teacher's full
+450-word list into My words to practice the real ones. Each word has a meaning, a sentence,
+part of speech, origin, patterns and a highlighted tricky part, all written for this game.
+Words the voice could read two ways (read, tear, separate) are left out, except *lead*,
+which is on the list and always comes with its meaning.
+
+**Typing.** Letters are typed on the game's own A to Z keys or a physical keyboard,
+never in a text box, because a phone keyboard would autocorrect the word.
+
+**Practice.** After a miss the child sees the word, covers it and spells it again,
+and it returns at the end of the round. Words come back after 1, 3, 7, 14 and 30
+days, sooner if a bee date is set. A right answer only moves a word on when it is
+due, so cramming cannot fake mastery. Mastered means right on three different days.
+
+**Mock Bee rules.** These follow the [2027 Suggested Rules for Spelling Bees](https://spellingbee.com/sites/default/files/inline-files/2027_Suggested_Rules_for_Spelling_Bees.pdf):
+
+- A speller may ask for the meaning, a sentence, the part of speech, the origin or
+  to hear the word again, but not for a slower reading (rule 4), so Slowly is practice only.
+- A word with a sound-alike is always defined (rule 4).
+- Starting over must use the same letters, or the speller is out (rule 5).
+- A miss eliminates at once (rule 7).
+- If nobody in a round is right, everyone stays. A sole correct speller wins at once,
+  and spellers out in the same round tie (rule 8).
+- Other accepted spellings, such as favourite, count (rule 9).
+- Words get harder by round, and a school's list runs out before the last rounds, because
+  real bees end with words from outside the study lists (rule 2).
+
+Not modeled: asking for an alternate pronunciation, since the device voice has only
+one. Every bee may set its own rules, so check with yours.
+
+Saved in `klg-bee-v1`. Misses here use this schedule rather than the home page's
+Try again card, which still covers the quiz.
 
 ## World Capitals Quiz
 

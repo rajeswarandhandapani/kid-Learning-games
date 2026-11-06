@@ -87,7 +87,7 @@
     {"id":"time","name":"Time & Elapsed Time","icon":"🕒","blurb":"Read clocks & work out end times","level":3,"subject":"math","skills":["math.time"]},
     {"id":"money","name":"Money & Making Change","icon":"💰","blurb":"Count coins & make change","level":3,"subject":"math","skills":["math.money"]},
     {"id":"measurement","name":"Measurement","icon":"📏","blurb":"Units, converting & comparing sizes","level":3,"subject":"math","skills":["math.measure"]},
-    {"id":"spelling-bee","name":"Spelling Bee","icon":"🐝","blurb":"Hear the word, pick the right spelling","level":3,"subject":"english","skills":["english.spelling"]},
+    {"id":"spelling-bee","name":"Spelling Bee","icon":"🐝","blurb":"Train for a real bee: hear it, ask for clues, spell it","level":3,"subject":"english","skills":["english.spelling"]},
     {"id":"tamil-word-builder","name":"Tamil Word Builder","icon":"🧩","blurb":"Fill in the missing Tamil letter","level":3,"subject":"tamil","skills":["tamil.spelling"]},
     {"id":"tamil-word-puzzle","name":"Tamil Word Puzzle","icon":"🧱","blurb":"Hear a word. Build it from letter tiles.","level":3,"subject":"tamil","skills":["tamil.spelling"]},
     {"id":"market-day","name":"Market Day","icon":"🛒","blurb":"Shop, farm and trip stories: × or ÷?","level":3,"subject":"math","skills":["math.multiply","math.divide"]},
@@ -238,35 +238,114 @@
   }
 
   /**
-   * The levels a child at this stage plays in this subject. Few games are written
-   * for 9+ alone, so that stage also gets the 7–9 games. A subject with nothing at
-   * a stage falls back to the nearest easier level, then the nearest harder one.
+   * The levels inside each game: which age band each one suits, and the address
+   * setting that turns it on ("" is the game's default). A game only lists ages it
+   * makes sense for, so Counting stops before 9+ and World Capitals starts at 7.
+   * The Tamil Letter Chart is a reference chart to explore, so it has no levels.
    */
-  function levelsFor(stage, subject) {
-    var levels = Object.keys(LEVELS).map(Number);
-    if (!levels.includes(Number(stage))) return levels;
-    var n = Number(stage);
-    var wanted = n === 4 ? [4, 3] : [n];
-    var has = function (level) {
-      return GAMES.some(function (g) { return g.level === level && (!subject || g.subject === subject); });
-    };
-    if (wanted.some(has)) return wanted.filter(has);
-    var nearest = levels.slice().sort(function (a, b) {
-      var da = Math.abs(a - n), db = Math.abs(b - n);
-      return da - db || a - b;
-    }).filter(has)[0];
-    return nearest ? [nearest] : levels;
+  var L1 = "level=1", L2 = "level=2", L3 = "level=3";
+  var GAME_LEVELS = {
+    "memory-match": { 1: "", 2: "pairs=8", 3: "pairs=10", 4: "pairs=15" },
+    "picture-words": { 1: "", 2: L2 },
+    "feelings-faces": { 1: "", 2: L2 },
+    "everyday-tools": { 1: "", 2: L2 },
+    "number-sounds": { 1: "", 2: "max=50", 3: "max=100" },
+    "counting": { 1: "", 2: "max=20" },
+    "shapes-colors": { 1: "mode=color", 2: "mode=shape", 3: "mode=sides" },
+    "english-alphabets": { 1: "", 2: "mode=phonics" },
+    "tamil-alphabets": { 1: "type=vowels", 2: "type=consonants", 3: "type=uyirmei" },
+    "rhyming-words": { 1: "mode=picture", 2: "mode=rhyme", 3: "mode=finish" },
+    "baby-animals": { 1: L1, 2: "" },
+    "tamil-listen-find": { 1: "cat=animals", 2: "" },
+    "tamil-letter-pop": { 1: "", 2: "set=consonants", 3: "set=words" },
+    "tamil-tracing": { 1: "", 2: "set=consonants", 3: "set=uyirmei" },
+    "tamil-numbers": { 1: "", 2: "mode=listen", 3: "mode=numerals" },
+    "tamil-sentence-words": { 2: L1, 3: "" },
+    "tamil-missing-letters": { 2: L1, 3: "" },
+    "animal-habitats": { 2: "", 3: L2 },
+    "reading-stories": { 2: "", 3: L2 },
+    "comparing-numbers": { 1: "max=10", 2: "", 3: "max=1000", 4: "max=10000" },
+    "addition-subtraction": { 1: "max=10", 2: "", 3: "max=100", 4: "max=1000" },
+    "patterns": { 1: "mode=shapes", 2: "mode=skip", 3: "mode=numbers" },
+    "opposites": { 1: "mode=picture", 2: "mode=opposite", 3: "mode=similar" },
+    "calendar": { 1: "type=days", 2: "type=months", 3: "type=grid" },
+    "tamil-words": { 2: "type=picture", 3: "type=meaning" },
+    "tamil-short-long": { 1: "", 2: "mode=see", 3: "mode=pair" },
+    "tamil-sound-blend": { 2: "", 3: "mode=listen", 4: "mode=split" },
+    "tamil-first-letter": { 2: "start=vowel", 3: "" },
+    "tamil-memory": { 2: "", 3: "mode=signs" },
+    "tamil-letter-order": { 2: "", 3: "set=consonants", 4: "set=rows" },
+    "multiply-pictures": { 2: L1, 3: "", 4: L3 },
+    "divide-pictures": { 2: L1, 3: "", 4: L3 },
+    "share-fairly": { 2: L1, 3: "", 4: L3 },
+    "multiplication": { 2: "tables=2,5,10", 3: "tables=1,2,3,4,5,6,7,8,9,10", 4: "" },
+    "division": { 2: L1, 3: "", 4: "level=4" },
+    "fractions": { 2: L1, 3: "", 4: "level=4" },
+    "time": { 2: L1, 3: "", 4: L3 },
+    "money": { 2: L1, 3: "", 4: L3 },
+    "measurement": { 2: "mode=read", 3: "mode=unit", 4: "mode=convert" },
+    "spelling-bee": { 1: L1, 2: L2, 3: "focus=list", 4: "focus=stretch" },
+    "tamil-word-builder": { 2: L1, 3: "" },
+    "tamil-word-puzzle": { 2: "", 3: L2, 4: L3 },
+    "market-day": { 2: L1, 3: "", 4: L3 },
+    "fact-families": { 2: L1, 3: "", 4: L3 },
+    "array-garden": { 2: L1, 3: "", 4: L3 },
+    "multiples-hunt": { 2: L1, 3: "", 4: L3 },
+    "rounding-place-value": { 3: L1, 4: "" },
+    "solar-system": { 2: "mode=order", 3: "", 4: "mode=facts" },
+    "science-quiz": { 3: L1, 4: "" },
+    "world-capitals": { 3: "mode=flag", 4: "" },
+    "clock-setter": { 2: L1, 3: "", 4: L3 },
+    "fraction-pizza": { 2: L1, 3: "", 4: L3 },
+    "coin-shop": { 2: L1, 3: "", 4: L3 },
+    "block-builder": { 2: L1, 3: "", 4: L3 },
+    "shape-detectives": { 1: L1, 2: "", 3: L3 },
+    "measure-lab": { 2: L1, 3: "", 4: L3 },
+    "picture-graphs": { 2: L1, 3: "", 4: L3 },
+    "sound-it-out": { 1: L1, 2: "" },
+    "word-families": { 1: L1, 2: "" },
+    "sight-word-pop": { 1: L1, 2: "" },
+    "sentence-builder": { 2: L1, 3: "" },
+    "story-order": { 1: L1, 2: "" },
+    "tamil-days-colours": { 1: "mode=colours", 2: "", 3: "mode=months" },
+    "tamil-picture-sentences": { 2: L1, 3: "" },
+    "tamil-english-match": { 1: L1, 2: "" },
+    "tamil-story-time": { 3: L1, 4: "" },
+    "life-cycles": { 2: L1, 3: "" },
+    "my-body": { 1: L1, 2: "" },
+    "sort-it": { 1: L1, 2: "" },
+    "weather-wear": { 1: L1, 2: "" },
+    "map-explorer": { 2: L1, 3: "", 4: L3 },
+    "odd-one-out": { 1: L1, 2: "" },
+    "who-am-i": { 2: "", 3: L2 },
+    "robot-path": { 1: L1, 2: "", 3: L3 },
+    "word-detective": { 2: L1, 3: "" },
+    "punctuation-pals": { 2: "", 3: L2 },
+    "number-bonds": { 1: L1, 2: "", 3: L3 },
+    "stay-safe": { 1: "", 2: L2 },
+    "tamil-word-order": { 2: L1, 3: "" },
+  };
+
+  GAMES.forEach(function (game) {
+    var table = GAME_LEVELS[game.id] || {};
+    game.levels = Object.keys(table).map(function (band) { return { band: Number(band), query: table[band] }; });
+  });
+
+  /** The ages a game suits, for a card: "3–7", or "7+" when it reaches the oldest band. */
+  function agesLabel(game) {
+    var bands = game.levels.length ? game.levels.map(function (l) { return l.band; }) : [game.level];
+    var lows = { 1: 3, 2: 5, 3: 7, 4: 9 };
+    var highs = { 1: 5, 2: 7, 3: 9 };
+    var top = Math.max.apply(null, bands);
+    return lows[Math.min.apply(null, bands)] + (top === 4 ? "+" : "–" + highs[top]);
   }
 
-  /**
-   * The games to show for a stage (1–4, or anything else for every age), easiest
-   * first in learning-path order, then the games that are not on a path.
-   */
-  function gamesFor(stage, subject) {
-    var levels = levelsFor(stage, subject);
+  /** A subject's games (or every game), easiest first, then in learning-path order. */
+  function gamesFor(subject) {
     return GAMES.map(function (game, index) { return { game: game, index: index }; })
-      .filter(function (x) { return levels.includes(x.game.level) && (!subject || x.game.subject === subject); })
+      .filter(function (x) { return !subject || x.game.subject === subject; })
       .sort(function (a, b) {
+        if (a.game.level !== b.game.level) return a.game.level - b.game.level;
         var pa = pathStep(a.game), pb = pathStep(b.game);
         if (pa !== pb) return pa - pb;
         return a.index - b.index;
@@ -286,29 +365,28 @@
   }
 
   /** Play next: stays in the preferred subject until every game there has a star. */
-  function nextFor(stage, stats, prefer) {
+  function nextFor(stats, prefer) {
     var subjects = Object.keys(SUBJECTS);
     if (prefer && subjects.includes(prefer)) subjects = [prefer].concat(subjects.filter(function (s) { return s !== prefer; }));
     for (var i = 0; i < subjects.length; i++) {
-      var fresh = gamesFor(stage, subjects[i]).filter(function (g) { return !starsOf(g, stats); })[0];
+      var fresh = gamesFor(subjects[i]).filter(function (g) { return !starsOf(g, stats); })[0];
       if (fresh) return fresh;
     }
-    return firstToPlay(gamesFor(stage, subjects[0]), stats);
+    return firstToPlay(gamesFor(subjects[0]), stats);
   }
 
-  /** The game after this one: same subject and stage, later on the list, and without a star if possible. */
-  function nextAfter(id, stage, stats) {
+  /** The game after this one: same subject, later on the list, and without a star if possible. */
+  function nextAfter(id, stats) {
     var game = byId(id);
     if (!game) return null;
-    var list = gamesFor(stage, game.subject);
-    if (!list.includes(game)) list = gamesFor(game.level, game.subject);
+    var list = gamesFor(game.subject);
     var at = list.indexOf(game);
-    var others = list.slice(at + 1).concat(list.slice(0, Math.max(at, 0))).filter(function (g) { return g !== game; });
+    var others = list.slice(at + 1).concat(list.slice(0, Math.max(at, 0)));
     return others.filter(function (g) { return !starsOf(g, stats); })[0] || others[0] || null;
   }
 
   var api = { LEVELS: LEVELS, SUBJECTS: SUBJECTS, GAMES: GAMES, PATHS: PATHS, SKILL_NAMES: SKILL_NAMES,
-    byId: byId, pathStep: pathStep, levelsFor: levelsFor, gamesFor: gamesFor, nextFor: nextFor, nextAfter: nextAfter };
+    byId: byId, pathStep: pathStep, agesLabel: agesLabel, gamesFor: gamesFor, nextFor: nextFor, nextAfter: nextAfter };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.KlgCatalogue = api;
 })(typeof window !== "undefined" ? window : globalThis);

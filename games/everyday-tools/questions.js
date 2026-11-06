@@ -14,6 +14,9 @@
   glasses: '👓', gloves: '🧤', scarf: '🧣', sponge: '🧽',
   compass: '🧭', stethoscope: '🩺', magnet: '🧲', envelope: '✉️',
   book: '📖', helmet: '⛑️', wrench: '🔧', map: '🗺️', socks: '🧦',
+  telescope: '🔭', microscope: '🔬', scale: '⚖️', abacus: '🧮', saw: '🪚', axe: '🪓',
+  screwdriver: '🪛', battery: '🔋', light_bulb: '💡', test_tube: '🧪', hourglass: '⏳', microphone: '🎤',
+  keyboard: '⌨️', anchor: '⚓', parachute: '🪂', fire_extinguisher: '🧯', pickaxe: '⛏️', thread: '🧵', printer: '🖨️',
  };
  const QUESTIONS = [
   ['What do we use to brush our teeth?', 'toothbrush', 'spoon', 'comb', 'key'],
@@ -58,7 +61,40 @@
   ['What shows us the roads to a place far away?', 'map', 'toothbrush', 'gloves', 'bucket'],
   ['What do we wear on our feet inside our shoes?', 'socks', 'clock', 'compass', 'needle'],
  ];
- const api = { TOOLS, QUESTIONS };
+ /* Level 2: harder jobs and less common tools. */
+ const QUESTIONS_2 = [
+  ['What lets us see faraway stars and planets?', 'telescope', 'comb', 'spoon', 'bucket'],
+  ['What makes a tiny drop of pond water look huge so we can study it?', 'microscope', 'scarf', 'hammer', 'broom'],
+  ['What tells us how heavy a bag of rice is?', 'scale', 'paintbrush', 'helmet', 'sponge'],
+  ['What old tool with sliding beads helps us count and add?', 'abacus', 'mirror', 'socks', 'shovel'],
+  ['What do we use to cut a wooden plank in two?', 'saw', 'envelope', 'cup', 'glasses'],
+  ['What do we use to chop a big log for firewood?', 'axe', 'ruler', 'comb', 'book'],
+  ['What do we use to turn a screw into a shelf?', 'screwdriver', 'scarf', 'sponge', 'map'],
+  ['What gives a toy car its power when it is not plugged in?', 'battery', 'pencil', 'gloves', 'bucket'],
+  ['What lights up a room when we turn on the switch?', 'light_bulb', 'socks', 'key', 'ruler'],
+  ['What glass tube does a scientist use to mix small amounts of liquid?', 'test_tube', 'hammer', 'scarf', 'book'],
+  ['What old timer uses falling sand to show that time is passing?', 'hourglass', 'bucket', 'fork', 'gloves'],
+  ['What makes a singer’s voice louder on stage?', 'microphone', 'comb', 'bucket', 'ruler'],
+  ['What do we press to type words into a computer?', 'keyboard', 'sponge', 'ladder', 'spoon'],
+  ['What heavy metal object stops a ship from drifting away?', 'anchor', 'envelope', 'pencil', 'scissors'],
+  ['What slows down a skydiver falling through the air?', 'parachute', 'compass', 'mirror', 'fork'],
+  ['What can a grown-up use to put out a small kitchen fire?', 'fire_extinguisher', 'paintbrush', 'book', 'comb'],
+  ['What do miners swing to break up hard rock?', 'pickaxe', 'sponge', 'scarf', 'envelope'],
+  ['What do we pull through a needle to sew?', 'thread', 'ruler', 'key', 'bucket'],
+  ['What makes a paper copy of a page from a computer?', 'printer', 'thermometer', 'ladder', 'fork'],
+  ['What helps a hiker find north in the forest?', 'compass', 'sponge', 'cup', 'comb'],
+  ['What tool tells a nurse how warm your body is?', 'thermometer', 'wrench', 'paintbrush', 'envelope'],
+  ['What does a plumber use to loosen a leaking pipe?', 'wrench', 'socks', 'book', 'mirror'],
+  ['What would you use to pull iron nails out of the sand?', 'magnet', 'scarf', 'pencil', 'cup'],
+  ['What does a doctor press on your chest to hear your lungs?', 'stethoscope', 'fork', 'umbrella', 'key'],
+  ['What helps a sailor plan a route to a far island?', 'map', 'sponge', 'soap', 'gloves'],
+  ['What does a carpenter use to check how long a board is?', 'ruler', 'socks', 'spoon', 'bucket'],
+  ['What helps a detective look closely at a tiny fingerprint?', 'magnifying_glass', 'broom', 'bucket', 'scarf'],
+  ['What does a firefighter climb to reach a high window?', 'ladder', 'pencil', 'soap', 'cup'],
+  ['What does a tailor use to stitch a torn pocket?', 'needle', 'shovel', 'umbrella', 'clock'],
+  ['What does a builder wear to protect their head?', 'helmet', 'socks', 'gloves', 'scarf'],
+ ];
+ const api = { TOOLS, QUESTIONS, QUESTIONS_2 };
  if (typeof module !== 'undefined' && module.exports) module.exports = api;
  root.KlgQuestions = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -6,7 +6,7 @@
 (function () {
   "use strict";
   const V = window.KlgMathVis;
-  const BANK = window.KlgQuestions.SENTENCES;
+  const BANK = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.SENTENCES_2 : window.KlgQuestions.SENTENCES;
   const MARKS = [
     { mark: ".", name: "full stop" },
     { mark: "?", name: "question mark" },

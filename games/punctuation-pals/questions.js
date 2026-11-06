@@ -33,7 +33,34 @@
     ["Oh no, I dropped my ice cream","!","“Oh no” shows a sudden feeling."],
     ["Happy birthday to you","!","It is an excited greeting."],
   ];
-  const api = { SENTENCES };
+  /* Level 2: longer and trickier sentences. Some look like questions but only tell us something. */
+  const SENTENCES_2 = [
+    ["Could you pass me the salt, please","?","It is polite, but it still asks something."],
+    ["Have you finished all of your homework yet","?","It asks for a yes or no answer."],
+    ["You are coming with us to the zoo, aren’t you","?","The ending “aren’t you” turns it into a question."],
+    ["Whose muddy shoes are these by the door","?","It starts with “whose” and asks something."],
+    ["If it rains tomorrow, will we still go","?","The first part sets the scene, then “will we” asks something."],
+    ["How many planets go around the Sun","?","It starts with “how many” and asks something."],
+    ["Would you rather have a cat or a dog","?","It asks you to choose an answer."],
+    ["What time should we meet at the library","?","It starts with “what time” and asks something."],
+    ["I wonder whether it will rain tomorrow",".","It tells us what someone is thinking. It does not ask anyone."],
+    ["She asked me where the key was",".","It reports a question, but it is telling us what happened."],
+    ["Nobody knows why the dog barked all night",".","It has the word “why”, but it only tells us something."],
+    ["Tell me what you had for lunch",".","It is a calm request, so a full stop is right."],
+    ["When the bell rang, we went back to class",".","“When” here tells us the time. It is not a question."],
+    ["The teacher wants to know who broke the window",".","It tells us what the teacher wants."],
+    ["After the rain stopped, a rainbow appeared",".","It simply tells us what happened."],
+    ["How the bird got into the room is a mystery",".","It starts with “how”, but it is telling us something."],
+    ["What an amazing goal that was","!","It starts with “what”, but it shows amazement and asks nothing."],
+    ["How tall you have grown","!","It starts with “how”, but it shows surprise and asks nothing."],
+    ["Quick, the bus is about to leave","!","It is urgent."],
+    ["Watch out for that falling branch","!","It is an urgent warning."],
+    ["I can’t believe we won the whole tournament","!","It shows great excitement."],
+    ["What a terrible storm we had last night","!","It shows a strong feeling and asks nothing."],
+    ["Fire, everybody get out now","!","It is an urgent warning."],
+    ["How wonderful it is to see you again","!","It shows a big feeling and asks nothing."],
+  ];
+  const api = { SENTENCES, SENTENCES_2 };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.KlgQuestions = api;
 })(typeof window !== 'undefined' ? window : globalThis);

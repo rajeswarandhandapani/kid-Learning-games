@@ -1,6 +1,6 @@
 {
   "name": "little-learners",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "private": true,
   "description": "Accessible, browser-based learning games for curious kids",
   "scripts": {
@@ -20,6 +20,7 @@
     "test:levels": "node tests/number-levels-browser.cjs",
     "test:newgames": "node tests/new-games-browser.cjs",
     "test:ux": "node tests/ux-browser.cjs",
+    "test:bee": "node tests/bee-browser.cjs",
     "audio:tamil": "node scripts/fetch-tamil-audio.cjs"
   },
   "devDependencies": {

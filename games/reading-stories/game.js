@@ -1,5 +1,5 @@
 'use strict';
-const { STORIES } = window.KlgQuestions;
+const STORIES = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.STORIES_2 : window.KlgQuestions.STORIES;
 function storyPicture(emoji) {
  const f = document.createElement('figure');
  f.className = 'kv-clue';

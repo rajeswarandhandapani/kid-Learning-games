@@ -61,10 +61,10 @@
     return reward;
   }
 
-  function finish({ score, total, el, message, praise = PRAISE, bestStreak = 0 }) {
+  function finish({ score, total, el, message, praise = PRAISE, bestStreak = 0, mode, beeChampion }) {
     const stars = starsFor(score, total);
     const reward = window.KlgProgress
-      ? KlgProgress.record({ score, total, elapsedMs: 0, bestStreak })
+      ? KlgProgress.record({ score, total, elapsedMs: 0, bestStreak, mode, beeChampion })
       : null;
     if (stars >= 2) {
       if (window.KlgSounds) KlgSounds.fanfare();

@@ -1,5 +1,6 @@
 'use strict';
-const { TOOLS, QUESTIONS } = window.KlgQuestions;
+const { TOOLS } = window.KlgQuestions;
+const QUESTIONS = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.QUESTIONS_2 : window.KlgQuestions.QUESTIONS;
 function shuffle(items) {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -9,6 +10,11 @@ function shuffle(items) {
   return copy;
 }
 function name(key) { return key.replaceAll('_', ' '); }
+function helps(key) {
+  const word = name(key);
+  if (['scissors', 'glasses', 'gloves', 'headphones', 'socks'].includes(key)) return `${word[0].toUpperCase()}${word.slice(1)} help with that.`;
+  return `${/^[aeiou]/.test(word) ? 'An' : 'A'} ${word} helps with that.`;
+}
 document.addEventListener('DOMContentLoaded', () => {
   const quiz = new QuizEngine({
     totalQuestions: 10,
@@ -20,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return {
         prompt, correctAnswer: TOOLS[correct], choices: keys.map(key => TOOLS[key]),
         choiceLabels: Object.fromEntries(keys.map(key => [TOOLS[key], name(key)])),
-        explanation: `A ${name(correct)} helps with that.`
+        explanation: helps(correct)
       };
     }
   });

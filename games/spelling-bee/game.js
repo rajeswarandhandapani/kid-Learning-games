@@ -1,6 +1,9 @@
 /**
- * Spelling Bee question generator. The browser's speech synthesis says a
- * word out loud (tap the 🔊 to hear it again) and the child picks the
+ * The "pick the right spelling" quiz, opened with ?level= from Spelling Bee's
+ * More ways to play. It is how written and online bees test spelling. The
+ * training for spoken bees is in bee-coach.js.
+ *
+ * The browser's speech synthesis says a word out loud (tap the 🔊 to hear it again) and the child picks the
  * correct spelling from four choices. Three levels picked with ?level=:
  *
  *  - 1 (default): short phonetic words (cat, ship, rain).
@@ -203,6 +206,10 @@ const LEVEL_LABELS = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Without ?level= or ?review= this page is bee training instead: see bee-coach.js.
+  const settings = new URLSearchParams(window.location.search);
+  if (!settings.has("level") && !settings.has("review")) return;
+
   const level = getLevel();
   const words = WORD_LEVELS[level];
   const storageKey = "klg-spelling-bee-best-ms:" + level;

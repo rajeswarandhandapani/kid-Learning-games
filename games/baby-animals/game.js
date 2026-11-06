@@ -26,7 +26,10 @@ function shuffle(array) {
 
 // avoid: other names for THIS animal's baby — never offered as wrong
 // choices against it (and this animal is never a wrong choice for them).
-const { ANIMALS } = window.KlgQuestions;
+const FIRST_LEVEL = new URLSearchParams(location.search).get('level') === '1';
+// Level 1: the baby animals a young child is most likely to have met in a book or on a farm.
+const FAMILIAR = ['dog', 'cat', 'cow', 'horse', 'sheep', 'pig', 'goat', 'chicken', 'duck', 'kangaroo', 'bear', 'lion', 'tiger', 'rabbit', 'deer', 'elephant', 'frog', 'butterfly', 'penguin', 'panda', 'owl', 'whale', 'giraffe', 'dolphin'];
+const ANIMALS = FIRST_LEVEL ? window.KlgQuestions.ANIMALS.filter((a) => FAMILIAR.includes(a.animal)) : window.KlgQuestions.ANIMALS;
 
 /** True when `name` is a right (or defensible) answer for this animal. */
 function nameFits(entry, name) {
@@ -117,7 +120,7 @@ function formatSeconds(ms) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const mode = getMode();
-  const totalQuestions = 15;
+  const totalQuestions = FIRST_LEVEL ? 8 : 15;
   const storageKey = "klg-baby-animals-best-ms:" + mode;
 
   const labels = {

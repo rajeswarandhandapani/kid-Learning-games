@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const V = window.KlgMathVis;
-  const BANK = window.KlgQuestions.SITUATIONS;
+  const BANK = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.SITUATIONS_2 : window.KlgQuestions.SITUATIONS;
 
   /** Answer buttons: a wrong one is disabled and asks for another try. */
   function choiceBar(choices, ctx, onRight, wrongMessage) {

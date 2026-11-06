@@ -2,27 +2,23 @@
  * The home page: one job per view, so a child who cannot read yet can still get
  * to a game. The address hash picks the view, so the Back button and links work.
  *
- *   #age          four big age tiles (shown first until an age is chosen)
  *   (none)        ▶ Play next, 🔁 Try again when due, six picture tiles
- *   #world/math   that subject's games for this age, in learning-path order
+ *   #world/math   that subject's games, easiest first
  *   #world/favorites  the games marked with a heart
  *   #me           rank, XP, streak and badges
  *   #all          search and filters over every game
  *
  * Every game comes from catalogue.js (window.KlgCatalogue), so adding a game is
  * one line in the catalogue. All the cards stay in one grid, shown and ordered
- * according to the view.
+ * according to the view. Nobody is asked their age: each game has its own levels.
  */
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
-  const STAGE_KEY = "klg-stage";
   const FAVORITES_KEY = "klg-favorites";
   const canSpeak = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
-  let stage = null;
   let favorites = [];
   let summary = null;
-  let pendingHash = "";
   let firstRoute = true;
 
   function esc(text) {
@@ -67,14 +63,6 @@
     return /[஀-௿]/.test(game.name) ? game.blurb : game.name;
   }
 
-  function isChosenStage(value) {
-    return value === "all" || KlgCatalogue.LEVELS[value] !== undefined;
-  }
-
-  function stageNumber() {
-    return stage === "all" ? null : Number(stage);
-  }
-
   /* ---------- the game cards ---------- */
 
   function renderCards() {
@@ -94,9 +82,9 @@
       const tile = document.createElement("div");
       tile.className = "game-tile";
       tile.dataset.game = game.id;
-      tile.innerHTML = '<a href="games/' + game.id + '/index.html" class="text-decoration-none"><div class="card game-card" data-game="' + game.id + '" data-subject="' + game.subject + '" data-level="' + game.level + '"' + (game.isNew ? ' data-new="1"' : "") + ">" +
+      tile.innerHTML = '<a href="games/' + game.id + '/index.html" class="text-decoration-none"><div class="card game-card" data-game="' + game.id + '" data-subject="' + game.subject + '" data-level="' + game.level + '" data-ages="' + game.levels.map((l) => l.band).join(",") + '"' + (game.isNew ? ' data-new="1"' : "") + ">" +
         '<div class="card-body"><div class="game-card-icon">' + esc(game.icon) + "</div>" +
-        "<h3>" + esc(game.name) + '</h3><p class="kid-blurb">' + esc(game.blurb) + "</p></div></div></a>";
+        "<h3>" + esc(game.name) + '</h3><p class="kid-blurb">' + esc(game.blurb) + '</p><div class="kid-card-ages">Ages ' + esc(cat.agesLabel(game)) + "</div></div></div></a>";
       tile.appendChild(speaker(() => spokenName(game), game.name));
       const favorite = document.createElement("button");
       favorite.className = "favorite-button";
@@ -151,7 +139,7 @@
     const cat = window.KlgCatalogue;
     const list = world === "favorites"
       ? favorites.map((id) => cat.byId(id)).filter(Boolean)
-      : cat.gamesFor(stageNumber(), world);
+      : cat.gamesFor(world);
     const order = new Map(list.map((game, i) => [game.id, i]));
     const nextGame = world === "favorites" ? null : list.filter((g) => !(summary.games[g.id] && summary.games[g.id].bestStars > 0))[0];
     grid.querySelectorAll(".game-tile").forEach((tile) => {
@@ -202,7 +190,7 @@
     document.querySelectorAll("#levels .game-tile").forEach((tile, index) => {
       const card = tile.querySelector(".game-card");
       const matches = card.textContent.toLowerCase().includes(search) &&
-        (level === "all" || card.dataset.level === level) &&
+        (level === "all" || card.dataset.ages.split(",").includes(level) || (!card.dataset.ages && card.dataset.level === level)) &&
         (subjectFilter === "all" || (subjectFilter === "favorites" ? favorites.includes(tile.dataset.game) : card.dataset.subject === subjectFilter));
       tile.hidden = !matches;
       tile.style.order = Number(card.dataset.level) * 1000 + index;
@@ -229,42 +217,6 @@
       document.querySelector('.subject-tabs [data-subject="all"]').click();
       search.focus();
     });
-  }
-
-  /* ---------- the age tiles ---------- */
-
-  function renderAgeTiles() {
-    const cat = window.KlgCatalogue;
-    const box = $("age-tiles");
-    box.replaceChildren();
-    Object.keys(cat.LEVELS).forEach((key) => {
-      const level = cat.LEVELS[key];
-      const tile = document.createElement("div");
-      tile.className = "kid-age";
-      tile.dataset.level = key;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "kid-age-btn";
-      button.dataset.stage = key;
-      button.setAttribute("aria-label", level.ages);
-      button.innerHTML = '<span class="kid-age-pic" aria-hidden="true">' + level.emoji + "</span><b>" + esc(level.short) + "</b>";
-      button.addEventListener("click", () => chooseStage(key));
-      tile.append(button, speaker(level.say));
-      box.appendChild(tile);
-    });
-    $("age-all").addEventListener("click", () => chooseStage("all"));
-    $("age-title-say").replaceWith(Object.assign(speaker("How old are you? Tap your age."), { id: "age-title-say" }));
-  }
-
-  function chooseStage(value) {
-    stage = value;
-    writePref(STAGE_KEY, value);
-    paintTopBar();
-    if (window.KlgSounds) KlgSounds.click();
-    const target = pendingHash || "#home";
-    pendingHash = "";
-    if (location.hash === target) route();
-    else location.hash = target;
   }
 
   /* ---------- the home view ---------- */
@@ -295,8 +247,7 @@
 
   function renderHome() {
     const cat = window.KlgCatalogue;
-    const n = stageNumber();
-    const next = cat.nextFor(n, summary.games, readPref("klg-path", ""));
+    const next = cat.nextFor(summary.games, readPref("klg-path", ""));
     if (next) {
       $("play-next").setAttribute("href", "games/" + next.id + "/index.html");
       $("play-next").dataset.subject = next.subject;
@@ -304,7 +255,7 @@
       $("play-next-pic").textContent = next.icon;
       $("play-next-wrap").dataset.subject = next.subject;
     }
-    const list = cat.gamesFor(n);
+    const list = cat.GAMES;
     const today = list[dailyIndex(list.length)];
     if (today) {
       $("daily-name").textContent = today.icon + " " + today.name;
@@ -337,11 +288,6 @@
   /* ---------- the top bar ---------- */
 
   function paintTopBar() {
-    const cat = window.KlgCatalogue;
-    const chip = $("age-chip");
-    const level = cat.LEVELS[stage];
-    chip.textContent = level ? level.emoji + " " + level.short : stage === "all" ? "🌈 All" : "🎂 Age";
-    chip.setAttribute("aria-label", (level ? level.ages : "All ages") + ". Tap to change.");
     const stars = $("stars-chip");
     stars.textContent = "⭐ " + summary.stars;
     stars.setAttribute("aria-label", summary.stars + (summary.stars === 1 ? " star" : " stars") + ". See my stars.");
@@ -400,27 +346,7 @@
     $("world-title").textContent = icon + " " + name;
     $("world-say").replaceWith(Object.assign(speaker(words), { id: "world-say" }));
 
-    const n = stageNumber();
-    const row = $("stage-row");
-    row.hidden = !subject || n === null;
-    if (!row.hidden) {
-      const level = cat.LEVELS[n];
-      $("stage-now").textContent = level.emoji + " " + level.short;
-      $("stage-easier").hidden = n <= 1;
-      $("stage-harder").hidden = n >= 4;
-    }
     if (subject) writePref("klg-path", world);
-  }
-
-  function moveStage(step) {
-    const n = stageNumber();
-    if (n === null || !KlgCatalogue.LEVELS[n + step]) return;
-    stage = String(n + step);
-    writePref(STAGE_KEY, stage);
-    paintTopBar();
-    renderWorld(document.body.dataset.world);
-    showCards();
-    window.scrollTo(0, 0);
   }
 
   /* ---------- views ---------- */
@@ -430,15 +356,10 @@
     const hash = location.hash.replace(/^#/, "");
     let view = "home";
     let world = "";
-    if (hash === "age" || hash === "me" || hash === "all") view = hash;
+    if (hash === "me" || hash === "all") view = hash;
     else if (hash.indexOf("world/") === 0) {
       const key = hash.slice(6);
       if (cat.SUBJECTS[key] || key === "favorites") { view = "world"; world = key; }
-    }
-    // Grown-ups may jump straight to the full list; everything else needs an age first.
-    if (!isChosenStage(stage) && view !== "all" && view !== "age") {
-      if (view !== "home") pendingHash = location.hash;
-      view = "age";
     }
     document.body.dataset.view = view;
     document.body.dataset.world = world;
@@ -590,8 +511,7 @@
 
   function wireButtons() {
     $("surprise-btn").addEventListener("click", () => {
-      const list = KlgCatalogue.gamesFor(stageNumber());
-      if (!list.length) return;
+      const list = KlgCatalogue.GAMES;
       if (window.KlgSounds) KlgSounds.click();
       window.location.href = "games/" + list[Math.floor(Math.random() * list.length)].id + "/index.html";
     });
@@ -603,8 +523,6 @@
     $("parent-open").addEventListener("click", openParentDialog);
     $("parent-close").addEventListener("click", () => $("parent-dialog").close());
     $("see-all-grownup").addEventListener("click", () => $("parent-dialog").close());
-    $("stage-easier").addEventListener("click", () => moveStage(-1));
-    $("stage-harder").addEventListener("click", () => moveStage(1));
     $("home-title-say").replaceWith(Object.assign(speaker("What shall we play?"), { id: "home-title-say" }));
     const nextSay = speaker(() => "Play next: " + spokenName(KlgCatalogue.byId($("play-next").getAttribute("href").split("/")[1])), "Play next");
     $("play-next-wrap").appendChild(nextSay);
@@ -614,15 +532,12 @@
   document.addEventListener("DOMContentLoaded", () => {
     if (!window.KlgProgress || !window.KlgCatalogue) return;
     summary = KlgProgress.summary();
-    const saved = readPref(STAGE_KEY, "");
-    stage = isChosenStage(saved) ? saved : null;
     try {
       const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
       if (Array.isArray(parsed)) favorites = parsed.filter((id) => typeof id === "string");
     } catch (e) { /* no saved favorites */ }
     renderCards();
     decorateCards();
-    renderAgeTiles();
     renderWorldTiles();
     wireFilters();
     wireButtons();

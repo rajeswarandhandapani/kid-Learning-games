@@ -170,7 +170,8 @@ const readQuestion = () => {
   catch (e) { failures.push(spec); errors.splice(0); console.log('FAIL', spec, '\n     ', String(e.message).split('\n').slice(0, 6).join('\n      ')); }
  };
 
- const quizGames = gamesUsing('new QuizEngine');
+ // Spelling Bee opens on its training, which has its own schedule; only its quiz is replayed here.
+ const quizGames = gamesUsing('new QuizEngine').map((id) => (id === 'spelling-bee' ? 'spelling-bee?level=1' : id));
  const roundGames = gamesUsing('KlgRound.run');
  console.log(`${quizGames.length} quiz games, ${roundGames.length} hand-built games`);
  for (const spec of [...quizGames, ...QUIZ_EXTRA]) await attempt(spec, checkQuiz);

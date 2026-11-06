@@ -4,8 +4,8 @@
  * built its controls, and needs no per-game code.
  *
  *   Top bar       🏠 Home (back to this subject), the game's name, 🔊 sound
- *   Start screen  picture, name, one big ▶ Play and 🔊 Hear how to play.
- *                 Everything else folds away under ⚙️ More ways to play.
+ *   Start screen  picture, name, the game's levels by age, one big ▶ Play and
+ *                 🔊 Hear how to play. Everything else folds away under ⚙️ More ways to play.
  *   Play screen   back, progress and score on one short row, with the speaker
  *                 beside the question.
  *
@@ -13,7 +13,7 @@
  */
 (function () {
   "use strict";
-  const STAGE_KEY = "klg-stage";
+  const LEVELS_KEY = "klg-game-levels";
   const canSpeak = !!window.speechSynthesis && typeof window.SpeechSynthesisUtterance !== "undefined";
 
   function say(text) {
@@ -27,6 +27,92 @@
 
   const gameId = window.KlgProgress ? KlgProgress.currentGameId() : null;
   const game = gameId && window.KlgCatalogue ? KlgCatalogue.byId(gameId) : null;
+
+  /* ---------- levels ---------- */
+
+  /** What was last chosen: { band, games: { id: query } }. */
+  function readLevels() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LEVELS_KEY));
+      return saved && typeof saved === "object" && saved.games && typeof saved.games === "object" ? saved : { band: 0, games: {} };
+    } catch (e) {
+      return { band: 0, games: {} };
+    }
+  }
+
+  function saveLevel(level) {
+    const saved = readLevels();
+    saved.band = level.band;
+    saved.games[game.id] = level.query;
+    try {
+      localStorage.setItem(LEVELS_KEY, JSON.stringify(saved));
+    } catch (e) { /* lasts for this visit only */ }
+  }
+
+  /**
+   * Opening a game with no settings goes to the level last used in it. In a game not
+   * played yet, it goes to the closest thing to the age last chosen in any game, so
+   * a child only has to choose once, and nobody is asked how old they are.
+   */
+  function openChosenLevel() {
+    if (location.search || !game || !game.levels.length) return false;
+    const saved = readLevels();
+    let query = saved.games[game.id];
+    if (typeof query !== "string" && saved.band) {
+      const closest = game.levels.slice().sort((a, b) => Math.abs(a.band - saved.band) - Math.abs(b.band - saved.band))[0];
+      query = closest.query;
+    }
+    if (!query) return false;
+    location.replace(location.pathname + "?" + query);
+    return true;
+  }
+
+  const paramsOf = (query) => [...new URLSearchParams(query).entries()];
+
+  /** The level the address asks for. With nothing set, the game's own default. */
+  function currentLevel(keys) {
+    const here = new URLSearchParams(location.search);
+    const found = game.levels.filter((level) => {
+      const wanted = paramsOf(level.query);
+      return wanted.every(([key, value]) => here.get(key) === value) &&
+        keys.every((key) => wanted.some(([k]) => k === key) || !here.has(key));
+    })[0];
+    if (found) return found;
+    return game.levels.filter((level) => level.band === game.level)[0] || null;
+  }
+
+  /** The row of age buttons. Settings that are not about the level, like a topic, are kept. */
+  function buildLevelRow() {
+    if (!game || game.levels.length < 2) return null;
+    const keys = [...new Set(game.levels.flatMap((level) => paramsOf(level.query).map(([key]) => key)))];
+    const current = currentLevel(keys);
+    const row = make("nav", "kid-levels");
+    row.setAttribute("aria-label", "Choose a level");
+    game.levels.forEach((level) => {
+      const info = KlgCatalogue.LEVELS[level.band];
+      const next = new URLSearchParams(location.search);
+      next.delete("review");
+      keys.forEach((key) => next.delete(key));
+      paramsOf(level.query).forEach(([key, value]) => next.set(key, value));
+      const link = make("a", "kid-level");
+      link.href = next.toString() ? "?" + next.toString() : location.pathname;
+      link.dataset.band = level.band;
+      link.setAttribute("aria-label", info.ages);
+      link.append(make("span", "kid-level-pic", info.emoji), make("b", "", info.short));
+      if (level === current) link.setAttribute("aria-current", "true");
+      link.addEventListener("click", () => saveLevel(level));
+      row.append(link);
+    });
+    return row;
+  }
+
+  /** True when the address has settings the level row does not show, so the fold should open. */
+  function hasOtherSettings() {
+    const settings = new URLSearchParams(location.search);
+    settings.delete("review");
+    if (game) game.levels.forEach((level) => paramsOf(level.query).forEach(([key]) => settings.delete(key)));
+    return [...settings.keys()].length > 0;
+  }
 
   function make(tag, className, text) {
     const node = document.createElement(tag);
@@ -112,24 +198,25 @@
 
     // Top to bottom: the picture and name, then Play, then the sound button, then the rest.
     const label = root.querySelector("#mode-label");
+    const beside = [...root.querySelectorAll(":scope > .kid-after-play")]; // main choices, not settings
     const more = make("details", "kid-more");
     const summary = make("summary", "", "⚙️ More ways to play");
     more.appendChild(summary);
     [...root.children].forEach((node) => {
-      if (isHeading(node) || node === start || node === hear || node === reviewing || node === label) return;
+      if (isHeading(node) || node === start || node === hear || node === reviewing || node === label || beside.includes(node)) return;
       more.appendChild(node);
     });
     if (label && !label.textContent.trim()) more.appendChild(label);
-    root.append(start);
+    const levels = reviewing ? null : buildLevelRow();
+    if (levels) root.append(levels);
+    root.append(start, ...beside);
     if (reviewing) root.insertBefore(reviewing, start);
     if (hear) root.append(hear);
     // Anything visible left in the fold? A review hides its settings, so nothing would be.
     const useful = [...more.children].some((node) => node !== summary && node.style.display !== "none" && !node.hidden);
     if (useful) root.append(more);
     // Coming back from a level or mode link: show which one is on.
-    const settings = new URLSearchParams(location.search);
-    settings.delete("review");
-    if (useful && [...settings.keys()].length) more.open = true;
+    if (useful && hasOtherSettings()) more.open = true;
   }
 
   /* ---------- end of a round ---------- */
@@ -143,8 +230,7 @@
     const again = screen.querySelector("#play-again-btn, #play-again");
     const row = again ? again.parentNode : null;
     if (!row) return;
-    const chosen = stage();
-    const next = KlgCatalogue.nextAfter(game.id, chosen || game.level, KlgProgress.summary().games);
+    const next = KlgCatalogue.nextAfter(game.id, KlgProgress.summary().games);
     let link = screen.querySelector(".kid-next-game");
     if (!next) {
       if (link) link.remove();
@@ -232,16 +318,9 @@
     buildFinishLinks();
   }
 
-  /** The chosen age band, or null before one is chosen. */
-  function stage() {
-    try {
-      return localStorage.getItem(STAGE_KEY);
-    } catch (e) {
-      return null;
-    }
-  }
+  window.KlgShell = { say, canSpeak, game, addNextGame };
 
-  window.KlgShell = { say, canSpeak, game, stage, addNextGame };
+  if (openChosenLevel()) return;
 
   // Game scripts come first in the page, so their own start-up has already run.
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

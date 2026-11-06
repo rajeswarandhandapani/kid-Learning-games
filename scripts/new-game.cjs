@@ -139,4 +139,4 @@ if (!cat.includes(`id: "${id}"`) && !cat.includes(`"id":"${id}"`)) {
  fs.writeFileSync(catPath, cat);
 }
 require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'build-sw.cjs')], { stdio: 'inherit' });
-console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Now run: npm run sync:index`);
+console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Add its levels to GAME_LEVELS in catalogue.js, then run: npm run sync:index`);

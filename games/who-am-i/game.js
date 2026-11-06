@@ -6,7 +6,7 @@
 (function () {
   "use strict";
   const V = window.KlgMathVis;
-  const BANK = window.KlgQuestions.RIDDLES;
+  const BANK = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.RIDDLES_2 : window.KlgQuestions.RIDDLES;
   /** "a rainbow", "an elephant", "the Sun", "cheese": names read as part of a sentence. */
   const called = (name) => (/^[A-Z]/.test(name) ? "the " + name : name === "cheese" ? name : (/^[aeiou]/.test(name) ? "an " : "a ") + name);
 

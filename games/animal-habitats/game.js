@@ -1,5 +1,5 @@
 'use strict';
-const { HABITATS } = window.KlgQuestions;
+const HABITATS = new URLSearchParams(location.search).get('level') === '2' ? window.KlgQuestions.HABITATS_2 : window.KlgQuestions.HABITATS;
 const withArticle = (name) => (/^[aeiou]/i.test(name) ? 'an ' : 'a ') + name;
 const SCENE_FOR = { Desert: "desert", Ocean: "ocean", Arctic: "arctic", Antarctica: "arctic", Forest: "forest", Rainforest: "rainforest",
  Grassland: "grassland", Pond: "pond", "Coral reef": "reef", Cave: "cave" };

@@ -821,6 +821,13 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .kid-more .btn-secondary { background:var(--kid-accent); border-color:var(--kid-accent); color:#fff; }
 .kid-more .btn-outline-secondary { background:#fff; border-color:var(--kid-accent); color:var(--kid-accent); }
 .kid-more .btn-outline-secondary:hover { background:var(--kid-accent-soft); color:var(--kid-accent); }
+.kid-levels { display:flex; justify-content:center; gap:6px; max-width:420px; margin:8px auto 2px; }
+.kid-level { flex:1 1 0; min-width:44px; max-width:100px; min-height:58px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 2px; border:3px solid var(--kid-accent); border-radius:16px; background:#fff; color:var(--kid-accent); font-size:1.02rem; line-height:1.1; text-decoration:none; box-shadow:0 3px 0 var(--kid-line); }
+.kid-level:hover { color:var(--kid-accent); background:var(--kid-accent-soft); }
+.kid-level b { font-weight:800; white-space:nowrap; }
+.kid-level-pic { font-size:1.25rem; line-height:1.1; }
+.kid-level[aria-current=true] { background:var(--kid-accent); color:#fff; }
+.kid-level[aria-current=true]:hover { color:#fff; background:var(--kid-accent); }
 .kid-select-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); margin:0; }
 .kid-mode-row { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:10px 0; }
 .kid-mode-btn { min-height:56px; padding:8px 16px; border:3px solid var(--kid-accent); border-radius:16px; background:#fff; color:var(--kid-accent); font-size:1.05rem; font-weight:800; }
@@ -869,6 +876,9 @@ body.kid-game { --klg-purple:var(--kid-accent); }
   .kid-game .quiz-question { font-size:1.6rem; }
 }
 @media(max-height:640px) {
+  .kid-level { flex-direction:row; gap:3px; min-height:46px; font-size:.98rem; }
+  .kid-level-pic { font-size:1rem; }
+  .kid-levels { margin-top:4px; }
   .kid-game #start-screen .game-card-icon, .kid-game #start-screen .typing-emblem { width:60px; height:60px; font-size:36px; border-radius:18px; margin-bottom:4px!important; }
   .kid-game #start-btn.kid-play { min-height:64px; font-size:1.7rem; margin:6px auto!important; }
 }
@@ -884,6 +894,7 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .kid-top .klg-mute-btn { position:static; flex:none; width:48px; height:48px; min-height:48px; padding:0; border:2px solid var(--kid-line); border-radius:50%; background:#fff; font-size:1.35rem; box-shadow:none; }
 .kid-main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:10px 12px 8px; }
 .kid-title { display:flex; align-items:center; justify-content:center; gap:10px; margin:2px 0 10px; }
+.kid-title h1:focus-visible, .kid-world-head h1:focus-visible { outline:none!important; }
 .kid-title h1, .kid-world-head h1 { flex:0 1 auto; min-width:0; margin:0; font-size:1.5rem; font-weight:800; text-align:center; outline:none; }
 .kid-title-back h1 { flex:1; }
 .kid-title-back::after { content:''; flex:none; width:40px; }
@@ -892,20 +903,10 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .kid-back { flex:none; display:inline-flex; align-items:center; min-height:48px; padding:6px 12px; border:2px solid var(--kid-line); border-radius:14px; background:#fff; color:var(--kid-ink); font-size:1rem; font-weight:800; text-decoration:none; white-space:nowrap; }
 .kid-quiet { display:block; min-height:48px; margin:10px auto 0; padding:10px 18px; border:0; border-radius:14px; background:transparent; color:var(--kid-muted); font-size:1rem; font-weight:700; text-align:center; text-decoration:underline; text-underline-offset:3px; width:fit-content; }
 
-/* Age tiles */
-.kid-ages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; max-width:640px; margin:0 auto; }
-.kid-age { position:relative; }
-.kid-age-btn { width:100%; min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:10px; border:0; border-radius:24px; color:#fff; font-size:2.1rem; font-weight:800; box-shadow:0 6px 0 #00000033; }
-.kid-age-btn:active { transform:translateY(4px); box-shadow:0 2px 0 #00000033; }
-.kid-age-pic { font-size:3.2rem; line-height:1.1; }
-.kid-age[data-level="1"] .kid-age-btn { background:var(--kid-science); }
-.kid-age[data-level="2"] .kid-age-btn { background:var(--kid-math); }
-.kid-age[data-level="3"] .kid-age-btn { background:var(--kid-english); }
-.kid-age[data-level="4"] .kid-age-btn { background:var(--kid-logic); }
-.kid-age .kid-say { position:absolute; right:8px; top:8px; }
 
 /* Play next */
 .kid-next-wrap { position:relative; margin-bottom:12px; }
+.kid-card-ages { margin-top:2px; color:var(--kid-muted); font-size:.95rem; font-weight:700; }
 .kid-play-next { display:flex; align-items:center; gap:12px; min-height:104px; padding:12px 60px 12px 16px; border-radius:26px; background:var(--kid-accent); color:#fff; text-decoration:none; box-shadow:0 6px 0 #00000040; }
 .kid-play-next:hover { color:#fff; filter:brightness(1.06); }
 .kid-play-next:active { transform:translateY(4px); box-shadow:0 2px 0 #00000040; }
@@ -966,9 +967,6 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .learning-home .game-card.next-up { border-color:var(--kid-accent); }
 .kid-next-chip { position:absolute; top:6px; left:6px; padding:2px 8px; border-radius:999px; background:var(--kid-accent); color:#fff; font-size:.8rem; font-weight:800; }
 .kid-world-foot { margin-top:14px; }
-.kid-stage-row { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
-.kid-stage-row .kid-soft { flex-direction:row; min-width:120px; }
-.kid-stage-now { font-size:1.15rem; font-weight:800; white-space:nowrap; }
 
 /* My stars */
 .learning-home .klg-player-card { border:0; border-radius:22px; background:#fff; color:var(--kid-ink); box-shadow:0 5px 0 var(--kid-line); }
@@ -1010,8 +1008,6 @@ dialog a { min-height:44px; }
   .kid-world-link { min-height:150px; }
   .kid-world-icon { font-size:3.6rem; }
   .kid-world-link b { font-size:1.5rem; }
-  .kid-ages { grid-template-columns:repeat(4,minmax(0,1fr)); max-width:none; }
-  .kid-age-btn { min-height:220px; }
   .kid-next-wrap .kid-play-pic { display:flex; }
   .kid-play-next { min-height:116px; padding:12px 70px 12px 20px; }
   .kid-row { max-width:640px; margin-left:auto; margin-right:auto; }
@@ -1025,8 +1021,6 @@ dialog a { min-height:44px; }
   .kid-play-arrow { width:52px; height:52px; font-size:1.5rem; }
   .kid-title { margin-bottom:6px; }
   .kid-title h1 { font-size:1.25rem; }
-  .kid-age-btn { min-height:118px; font-size:1.7rem; }
-  .kid-age-pic { font-size:2.4rem; }
 }
 @media(max-width:480px) {
   .kid-logo b { display:none; }
@@ -1045,13 +1039,9 @@ dialog a { min-height:44px; }
 /* Small and tall screens */
 .kid-play-pic { display:flex; align-items:center; justify-content:center; width:72px; height:72px; border-radius:20px; background:#fff; }
 @media(max-width:380px) {
-  .kid-age-pic, .kid-world-icon { margin-right:38px; }
 }
 @media(min-width:700px) and (min-height:900px) {
   .kid-world-link { min-height:220px; }
   .kid-world-icon { font-size:4.6rem; }
   .kid-world-link b { font-size:1.8rem; }
-  .kid-age-btn { min-height:300px; font-size:2.8rem; }
-  .kid-age-pic { font-size:4.4rem; }
-  .kid-ages { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }

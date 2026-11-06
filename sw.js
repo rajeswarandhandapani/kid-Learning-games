@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-cc20782f2e73";
+const CACHE = "klg-df1d744ab4a5";
 const FILES = [
  "./",
  "./index.html",
@@ -373,6 +373,10 @@ const FILES = [
  "./games/sort-it/questions.js",
  "./games/sound-it-out/game.js",
  "./games/sound-it-out/index.html",
+ "./games/spelling-bee/bee-coach.js",
+ "./games/spelling-bee/bee-core.js",
+ "./games/spelling-bee/bee-words.js",
+ "./games/spelling-bee/bee.css",
  "./games/spelling-bee/game.js",
  "./games/spelling-bee/index.html",
  "./games/spelling-bee/questions.js",

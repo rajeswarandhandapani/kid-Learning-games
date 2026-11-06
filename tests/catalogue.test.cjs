@@ -63,63 +63,79 @@ test('every game page loads the shared frame last, after the game has built its 
  assert.match(fs.readFileSync('scripts/new-game.cjs', 'utf8'), /page-shell\.js/, 'new games must load it too');
 });
 
-test('a child can reach every game from an age and a subject', () => {
+test('a child can reach every game from a subject, with no age question', () => {
  const reached = new Set();
- for (const stage of [1, 2, 3, 4]) {
-  for (const subject of Object.keys(cat.SUBJECTS)) {
-   const list = cat.gamesFor(stage, subject);
-   assert.ok(list.length > 0, `stage ${stage} has nothing in ${subject}`);
-   assert.ok(list.every((g) => g.subject === subject), subject);
-   list.forEach((g) => reached.add(g.id));
-  }
+ for (const subject of Object.keys(cat.SUBJECTS)) {
+  const list = cat.gamesFor(subject);
+  assert.ok(list.length > 0, subject);
+  assert.ok(list.every((g) => g.subject === subject), subject);
+  list.forEach((g) => reached.add(g.id));
  }
  assert.deepEqual(cat.GAMES.map((g) => g.id).filter((id) => !reached.has(id)), []);
- assert.equal(cat.gamesFor('all').length, cat.GAMES.length);
+ assert.equal(cat.gamesFor().length, cat.GAMES.length);
+ for (const file of ['index.html', 'assets/js/home.js', 'assets/js/page-shell.js']) assert.ok(!/klg-stage|How old are you/.test(fs.readFileSync(file, 'utf8')), file + ' still asks for an age');
 });
 
-test('every subject has a tile, and every stage has words to say', () => {
+test('every subject has a tile, and every age band has words to say', () => {
  for (const s of Object.values(cat.SUBJECTS)) assert.ok(s.kid && s.icon && s.say, s.label);
  for (const l of Object.values(cat.LEVELS)) assert.ok(l.short && l.say, l.name);
 });
 
-test('games come in learning-path order, and only for the chosen age', () => {
- const math = cat.gamesFor(1, 'math');
- assert.ok(math.every((g) => g.level === 1));
- const onPath = math.filter((g) => cat.pathStep(g) !== Infinity);
- assert.deepEqual(onPath.map(cat.pathStep), onPath.map(cat.pathStep).slice().sort((a, b) => a - b));
+test('games come easiest first, then in learning-path order', () => {
+ const math = cat.gamesFor('math');
  assert.equal(math[0].id, 'number-sounds');
- const firstOff = math.findIndex((g) => cat.pathStep(g) === Infinity);
- if (firstOff >= 0) assert.ok(math.slice(firstOff).every((g) => cat.pathStep(g) === Infinity), 'path games come first');
- assert.deepEqual(cat.levelsFor(4, 'math'), [4, 3], 'the oldest stage also gets the 7–9 games');
- assert.deepEqual(cat.levelsFor(3, 'science'), [2], 'a gap falls back to the nearest easier level');
- assert.deepEqual(cat.levelsFor(4, 'logic'), [2]);
+ const levels = math.map((g) => g.level);
+ assert.deepEqual(levels, levels.slice().sort((a, b) => a - b));
+ const first = math.filter((g) => g.level === 1 && cat.pathStep(g) !== Infinity);
+ assert.deepEqual(first.map(cat.pathStep), first.map(cat.pathStep).slice().sort((a, b) => a - b));
+});
+
+test('every game has levels for the ages it suits', () => {
+ for (const g of cat.GAMES) {
+  if (g.id === 'tamil-letter-chart') { assert.equal(g.levels.length, 0, 'a chart to explore has no levels'); continue; }
+  assert.ok(g.levels.length >= 2, g.id + ' needs at least two levels');
+  const bands = g.levels.map((l) => l.band);
+  assert.deepEqual(bands, bands.slice().sort(), g.id);
+  bands.forEach((band) => assert.ok(cat.LEVELS[band], g.id));
+  assert.equal(new Set(g.levels.map((l) => l.query)).size, g.levels.length, g.id + ' has two levels that are the same');
+  for (let i = 1; i < bands.length; i++) assert.equal(bands[i], bands[i - 1] + 1, g.id + ' skips an age');
+  // The game must really read each setting, or the level would do nothing.
+  const dir = `games/${g.id}/`;
+  const source = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(dir + f, 'utf8')).join('') +
+    (/tamil-typing\.js/.test(fs.readFileSync(dir + 'index.html', 'utf8')) ? fs.readFileSync('assets/js/tamil-typing.js', 'utf8') : '');
+  for (const level of g.levels) {
+   for (const key of new URLSearchParams(level.query).keys()) {
+    assert.match(source, new RegExp(`["'\`]${key}["'\`]`), `${g.id} never reads ?${key}=`);
+   }
+  }
+ }
+ assert.equal(cat.agesLabel(cat.byId('counting')), '3–7');
+ assert.equal(cat.agesLabel(cat.byId('fractions')), '5+');
+ assert.equal(cat.agesLabel(cat.byId('tamil-letter-chart')), '3–5');
 });
 
 test('Play next moves on as stars are earned, and never gets stuck', () => {
  const star = (...ids) => Object.fromEntries(ids.map((id) => [id, { bestStars: 1 }]));
- assert.equal(cat.nextFor(1, {}).subject, 'math');
- assert.equal(cat.nextFor(1, {}).id, 'number-sounds');
- assert.equal(cat.nextFor(1, star('number-sounds')).id, 'counting');
- assert.equal(cat.nextFor(1, {}, 'english').subject, 'english', 'stays in the subject last chosen');
- assert.equal(cat.nextFor(1, {}, 'nonsense').subject, 'math');
+ assert.equal(cat.nextFor({}).subject, 'math');
+ assert.equal(cat.nextFor({}).id, 'number-sounds');
+ assert.equal(cat.nextFor(star('number-sounds')).id, 'counting');
+ assert.equal(cat.nextFor({}, 'english').subject, 'english', 'stays in the subject last chosen');
+ assert.equal(cat.nextFor({}, 'nonsense').subject, 'math');
  const everything = Object.fromEntries(cat.GAMES.map((g) => [g.id, { bestStars: 3 }]));
  everything.counting = { bestStars: 1 };
- assert.equal(cat.nextFor(1, everything).id, 'counting', 'with every star earned, it offers the weakest game');
- for (const stage of [1, 2, 3, 4, 'all']) assert.ok(cat.nextFor(stage, {}), 'stage ' + stage);
+ assert.equal(cat.nextFor(everything).id, 'counting', 'with every star earned, it offers the weakest game');
 });
 
 test('the next game is a different game in the same subject', () => {
  for (const g of cat.GAMES) {
-  for (const stage of [1, 2, 3, 4, null]) {
-   const next = cat.nextAfter(g.id, stage, {});
-   if (!next) continue;
-   assert.notEqual(next.id, g.id, g.id);
-   assert.equal(next.subject, g.subject, g.id);
-  }
+  const next = cat.nextAfter(g.id, {});
+  assert.ok(next, g.id + ' has no next game');
+  assert.notEqual(next.id, g.id, g.id);
+  assert.equal(next.subject, g.subject, g.id);
  }
- assert.equal(cat.nextAfter('number-sounds', 1, {}).id, 'counting');
- assert.equal(cat.nextAfter('number-sounds', 1, { counting: { bestStars: 2 } }).id === 'counting', false, 'skips a finished game');
- assert.equal(cat.nextAfter('nothing', 1, {}), null);
+ assert.equal(cat.nextAfter('number-sounds', {}).id, 'counting');
+ assert.equal(cat.nextAfter('number-sounds', { counting: { bestStars: 2 } }).id === 'counting', false, 'skips a finished game');
+ assert.equal(cat.nextAfter('nothing', {}), null);
 });
 
 test('the Picture Pro badge can still be earned', () => {

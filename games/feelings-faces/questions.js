@@ -48,7 +48,44 @@
   ['Raj’s kite flew higher than all the others. He laughed and waved at his mom. How does Raj feel?', 'happy'],
   ['A loud firework went off right behind Ella. She jumped and covered her ears, shaking. How does Ella feel?', 'scared'],
  ];
- const api = { FEELINGS, MOMENTS };
+ /* Level 2: feelings that are harder to name. Each story has clues that point to one of them. */
+ const FEELINGS_2 = [
+  ['😎','proud'], ['😔','lonely'], ['😬','nervous'],
+  ['😳','embarrassed'], ['😒','jealous'], ['😞','disappointed'],
+ ];
+ const MOMENTS_2 = [
+  ['Ravi practiced for weeks and finally rode his bike with no help. He stood tall and said, “I did it myself!” How does Ravi feel?', 'proud'],
+  ['Anu showed her family the painting that won first prize. She held it up high with a big smile. How does Anu feel?', 'proud'],
+  ['Max tied his own shoes for the first time and called everyone over to see. How does Max feel?', 'proud'],
+  ['After months of saving, Lea bought the book with her own money. She walked home with her chin up. How does Lea feel?', 'proud'],
+  ['Grandma watched her grandson read a whole page out loud. She sat up straight and beamed at the room. How does Grandma feel?', 'proud'],
+  ['The new boy ate lunch by himself and wished someone would sit with him. How does the new boy feel?', 'lonely'],
+  ['All her friends were away for the summer. Divya looked out at the empty playground with nobody to talk to. How does Divya feel?', 'lonely'],
+  ['The old man’s family lived far away. Most evenings he sat by the phone, hoping that someone would call. How does the old man feel?', 'lonely'],
+  ['Everyone at the party was talking in groups. Noor stood in the corner and wished she had someone to talk to. How does Noor feel?', 'lonely'],
+  ['The puppy sat by the door all day with no one home to play with it, and it whined softly. How does the puppy feel?', 'lonely'],
+  ['Tomorrow is Isha’s first day at a new school. Her stomach feels fluttery and she cannot stop biting her nails. How does Isha feel?', 'nervous'],
+  ['Sam waited behind the curtain before the play. His hands were sweaty and he kept checking his lines. How does Sam feel?', 'nervous'],
+  ['It was almost Tara’s turn in the spelling bee. Her knees shook a little and she took a slow, deep breath. How does Tara feel?', 'nervous'],
+  ['Nikhil stood at the top of the high slide for the first time. His heart thumped as he looked over the edge and waited. How does Nikhil feel?', 'nervous'],
+  ['The doctor’s door opened and Mina’s name was called. She twisted her sleeve and looked at her mom. How does Mina feel?', 'nervous'],
+  ['Lena called her teacher “Mom” in front of the class. Everyone giggled and her cheeks turned bright red. How does Lena feel?', 'embarrassed'],
+  ['Arjun walked around all morning with his shirt on inside out. When a friend told him, he covered his face. How does Arjun feel?', 'embarrassed'],
+  ['Dad sang loudly in the shop, and then saw that everyone was looking. He went pink and stopped. How does Dad feel?', 'embarrassed'],
+  ['Zoe tripped on the stage in front of the whole school. She looked at the floor and wished she could hide. How does Zoe feel?', 'embarrassed'],
+  ['Kumar waved back at someone who was really waving at the person behind him. He quickly pretended to fix his hair. How does Kumar feel?', 'embarrassed'],
+  ['Mira’s sister got a shiny new bike. Mira looked at her own old one and wished the new one were hers. How does Mira feel?', 'jealous'],
+  ['Everyone kept praising Jay’s drawing. Sara looked down at hers and wanted all the praise for herself. How does Sara feel?', 'jealous'],
+  ['Mom hugged the new baby all day. Dev frowned from the doorway and wished that Mom would hug him instead. How does Dev feel?', 'jealous'],
+  ['Her best friend began playing with someone new. Asha watched them laugh and wanted her friend all to herself. How does Asha feel?', 'jealous'],
+  ['The dog growled softly when its owner stroked the new kitten, and it pushed in between them. How does the dog feel?', 'jealous'],
+  ['Rain cancelled the picnic that Ben had waited for all week. He sighed and put his basket away. How does Ben feel?', 'disappointed'],
+  ['Priya hoped for a puppy on her birthday, but she got socks. She said thank you, and her smile faded. How does Priya feel?', 'disappointed'],
+  ['Kiran trained hard, but his team lost in the last minute. He walked off slowly with his shoulders low. How does Kiran feel?', 'disappointed'],
+  ['The shop had sold its last mango ice cream just before Rosa reached the front. Her face fell. How does Rosa feel?', 'disappointed'],
+  ['Omar’s favorite show was not on tonight after all. He let out a long breath and turned the TV off. How does Omar feel?', 'disappointed'],
+ ];
+ const api = { FEELINGS, MOMENTS, FEELINGS_2, MOMENTS_2 };
  if (typeof module !== 'undefined' && module.exports) module.exports = api;
  root.KlgQuestions = api;
 })(typeof window !== 'undefined' ? window : globalThis);

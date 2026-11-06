@@ -136,3 +136,54 @@ The library has 80 games. This release adds Review My Mistakes, bigger question 
 - New English and science questions are checked by tests for structure, and for accuracy only by Claude's own reading.
 - Speakers on the home page use the device's voice, in English, so Tamil-named games speak their English description.
 - Age bands are suggestions, and the choice is a shared setting on the device, not a child profile.
+
+## Spelling Bee training · November 6, 2026
+
+Upgraded Spelling Bee from multiple choice to training for a real bee, for a 3rd grader.
+
+**What the research changed**
+
+| Finding | What the game does |
+| --- | --- |
+| 2027 Suggested Rules: a speller may ask for a meaning, sentence, part of speech or origin, but not a slower reading | Clue buttons match that list. Slowly is in practice only |
+| Rule 5: changing a letter while retracing is a disqualification | Start over keeps the first letters, and a change ends the turn |
+| Rule 8: if nobody is right everyone stays, and a sole correct speller wins at once | The mock bee ends this way, with no extra championship word |
+| Rule 1: rounds can be spelling or vocabulary, oral, written or online | School Bee has vocabulary rounds. The older quiz stays for written and online bees |
+| Rule 2: the last words can come from outside the study lists | Hard tiers in the last rounds, and 25 pattern lessons |
+| Spelling aloud is the real format | Grown-up mode, where the child spells out loud |
+
+**Word bank checks**
+
+- All 603 words have an English entry on Wiktionary, read one at a time with a script. The first pass was rate-limited, so 230 words were read again slowly.
+- Origins and parts of speech were compared with Wiktionary, and every disagreement was reviewed by hand. That changed 17 origins, mostly words built in English from smaller parts. Merriam-Webster Unabridged is the bee's only authority and was not checked, so an origin can still differ from it.
+- `tests/bee.test.cjs` checks that a meaning never contains the word, a written sentence hides it, no word can be read two ways, and every pattern has enough words.
+
+**Bugs found while building it**
+
+- The training and the quiz both had `#play-again-btn`, which would have broken Play Again in one of them. Each mode now removes the other's screens, and a test checks for duplicates.
+- The keyboard hid Hear the word at 320×568, and the row of spellers hid clue buttons at 390×664. Short screens now have a compact layout, tested at 375×553 and 390×664 too, because real phones lose height to the browser's bars.
+- 🧑‍🏫 draws as two pictures in the bundled emoji font, so Grown-up uses 🗣️.
+
+**Limits**
+
+- Chromium only, with a stand-in for the device voice. No real voice has been heard reading these words, and a device voice can mispronounce unusual ones such as dachshund. That is worth a listen before relying on it.
+- No child has used it. Rival strength is tuned by simulation so a perfect speller needs about 7 rounds to win a Classroom Bee and about 9 to win a School Bee. It is not based on real bee results.
+- Only the 50 third-grade words are from the official list. The Stretch and Champion tiers are our own stand-ins for Two Bee and Three Bee, so a school bee will use words they do not have. The teacher's full 450-word list can be pasted into My words.
+- *lead* can be read two ways. The game teaches the verb and always gives that meaning, but the sheet does not say which one a pronouncer will use.
+- Word progress is saved on one device and browser only.
+
+## Levels inside each game · November 6, 2026
+
+The home page no longer asks for an age. Each subject shows all its games, easiest first, and 79 of the 80 games have 2 to 4 levels labelled by age. The Tamil Letter Chart has none, because it is a chart to explore.
+
+| Where the levels came from | Games |
+| --- | --- |
+| Settings the game already had, labelled with ages | 65 |
+| 218 new harder questions | 8: Picture Words, Feelings Faces, What Do We Use?, Animal Homes, Story Detectives, Stay Safe, Who Am I?, Punctuation Pals |
+| Existing questions split into easier and harder | 2: Baby Animals, Science Quiz |
+| Existing words or sentences filtered by length, so no new Tamil to review | 4: Tamil Sentence Words, Tamil Missing Letters, Tamil Word Builder, சொல் வரிசை |
+
+**Checks.** Every level of every game was opened and started at 390×844, with the right button marked and no errors. A catalogue test confirms that each game really reads its setting, and bank tests cover size and pictures. `tests/ux-browser.cjs` covers remembering a level.
+
+**Limits.** Which age a level suits is my judgment from its content, not a tested fit. No child has tried these levels. A 3-year-old can now see every game in a subject, including ones with no level for their age. The age shown on each card and the easiest-first order are the only guidance.
+

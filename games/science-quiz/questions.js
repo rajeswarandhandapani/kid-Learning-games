@@ -132,7 +132,14 @@
       { q: "What happens when you stir salt into warm water? 🧂", a: "It dissolves", wrong: ["It catches fire","It turns to ice","It floats away"] },
     ],
   };
-  const api = { BANK };
+  /* Level 1: where each topic's simpler questions are in its list. */
+  const EASY = {
+    animals: [3, 4, 7, 8, 9, 11, 13, 15, 16, 22, 26, 29],
+    body: [1, 2, 3, 5, 6, 7, 9, 11, 16, 17, 18, 22, 23, 25],
+    plants: [0, 4, 5, 7, 11, 12, 15, 20, 22, 27, 29],
+    matter: [0, 2, 3, 5, 6, 7, 11, 14, 16, 21, 24],
+  };
+  const api = { BANK, EASY };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.KlgQuestions = api;
 })(typeof window !== 'undefined' ? window : globalThis);

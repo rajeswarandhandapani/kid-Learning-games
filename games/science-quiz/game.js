@@ -26,7 +26,11 @@ function pick(array) {
   return array[randomInt(0, array.length - 1)];
 }
 
-const { BANK } = window.KlgQuestions;
+const FIRST_LEVEL = new URLSearchParams(window.location.search).get("level") === "1";
+const BANK = Object.fromEntries(Object.entries(window.KlgQuestions.BANK).map(([topic, list]) => [
+  topic,
+  FIRST_LEVEL ? window.KlgQuestions.EASY[topic].map((i) => list[i]) : list,
+]));
 
 const TOPICS = Object.keys(BANK);
 

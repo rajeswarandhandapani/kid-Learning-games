@@ -1,5 +1,7 @@
 'use strict';
-const { FEELINGS, MOMENTS } = window.KlgQuestions;
+const HARDER = new URLSearchParams(location.search).get('level') === '2';
+const FEELINGS = HARDER ? window.KlgQuestions.FEELINGS_2 : window.KlgQuestions.FEELINGS;
+const MOMENTS = HARDER ? window.KlgQuestions.MOMENTS_2 : window.KlgQuestions.MOMENTS;
 function shuffle(items) {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
