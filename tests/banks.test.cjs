@@ -243,3 +243,32 @@ test('Spelling Bee never offers these words as a wrong spelling', () => {
   }
  }
 });
+
+test('Tamil Story Time', () => {
+ const { STORIES } = bank('tamil-story-time');
+ enough(STORIES, 4, 'stories');
+ unique(STORIES.map((s) => s.title), 'stories');
+ for (const s of STORIES) {
+  assert.equal(s.panels.length, 4, s.title);
+  for (const [emoji, tamil, english] of s.panels) { assert.match(tamil, /[஀-௿]/u, s.title); assert.ok(english, s.title); picturesDrawable([emoji], s.title); }
+  assert.equal(s.others.length, 3, s.title);
+  unique([s.answer, ...s.others].map((x) => x[1]), s.title);
+  picturesDrawable([s.answer, ...s.others].map((x) => x[0]), s.title);
+  const text = s.panels.map((p) => p[1]).join(' ');
+  assert.ok(text.includes(s.answer[1].slice(0, 2)), `${s.title}: the answer must be in the story`);
+ }
+});
+
+test('Tamil sentence bank: pictures and three rounds of ten', () => {
+ const { sentences } = require('../assets/js/tamil-sentences-data.js');
+ enough(sentences, 10, 'sentences');
+ picturesDrawable(sentences.map((s) => s.emoji), 'sentences');
+});
+
+test('new Tamil sentence targets all have a human recording', () => {
+ const context = { window: {} };
+ vm.runInNewContext(fs.readFileSync('assets/js/tamil-audio-manifest.js', 'utf8'), context);
+ const { sentences } = require('../assets/js/tamil-sentences-data.js');
+ const missing = sentences.filter((s) => !context.window.KLG_TAMIL_AUDIO[s.word]).map((s) => s.word);
+ assert.deepEqual(missing, []);
+});

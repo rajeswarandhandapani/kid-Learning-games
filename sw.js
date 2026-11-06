@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-96783f8be0ff";
+const CACHE = "klg-f93f328e06fe";
 const FILES = [
  "./",
  "./index.html",
@@ -398,6 +398,7 @@ const FILES = [
  "./games/tamil-sound-blend/index.html",
  "./games/tamil-story-time/game.js",
  "./games/tamil-story-time/index.html",
+ "./games/tamil-story-time/questions.js",
  "./games/tamil-tracing/game.js",
  "./games/tamil-tracing/index.html",
  "./games/tamil-word-builder/game.js",
