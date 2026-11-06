@@ -1010,7 +1010,7 @@ body.kid-game { --klg-purple:var(--kid-accent); }
 .path-next { width:fit-content; max-width:100%; min-height:1.4em; margin:14px auto!important; padding:6px 16px; border-radius:999px; background-color:#fff; font-size:1.02rem; font-weight:800; text-align:center; color:var(--kid-deep-ink)!important; box-shadow:0 5px 14px #0b063040; }
 .path-next:empty { display:none; }
 .kid-empty { padding:24px 14px; margin-top:14px; border-radius:22px; background:#fff; font-size:1.2rem; font-weight:700; text-align:center; }
-.kid-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:14px; padding-bottom:6px; }
+.kid-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; padding-bottom:6px; }
 .kid-cards[hidden] { display:none; }
 .learning-home .game-tile { position:relative; min-width:0; }
 .learning-home .game-tile > a { display:block; height:100%; }

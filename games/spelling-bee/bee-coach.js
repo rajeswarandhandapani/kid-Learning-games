@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hear = iconButton('bee-hear', '🔊', 'Hear it', () => speak(Core.spoken(entry)));
     hear.id = 'bee-study-hear';
     hearRow.append(hear, iconButton('bee-clue bee-slow', '🐢', 'Slowly', () => speak(Core.spoken(entry), 0.5)));
-    body.append(hearRow);
+    if (!noVoice) body.append(hearRow); // With no voice these buttons would do nothing.
     if (entry.def) body.append(el('p', 'bee-rule bee-study-line', `📖 ${capitalize(entry.def)}.`));
     if (entry.sentence) body.append(el('p', 'bee-rule bee-study-line', `💬 ${entry.sentence}`));
     body.append(patternTips(entry));

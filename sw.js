@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-a48f2e52e730";
+const CACHE = "klg-4a50de4fe420";
 const FILES = [
  "./",
  "./index.html",

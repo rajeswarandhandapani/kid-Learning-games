@@ -746,12 +746,15 @@ section('with no voice, the clues carry the word', async ({ newPage, assert }) =
  const noVoices = await newPage(390, 844, { voices: false });
  await noVoices.page.goto(URL_BEE);
  await noVoices.page.locator('#start-btn').click();
+ assert.equal(await noVoices.page.locator('#bee-study-hear').count(), 0, 'the study card offers no sound it cannot play');
+ await noVoices.page.locator('#bee-study-go').click();
  assert.ok(await noVoices.page.locator('#bee-novoice').isVisible());
  assert.match(await noVoices.page.locator('#bee-clue-text').textContent(), /Meaning: .+_____/);
  await noVoices.close();
  const noSpeech = await newPage(390, 844, { init: () => { delete window.speechSynthesis; delete Window.prototype.speechSynthesis; }, stub: false });
  await noSpeech.page.goto(URL_BEE);
  await noSpeech.page.locator('#start-btn').click();
+ await noSpeech.page.locator('#bee-study-go').click();
  assert.ok(await noSpeech.page.locator('#bee-novoice').isVisible());
  assert.match(await noSpeech.page.locator('#bee-clue-text').textContent(), /Meaning: /);
  await tap(noSpeech.page, 'cat');
@@ -809,6 +812,7 @@ section('every size: nothing hidden, nothing too small, no sideways scroll', asy
   // A word: the voice, every clue, every letter and Done are there without scrolling.
   await page.goto(URL_BEE);
   await page.locator('#start-btn').click();
+  await page.locator('#bee-study-go').click();
   for (const s of ['#bee-hear', '.bee-clue[data-clue="meaning"]', '.bee-clue[data-clue="slow"]', '#bee-tiles', '.bee-key[data-letter="a"]', '.bee-key[data-letter="z"]', '#bee-done', '#bee-erase']) await seen('word', s);
   for (const hidden of await page.evaluate(clearOfKeys, '.bee-ask button')) fail(`word at ${w}x${h}: ${hidden}`);
   await noSideways('word');
