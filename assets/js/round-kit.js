@@ -154,8 +154,9 @@
       nextBtn.textContent = index + 1 === total ? (reviewing ? "All done →" : "See my stars →") : "Next →";
       nextBtn.hidden = false;
       nextBtn.focus({ preventScroll: true });
-      // On a short screen the feedback and Next can land below the fold, which looks stuck.
-      nextBtn.scrollIntoView({ block: "nearest" });
+      // On a short screen the feedback can land below the fold. Next sticks to the
+      // bottom of the screen, and the feedback's scroll margin keeps it clear of Next.
+      $("feedback").scrollIntoView({ block: "nearest" });
     }
 
     function show() {
@@ -166,7 +167,8 @@
       ctx.total = total;
       nextBtn.hidden = true;
       setFeedback("", "");
-      $("progress-text").textContent = `Question ${index + 1} / ${total}`;
+      $("progress-text").textContent = `${index + 1} / ${total}`;
+      $("progress-text").setAttribute("aria-label", `Question ${index + 1} of ${total}`);
       $("score-pill").textContent = "⭐ " + score;
       ctx.stage.replaceChildren();
       current = reviewing ? reviewing.items[index].snapshot.q : opts.make(index, asked);

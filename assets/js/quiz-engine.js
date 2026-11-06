@@ -223,7 +223,7 @@ class QuizEngine {
     this.el.resultsScreen.tabIndex = -1;
     const tools = document.createElement('div');
     tools.className = 'quiz-tools';
-    tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span class="small text-muted">Take your time. You’re learning!</span>';
+    tools.innerHTML = '<button type="button" id="quiz-exit">← Change activity</button><span id="quiz-encourage" class="small text-muted">Take your time. You’re learning!</span>';
     this.el.quizScreen.prepend(tools);
     this.listenButton = document.createElement('button');
     this.listenButton.type = 'button';
@@ -262,7 +262,7 @@ class QuizEngine {
       this.totalQuestions = this.review.queue.length;
       this.el.totalQuestions.textContent = this.totalQuestions;
     }
-    this.el.quizScreen.querySelector('.quiz-tools span').textContent = this.practice ? 'Take your time. You’re learning!' : 'Timed challenge · give it a try!';
+    document.getElementById('quiz-encourage').textContent = this.practice ? 'Take your time. You’re learning!' : 'Timed challenge · give it a try!';
     this.currentIndex = 0;
     this.score = 0;
     this.streak = 0;
@@ -492,10 +492,11 @@ class QuizEngine {
       this.nextButton.textContent = this.currentIndex === this.totalQuestions ? last : 'Next question →';
       this.nextButton.hidden = false;
       this.nextButton.focus({ preventScroll: true });
-      // On a short screen the feedback and Next can land below the fold, which looks stuck.
-      this.nextButton.scrollIntoView({ block: 'nearest' });
-    } else {
-      this.feedback.scrollIntoView({ block: 'nearest' });
+    }
+    // On a short screen the feedback can land below the fold. Next sticks to the
+    // bottom of the screen, and the feedback's scroll margin keeps it clear of Next.
+    this.feedback.scrollIntoView({ block: 'nearest' });
+    if (!this.practice) {
       this.transitionTimer = setTimeout(() => this._nextQuestion(), isCorrect ? this.correctDelay : Math.max(this.incorrectDelay, 3500));
     }
   }

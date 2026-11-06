@@ -99,6 +99,7 @@ ${links('mode-links', 'mode', modeLinks, 0)}${links('level-links', 'level', leve
   <script src="../../assets/vendor/confetti.browser.min.js"></script>
 ${scripts.map(s => `  <script src="../../assets/js/${s}"></script>`).join('\n')}
   <script src="game.js"></script>
+  <script src="../../assets/js/page-shell.js"></script>
 </body>
 </html>
 `;

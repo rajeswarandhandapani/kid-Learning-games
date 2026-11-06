@@ -76,6 +76,84 @@ section('next and feedback stay on screen after an answer', async ({ newPage, fa
  }
 });
 
+/** Every game page with a start screen. */
+const STARTS = fs.readdirSync('games').filter((id) => id !== 'tamil-letter-chart' && fs.existsSync(`games/${id}/index.html`));
+
+section('start screens have one clear thing to do', async ({ newPage, fail }) => {
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
+  for (const id of STARTS) {
+   await page.goto(`${base}/games/${id}/index.html`);
+   const play = await page.evaluate(inView, '#start-btn');
+   if (!play.ok) fail(`${id} at ${w}x${h}: Play ${play.why}`);
+   const r = await page.evaluate(() => ({
+    words: document.getElementById('start-screen').innerText.trim().split(/\s+/).length,
+    label: document.getElementById('start-btn').textContent.trim(),
+    scrolls: document.documentElement.scrollWidth > innerWidth + 1,
+    home: document.querySelector('.navbar-brand').textContent.trim(),
+    sound: !!document.querySelector('.klg-navbar #klg-mute-btn'),
+   }));
+   if (r.words > 30) fail(`${id}: ${r.words} words on the start screen`);
+   if (r.label !== '▶ Play') fail(`${id}: start button says "${r.label}"`);
+   if (r.scrolls) fail(`${id} at ${w}x${h}: sideways scroll`);
+   if (r.home !== '🏠 Home') fail(`${id}: home button says "${r.home}"`);
+   if (!r.sound) fail(`${id}: sound button is not in the top bar`);
+  }
+  await close();
+ }
+});
+
+// A ten-by-ten board cannot give every square 44px on a phone, so Array Garden and
+// Multiples Hunt are allowed smaller squares there, as big as the screen allows.
+// Block Builder's small blocks can be tapped too, but its big − buttons do the same job.
+const tooSmall = () => [...document.querySelectorAll('a,button,select,input,summary')]
+ .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden' && !e.closest('.kid-select-hidden') && !e.classList.contains('skip-link') && !(innerWidth < 600 && e.matches('.ag-cell, .mh-cell')) && !e.matches('.kv-removable') && (r.width < 44 || r.height < 44); })
+ .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]} "${(e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 18)}" ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`);
+
+section('every control is big enough for a small finger', async ({ newPage, fail }) => {
+ for (const [w, h] of [[320, 568], [390, 844], [1080, 810]]) {
+  const { page, close } = await newPage(w, h);
+  for (const id of STARTS) {
+   await page.goto(`${base}/games/${id}/index.html`);
+   const details = page.locator('.kid-more summary');
+   if (await details.count()) await details.click();
+   for (const small of await page.evaluate(tooSmall)) fail(`${id} start at ${w}x${h}: ${small}`);
+   await page.locator('#start-btn').click();
+   await page.waitForTimeout(40);
+   for (const small of await page.evaluate(tooSmall)) fail(`${id} play at ${w}x${h}: ${small}`);
+  }
+  await close();
+ }
+});
+
+section('the question and every answer fit on the screen', async ({ newPage, fail }) => {
+ for (const [w, h] of SIZES.slice(1)) {
+  const { page, close } = await newPage(w, h);
+  for (const id of QUIZ) {
+   await page.goto(`${base}/games/${id}/index.html`);
+   await page.locator('#start-btn').click();
+   await page.locator('.quiz-choice-btn').first().waitFor();
+   const r = await page.evaluate(() => ({
+    bottom: Math.max(...[...document.querySelectorAll('.quiz-choice-btn')].map((b) => b.getBoundingClientRect().bottom)),
+    number: document.getElementById('question-number').textContent,
+    total: document.getElementById('total-questions').textContent,
+    top: document.getElementById('question-text').getBoundingClientRect().top,
+   }));
+   if (r.bottom > h + 1) fail(`${id} at ${w}x${h}: answers end at ${Math.round(r.bottom)}`);
+   if (r.number !== '1' || !Number(r.total)) fail(`${id}: the question counter was lost`);
+  }
+  for (const id of ROUND) {
+   await page.goto(`${base}/games/${id}/index.html`);
+   await page.locator('#start-btn').click();
+   await page.waitForFunction(() => window.__ctx);
+   const bottom = await page.evaluate(() => document.getElementById('stage').getBoundingClientRect().bottom);
+   // கதை நேரம் shows a four-picture story to read before its question, so scrolling is expected.
+   if (bottom > h + 1 && id !== 'tamil-story-time') fail(`${id} at ${w}x${h}: the game ends at ${Math.round(bottom)}`);
+  }
+  await close();
+ }
+});
+
 (async () => {
  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
  const failures = [];
@@ -102,7 +180,7 @@ section('next and feedback stay on screen after an answer', async ({ newPage, fa
  await browser.close();
  failures.push(...pageErrors);
  if (failures.length) {
-  console.log(`\n${failures.length} problems:\n  ${failures.slice(0, 60).join('\n  ')}`);
+  console.log(`\n${failures.length} problems:\n  ${failures.slice(0, Number(process.env.SHOW || 60)).join('\n  ')}`);
   process.exit(1);
  }
  console.log('PASS the layout checks at every size.');

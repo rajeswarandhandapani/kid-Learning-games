@@ -157,6 +157,14 @@ test('Start over clears saved questions too', () => {
  assert.equal(r.summary().waiting, 0);
 });
 
+test('the game id comes from the last folder, including inside the website\'s /games/ folder', () => {
+ for (const pathname of ['/games/counting/index.html', '/games/games/counting/index.html', '/kid-Learning-games/games/counting/', '/games/games/counting/']) {
+  assert.equal(setup({ pathname }).p.currentGameId(), 'counting', pathname);
+ }
+ assert.equal(setup({ pathname: '/index.html' }).p.currentGameId(), null);
+ assert.equal(setup({ pathname: '/games/index.html' }).p.currentGameId(), null);
+});
+
 test('a v3 progress record loads unchanged', () => {
  const v3 = JSON.stringify({ xp: 720, plays: 9, streak: 2, bestStreak: 4, lastDay: '2026-11-04', games: { counting: { plays: 9, bestScore: 10, total: 10, bestStars: 3, bestMs: 0, recent: [90, 100], byMode: {} } }, badges: { perfect: '2026-10-30' } });
  const { p } = setup({ saved: { 'klg-progress-v1': v3 } });

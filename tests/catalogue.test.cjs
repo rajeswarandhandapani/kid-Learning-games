@@ -53,6 +53,16 @@ test('every game page loads the catalogue before progress, or catalogue badges c
  assert.match(fs.readFileSync('scripts/new-game.cjs', 'utf8'), /'catalogue\.js', 'progress\.js'/, 'new games must load it too');
 });
 
+test('every game page loads the shared frame last, after the game has built its controls', () => {
+ for (const id of folders) {
+  const html = fs.readFileSync(path.join('games', id, 'index.html'), 'utf8');
+  const shell = html.lastIndexOf('page-shell.js');
+  assert.ok(shell >= 0, id + ' must load page-shell.js');
+  assert.equal(html.lastIndexOf('<script', shell - 1), html.lastIndexOf('<script'), id + ' must load page-shell.js last');
+ }
+ assert.match(fs.readFileSync('scripts/new-game.cjs', 'utf8'), /page-shell\.js/, 'new games must load it too');
+});
+
 test('the Picture Pro badge can still be earned', () => {
  assert.ok(cat.GAMES.filter((g) => g.v3).length >= 10);
 });

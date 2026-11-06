@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-b587058b869f";
+const CACHE = "klg-d1d416b14f33";
 const FILES = [
  "./",
  "./index.html",
@@ -234,6 +234,7 @@ const FILES = [
  "./assets/js/game-kit.js",
  "./assets/js/home.js",
  "./assets/js/math-visuals.js",
+ "./assets/js/page-shell.js",
  "./assets/js/play-kit.js",
  "./assets/js/progress.js",
  "./assets/js/quiz-engine.js",

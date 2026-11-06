@@ -268,7 +268,8 @@
 
   /** Folder name of the game being played, e.g. /games/counting/ -> counting. */
   function currentGameId() {
-    var match = window.location.pathname.match(/\/games\/([^/]+)\//);
+    // Anchored at the end: on the website the path is /games/games/counting/index.html.
+    var match = window.location.pathname.match(/\/games\/([^/]+)\/[^/]*$/);
     return match ? match[1] : null;
   }
 
