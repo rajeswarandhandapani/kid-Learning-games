@@ -34,10 +34,15 @@ const fixRandom = (page, value) => page.evaluate((v) => { Math.random = () => v;
 
 const lastSaid = (page) => page.evaluate(() => window.__said[window.__said.length - 1]);
 
+/** The voice can be told something other than the letters to type ("led" for lead the metal, "self-sufficient"). */
+const spokenAs = (word) => Core.spoken(byWord.get(word) || { word });
+const heardAs = new Map(WORDS.map((w) => [Core.spoken(w), w.word]));
+
 /** Listens to the word, the way a child would. */
 async function hearWord(page) {
  await page.locator('#bee-hear').click();
- return lastSaid(page);
+ const said = await lastSaid(page);
+ return heardAs.get(said) || said;
 }
 async function tap(page, letters) {
  for (const ch of letters) await page.locator(`.bee-key[data-letter="${ch}"]`).click();
@@ -122,7 +127,7 @@ section('a right answer: the word is scheduled, and the way on is in view', asyn
  const said = await lastSaid(page);
  const word = await hearWord(page);
  assert.ok(byWord.has(word), `${word} is a bank word`);
- assert.ok(said.startsWith(word), 'the word is said as soon as it appears');
+ assert.ok(said.startsWith(spokenAs(word)), 'the word is said as soon as it appears');
  assert.equal(await page.locator('#bee-progress').textContent(), '1 / 10');
  await spell(page, word);
  assert.match(await page.locator('.bee-right').textContent(), /Right/);
@@ -238,7 +243,7 @@ section('the clues answer what a real speller may ask, and never show the word',
  await clue('origin');
  assert.match(await text(), new RegExp(`^From ${w.origin}\\.`));
  await clue('slow');
- assert.equal(await lastSaid(page), word);
+ assert.equal(await lastSaid(page), spokenAs(word));
  assert.equal(await page.evaluate(() => window.__rates[window.__rates.length - 1]), 0.5);
  assert.equal(await page.locator('#bee-entry input, #bee-entry textarea').count(), 0, 'no text box, so a phone keyboard cannot autocorrect');
  await close();
@@ -273,7 +278,7 @@ section('the first words come from the bee list, and "lead" always gets its mean
  await page.evaluate(([k, day]) => localStorage.setItem(k, JSON.stringify({ words: { lead: { b: 1, due: day, tries: 1, miss: 0 } } })), [KEY, Core.dayNumber() - 1]);
  await page.reload();
  await page.locator('#start-btn').click();
- assert.equal(await lastSaid(page), `lead. ${byWord.get('lead').def}`);
+ assert.equal(await lastSaid(page), `led. ${byWord.get('lead').def}`, 'the voice says the metal, not "leed"');
  assert.equal(await page.locator('#bee-clue-text').textContent(), `Meaning: ${byWord.get('lead').def}.`);
  await close();
 });
@@ -466,6 +471,84 @@ section('mock bee: school bees have vocabulary rounds', async ({ newPage, assert
  await second.close();
 });
 
+section('a mock bee uses the official meaning, and even the longest can be read', async ({ newPage, assert, fail }) => {
+ const onList = WORDS.filter((w) => w.list);
+ const at = onList.findIndex((w) => w.word === 'spiders');
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
+  await page.goto(URL_BEE);
+  await page.locator('#bee-mock-btn').click();
+  await fixRandom(page, (at + 0.5) / onList.length);
+  await page.locator('.bee-choice[data-bee="class"]').click();
+  assert.equal(await hearWord(page), 'spiders');
+  await page.locator('.bee-clue[data-clue="meaning"]').click();
+  assert.equal(await page.locator('#bee-clue-text').textContent(), `Meaning: ${byWord.get('spiders').official}.`);
+  assert.equal(await lastSaid(page), byWord.get('spiders').official);
+  await page.locator('.bee-clue[data-clue="pos"]').click();
+  assert.match(await page.locator('#bee-clue-text').textContent(), /^Plural noun/);
+  await page.locator('.bee-clue[data-clue="meaning"]').click();
+  for (const hidden of await page.evaluate(clearOfKeys, '#bee-clue-text')) fail(`long meaning at ${w}x${h}: ${hidden}`);
+  await close();
+ }
+});
+
+section('the whole study list can be chosen, and a long or hyphenated word fits', async ({ newPage, assert, fail }) => {
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
+  await page.goto(URL_BEE);
+  await page.locator('#bee-words-btn').click();
+  for (const [focus, name] of [['list', 'Third grade'], ['core', 'One Bee'], ['stretch', 'Two Bee'], ['champion', 'Three Bee']]) {
+   assert.match(await page.locator(`.bee-tier[data-focus="${focus}"]`).textContent(), new RegExp(name));
+  }
+  for (const focus of ['core', 'stretch', 'champion']) assert.match(await page.locator(`.bee-tier[data-focus="${focus}"]`).textContent(), /0 of 150 mastered/);
+  // The longest word on the list, then one that is written with a hyphen.
+  for (const word of ['bioluminescence', 'selfsufficient']) {
+   await page.goto(URL_BEE);
+   await page.evaluate(([k, day, target]) => localStorage.setItem(k, JSON.stringify({ words: { [target]: { b: 1, due: day, tries: 1, miss: 0 } } })), [KEY, Core.dayNumber() - 1, word]);
+   await page.reload();
+   await page.locator('#start-btn').click();
+   assert.equal(await hearWord(page), word);
+   await tap(page, word);
+   for (const selector of ['#bee-done', '#bee-hear', '#bee-erase']) {
+    const seen = await page.evaluate(inView, selector);
+    if (!seen.ok) fail(`${word} at ${w}x${h}: ${selector} ${seen.why}`);
+   }
+   const wide = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+   if (wide) fail(`${word} at ${w}x${h}: the page scrolls sideways`);
+   await page.locator('#bee-done').click();
+   await page.locator('#bee-next').waitFor();
+   const feedback = await page.locator('#bee-feedback').textContent();
+   if (word === 'selfsufficient') {
+    assert.match(feedback, /self-sufficient/);
+    assert.match(feedback, /say "hyphen"/);
+    assert.match(await lastSaid(page).then(() => page.evaluate(() => window.__said.join('|'))), /self-sufficient/);
+   }
+  }
+  await close();
+ }
+});
+
+section('a list chosen in My words is still chosen after the game is reopened', async ({ newPage, assert }) => {
+ const { page, close } = await newPage(390, 844);
+ const pressed = async () => {
+  await page.locator('#bee-words-btn').click();
+  return page.locator('.bee-tier[aria-pressed="true"]').getAttribute('data-focus');
+ };
+ await page.goto(`${URL_BEE}?level=1`);
+ await page.locator('.kid-level[data-band="3"]').click();
+ await page.waitForURL(/focus=list/);
+ assert.equal(await pressed(), 'list', 'the 7-9 button opens on the third-grade list');
+ await page.locator('.bee-tier[data-focus="core"]').click();
+ await page.goto(URL_BEE);
+ await page.waitForURL(/focus=list/);
+ assert.equal(await pressed(), 'core', 'reopening keeps One Bee');
+ await page.locator('#bee-back').click();
+ await page.locator('.kid-level[data-band="4"]').click();
+ await page.waitForURL(/focus=stretch/);
+ assert.equal(await pressed(), 'stretch', 'but the 9+ button still changes it');
+ await close();
+});
+
 section('words get harder through a mock bee', async ({ newPage, assert }) => {
  const { page, close } = await newPage(390, 844);
  await startMockBee(page, 'school');
@@ -495,7 +578,8 @@ section('with a grown-up: the word is on the screen, and the grown-up judges', a
  assert.match(await page.locator('.bee-facts').textContent(), new RegExp(w.origin));
  assert.ok((await page.locator('.bee-facts').textContent()).includes(w.sentence));
  await page.locator('#bee-hear').click();
- assert.equal(await lastSaid(page), word);
+ assert.equal(await lastSaid(page), spokenAs(word));
+ assert.ok((await page.locator('.bee-facts').textContent()).includes(w.official || w.def), 'the grown-up sees the official meaning');
  await page.locator('#bee-oral-wrong').click();
  assert.equal((await readStore(page)).words[word].b, 1);
  for (let i = 1; i < 10; i++) await page.locator('#bee-oral-right').click();

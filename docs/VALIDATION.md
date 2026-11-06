@@ -163,13 +163,17 @@ Upgraded Spelling Bee from multiple choice to training for a real bee, for a 3rd
 - The training and the quiz both had `#play-again-btn`, which would have broken Play Again in one of them. Each mode now removes the other's screens, and a test checks for duplicates.
 - The keyboard hid Hear the word at 320×568, and the row of spellers hid clue buttons at 390×664. Short screens now have a compact layout, tested at 375×553 and 390×664 too, because real phones lose height to the browser's bars.
 - 🧑‍🏫 draws as two pictures in the bundled emoji font, so Grown-up uses 🗣️.
+- Reopening the game undid a list chosen in My words, or a pasted school list, because the age button's list stays in the address and was applied on every load. It now applies only when it changes.
 
 **Limits**
 
 - Chromium only, with a stand-in for the device voice. No real voice has been heard reading these words, and a device voice can mispronounce unusual ones such as dachshund. That is worth a listen before relying on it.
 - No child has used it. Rival strength is tuned by simulation so a perfect speller needs about 7 rounds to win a Classroom Bee and about 9 to win a School Bee. It is not based on real bee results.
-- Only the 50 third-grade words are from the official list. The Stretch and Champion tiers are our own stand-ins for Two Bee and Three Bee, so a school bee will use words they do not have. The teacher's full 450-word list can be pasted into My words.
-- *lead* can be read two ways. The game teaches the verb and always gives that meaning, but the sheet does not say which one a pronouncer will use.
+- All 450 words on the supplied study list are in the game. The file does not label One, Two and Three Bee: the split into three lists of 150 is inferred from the third-grade sheet being numbers 101 to 150 and from difficulty starting over at 151 and 301.
+- The official part of speech and meaning are copied from the supplied file, and a test compares them when the file is present. The 375 simple meanings, sentences, origins and patterns added with them were written for this game and have not been checked by a person. Origins are not official, and 11 uncertain ones are left out.
+- Three Bee is very hard for a third grader, and a device voice is likely to struggle with words such as *trichobothria*, *spes phthisica* and *Bildungsroman*. Some list words are about grown-up subjects (*fascism*, *segregation*, *leprosy*, *sputum*, *yakuza*), and the official meanings are read as written. A grown-up may want to look through them.
+- For the 11 words with a hyphen, a space or an accent, the child taps letters only, and the note about saying "hyphen" or pausing on stage is the usual practice, not a rule from the supplied sheet. Check with the local bee.
+- *ginger* is listed on the supplied sheet as an adjective, though its meaning describes the plant. The game follows the sheet, and its sentence (ginger cookies) fits both.
 - Word progress is saved on one device and browser only.
 
 ## Levels inside each game · November 6, 2026

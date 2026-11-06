@@ -1,7 +1,9 @@
 // Spelling Bee training: the word bank and the rules, with no browser needed.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WORDS, BEE_LIST, PATTERNS, ORIGIN_TIPS, POS_TIPS, TIERS } = require('../games/spelling-bee/bee-words.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { WORDS, BEE_LIST, BEE_SHEET, POS, PATTERNS, ORIGIN_TIPS, POS_TIPS, TIERS } = require('../games/spelling-bee/bee-words.js');
 const Core = require('../games/spelling-bee/bee-core.js');
 
 const TODAY = 20000;
@@ -10,6 +12,8 @@ const seeded = (seed = 1) => () => {
  return (seed - 1) / 2147483646;
 };
 const store = (extra) => ({ ...Core.emptyStore(), ...extra });
+/** Whether a text has the word in it, as a whole word, however it is written. */
+const hasWord = (text, word) => new RegExp(`(?<![\\p{L}\\p{M}])${word}(?![\\p{L}\\p{M}])`, 'iu').test(text);
 
 /** A word the voice could read two ways would be unfair, so none may be in the bank. */
 const HETERONYMS = ['read', 'lead', 'tear', 'wind', 'bow', 'close', 'live', 'minute', 'object', 'present', 'record', 'desert', 'dove', 'sow', 'refuse', 'content', 'produce', 'row', 'bass', 'permit', 'rebel', 'conduct', 'contract', 'invalid', 'project', 'subject', 'suspect', 'polish', 'wound', 'does', 'separate', 'buffet', 'transport', 'construct', 'address', 'perfect', 'entrance', 'sewer', 'august', 'attribute', 'console', 'convert', 'digest', 'export', 'import', 'increase', 'insult', 'moderate', 'estimate', 'graduate', 'alternate', 'appropriate', 'tomorrow-'];
@@ -21,16 +25,19 @@ test('every word is complete and its clues never give the spelling away', () => 
   assert.ok(!seen.has(w.word), `${w.word} is listed twice`);
   seen.add(w.word);
   assert.ok(Object.keys(POS_TIPS).includes(w.pos), `${w.word}: part of speech ${w.pos}`);
-  assert.ok(ORIGIN_TIPS[w.origin], `${w.word}: origin ${w.origin} has no tip`);
+  // Only a study list word may have no origin, and only because it is unknown or uncertain.
+  assert.ok(ORIGIN_TIPS[w.origin] || (w.study && w.origin === ''), `${w.word}: origin ${w.origin} has no tip`);
   assert.ok(w.patterns.length >= 1, `${w.word} has no pattern`);
   for (const p of w.patterns) assert.ok(PATTERNS[p], `${w.word}: unknown pattern ${p}`);
+  const shown = Core.display(w);
   assert.ok(w.word.includes(w.tricky), `${w.word}: tricky part "${w.tricky}" is not in the word`);
+  assert.ok(shown.toLowerCase().includes(w.tricky), `${shown}: tricky part "${w.tricky}" is broken up where it is written`);
   assert.ok(TIERS[w.tier], `${w.word}: tier`);
   const def = w.def.toLowerCase();
   assert.ok(!new RegExp(`\\b${w.word}\\b`).test(def), `${w.word}: the meaning gives the word`);
   if (w.word.length >= 6) assert.ok(!def.includes(w.word.slice(0, 5)), `${w.word}: the meaning gives most of the word: ${w.def}`);
-  assert.ok(new RegExp(`\\b${w.word}\\b`, 'i').test(w.sentence), `${w.word}: the sentence does not use the word: ${w.sentence}`);
-  assert.ok(!new RegExp(`\\b${w.word}\\b`, 'i').test(Core.maskSentence(w.sentence, w.word)), `${w.word}: the hidden sentence still shows it`);
+  assert.ok(hasWord(w.sentence, shown), `${shown}: the sentence does not use the word: ${w.sentence}`);
+  assert.ok(!hasWord(Core.maskSentence(w.sentence, shown), shown), `${shown}: the hidden sentence still shows it`);
   assert.match(w.sentence, /^[A-Z].*[.?!]$/, `${w.word}: sentence punctuation`);
  }
 });
@@ -49,7 +56,7 @@ test('the bank is big enough to study from, at every level and for every pattern
 test('a word the voice could read two ways is left out, or always comes with its meaning', () => {
  const byWord = new Map(WORDS.map((w) => [w.word, w]));
  for (const bad of HETERONYMS) if (byWord.has(bad)) assert.ok(byWord.get(bad).define && byWord.get(bad).def, `${bad} can be said two ways`);
- assert.ok(byWord.get('lead').define, 'lead is on the bee list and needs its meaning');
+ for (const word of ['lead', 'wind', 'permit']) assert.ok(byWord.get(word).define, `${word} is on the study list and needs its meaning`);
 });
 
 test('the third-grade bee list is all there', () => {
@@ -58,6 +65,116 @@ test('the third-grade bee list is all there', () => {
  const flagged = WORDS.filter((w) => w.list);
  assert.deepEqual(flagged.map((w) => w.word).sort(), [...BEE_LIST].sort());
  assert.ok(flagged.every((w) => w.tier === 1));
+});
+
+test('the whole study list is there, in three lists of 150', () => {
+ const entries = Object.entries(BEE_SHEET);
+ assert.equal(entries.length, 450);
+ assert.deepEqual(entries.map(([, row]) => row[2]), Array.from({ length: 450 }, (_, i) => i + 1), 'numbered in order, with none missing');
+ for (const n of [1, 2, 3]) assert.equal(WORDS.filter((w) => w.study === n).length, 150);
+ for (const [word, [, , num]] of entries) {
+  const entry = WORDS.find((w) => w.word === word);
+  assert.ok(entry, `${word} has no clues`);
+  assert.equal(entry.study, Math.ceil(num / 150), word);
+  assert.equal(entry.tier, entry.study, `${word} sits at its list's level`);
+ }
+ assert.deepEqual(BEE_LIST, entries.filter(([, row]) => row[2] >= 101 && row[2] <= 150).map(([word]) => word));
+});
+
+test('the study list matches the file it came from, when that file is here', { skip: !fs.existsSync(path.join(__dirname, '../reference-data/2026-2027-school-spelling-bee-450.json')) }, () => {
+ const { words } = JSON.parse(fs.readFileSync(path.join(__dirname, '../reference-data/2026-2027-school-spelling-bee-450.json'), 'utf8'));
+ assert.equal(words.length, 450);
+ const byNumber = new Map(WORDS.filter((w) => w.study).map((w) => [BEE_SHEET[w.word][2], w]));
+ for (const { num, word, pos, definition } of words) {
+  const entry = byNumber.get(num);
+  assert.equal(Core.display(entry), word, `number ${num}`);
+  assert.equal(entry.pos, pos, word);
+  assert.equal(entry.official, definition.replace(/\.$/, ''), word);
+ }
+});
+
+test('a word with a hyphen, a space or an accent is typed as letters and shown as it is written', () => {
+ const find = (word) => WORDS.find((w) => w.word === word);
+ const hyphen = find('selfsufficient');
+ assert.equal(Core.display(hyphen), 'self-sufficient');
+ assert.equal(Core.spoken(hyphen), 'self-sufficient');
+ assert.deepEqual(Core.judge(hyphen, 'selfsufficient'), { right: true, kind: 'right' });
+ assert.deepEqual(Core.splitTricky(hyphen), ['self-su', 'ff', 'icient']);
+ assert.match(Core.stageNote(hyphen), /hyphen/);
+ assert.equal(Core.maskSentence(hyphen.sentence, Core.display(hyphen)), 'The farm family is _____.');
+ const space = find('acappella');
+ assert.equal(Core.display(space), 'a cappella');
+ assert.match(Core.stageNote(space), /pause/);
+ assert.deepEqual(Core.judge(space, 'acapella'), { right: true, kind: 'variant' });
+ const accent = find('eclair');
+ assert.equal(Core.display(accent), 'éclair');
+ assert.equal(Core.stageNote(accent), '');
+ assert.equal(Core.maskSentence(accent.sentence, Core.display(accent)), 'I shared a chocolate _____ with my sister.');
+ assert.equal(Core.display(find('december')), 'December');
+ assert.equal(Core.stageNote(find('because')), '');
+ assert.equal(WORDS.filter((w) => w.show).length, 11);
+});
+
+test('choosing One, Two or Three Bee puts that real list first, and our own words after it', () => {
+ for (const [focus, n] of [['core', 1], ['stretch', 2], ['champion', 3]]) {
+  const plan = Core.planSession(store({ focus }), WORDS, TODAY, { rng: seeded() });
+  assert.ok(plan.every((w) => w.study === n), `${focus} starts on the real list`);
+  const done = store({ focus });
+  WORDS.filter((w) => w.study === n).forEach((w) => Core.recordResult(done, w.word, true, TODAY));
+  const after = Core.planSession(done, WORDS, TODAY, { rng: seeded() });
+  assert.ok(after.every((w) => w.tier === n && !w.study), `${focus} then moves to our own words at that level`);
+  const goal = Core.dailyGoal(store({ focus, beeDate: '2026-11-16' }), WORDS, Core.dayFromIso('2026-11-06'));
+  assert.equal(goal.scope, 150);
+ }
+});
+
+test('an age button sets the list once, and reopening the game does not undo a later choice', () => {
+ const s = store();
+ assert.equal(Core.applyLevelFocus(s, 'list'), true);
+ s.focus = 'core';
+ assert.equal(Core.applyLevelFocus(s, 'list'), false, 'the same address, opened again');
+ assert.equal(s.focus, 'core');
+ assert.equal(Core.applyLevelFocus(s, 'stretch'), true, 'a different age button');
+ assert.equal(s.focus, 'stretch');
+ assert.equal(Core.applyLevelFocus(s, 'list'), true, 'and back again');
+ assert.equal(s.focus, 'list');
+ for (const other of [null, '', 'core', 'nope']) assert.equal(Core.applyLevelFocus(s, other), false);
+ assert.equal(Core.normalizeStore({ levelFocus: 'stretch' }).levelFocus, 'stretch');
+ assert.equal(Core.normalizeStore({ levelFocus: 'nope' }).levelFocus, '');
+});
+
+test('a mock bee stays on the study list, then can go beyond it', () => {
+ for (const bee of Object.values(Core.BEES)) {
+  for (let round = 1; round <= bee.studyRounds; round++) {
+   for (let seed = 1; seed < 40; seed++) {
+    const word = Core.pickMockWord(bee, round, WORDS, new Set(), store({ focus: 'core' }), seeded(seed));
+    assert.ok(word.study, `${bee.key} round ${round}: ${word.word}`);
+    assert.equal(word.tier, bee.tierAt(round));
+   }
+  }
+  const later = new Set();
+  for (let seed = 1; seed < 200; seed++) later.add(!!Core.pickMockWord(bee, bee.studyRounds + 1, WORDS, new Set(), store({ focus: 'core' }), seeded(seed)).study);
+  assert.ok(later.has(false), `${bee.key}: the last rounds reach words from outside the list`);
+ }
+});
+
+test('study words match the sheet, with the official meaning kept apart from the simple one', () => {
+ for (const w of WORDS.filter((x) => x.study)) {
+  const [pos, official] = BEE_SHEET[w.word];
+  assert.equal(w.pos, POS[pos], w.word);
+  assert.equal(w.official, official, w.word);
+  assert.notEqual(w.def, official, `${w.word}: practice should use a simpler meaning`);
+  assert.ok(!hasWord(official, Core.display(w)), `${w.word}: the official meaning gives the word`);
+  assert.equal(Core.meaningFor(w, 'train'), w.def);
+  assert.equal(Core.meaningFor(w, 'mock'), official);
+ }
+ const lead = WORDS.find((w) => w.word === 'lead');
+ assert.equal(lead.pos, 'noun');
+ assert.match(lead.def, /metal/);
+ assert.equal(Core.spoken(lead), 'led', 'the metal is said "led"');
+ assert.equal(lead.homo, 'led');
+ assert.equal(Core.spoken(WORDS.find((w) => w.word === 'because')), 'because');
+ assert.deepEqual(Core.judge(lead, 'led'), { right: false, kind: 'homophone' });
 });
 
 test('sound-alikes and other spellings are well formed', () => {
@@ -134,7 +251,8 @@ test('after the bee list, new words step up a level', () => {
  const s = store();
  BEE_LIST.forEach((word) => Core.recordResult(s, word, true, TODAY));
  const plan = Core.planSession(s, WORDS, TODAY, { rng: seeded() });
- assert.ok(plan.every((w) => w.tier === 2), 'nothing is due, so all are Stretch words');
+ assert.ok(plan.every((w) => w.tier === 2), 'nothing is due, so all are from the next level');
+ assert.ok(plan.every((w) => w.study === 2), 'and from the real Two Bee list');
 });
 
 test('choosing what to learn first changes the new words', () => {

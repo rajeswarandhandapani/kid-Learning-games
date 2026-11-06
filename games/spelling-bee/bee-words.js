@@ -2,27 +2,32 @@
  * The word bank for Spelling Bee training. The definitions, sentences and groupings
  * are written for this game.
  *
- * BEE_LIST holds the 50 words on the 2026-2027 One Bee Study Words for Third Grade
- * sheet (Scripps), supplied by a parent. The rest of the bank is our own, and the
- * sheet's Two Bee and Three Bee lists are not included: Stretch and Champion stand in
- * until a grown-up pastes the real ones into "My words".
+ * The official 2026-2027 study list and its meanings are in bee-study.js. BEE_LIST is its
+ * 50 third-grade words. The other words in the rows below are our own: once a child has
+ * finished a study list, they are the words from outside it that a real bee ends with.
  *
  * Each row: [word, part of speech, meaning, sentence, origin, patterns, tricky part, extras?]
- *   tier 1 Core: third-grade words, including BEE_LIST.
- *   tier 2 Stretch: grades 4 to 6, the next level after the list.
- *   tier 3 Champion: hard or unfamiliar words, for the last rounds.
+ *   tier 1: One Bee, including BEE_LIST, and third-grade words of our own.
+ *   tier 2: Two Bee, and words of our own for grades 4 to 6.
+ *   tier 3: Three Bee, and hard or unfamiliar words of our own.
+ *   A word on the study list takes its tier from the list.
  *   patterns: keys into PATTERNS, joined with |.
  *   tricky: the part of the word to highlight when it is missed.
  *   extras: homo (a word that sounds the same), also (other accepted spellings),
  *           hook (a memory trick), cap (written with a capital letter),
- *           define (can be read two ways, so its meaning is always given).
+ *           define (can be read two ways, so its meaning is always given),
+ *           say (what to give the voice, when the spelling would mislead it),
+ *           show (how it is written, when it has a hyphen, a space or an accent).
  *
  * Words the device voice could say two ways (read, tear, separate) are left out,
- * because a wrong reading would be unfair. The one exception is "lead", which is on
- * BEE_LIST and is marked define. tests/bee.test.cjs enforces this.
+ * because a wrong reading would be unfair. The exceptions are on the study list: wind,
+ * permit and lead. Each is marked define, and say makes the voice read lead the metal as
+ * "led". tests/bee.test.cjs enforces this.
  */
 (function (root) {
   'use strict';
+
+  const { BEE_SHEET, STUDY_ROWS } = typeof require === 'function' ? require('./bee-study.js') : root.KlgBeeStudy;
 
   const PATTERNS = {
     heart: { name: 'Heart words', icon: '❤️', rule: 'Some words break the rules. Find the odd part and learn just that part by heart.', eg: 'said, does' },
@@ -50,6 +55,9 @@
     'q-x': { name: 'Q and X', icon: '👑', rule: 'Q nearly always brings u: quick, square. X often starts with ex: expect. In excellent you hear ks but write xc.', eg: 'quack, exit' },
     'ous-able': { name: 'Big endings', icon: '🏔️', rule: '-ous says us: famous. -able and -ible sound alike. If a whole word is left when you take the ending off, it is usually -able: comfort-able. If not, try -ible: terr-ible.', eg: 'joyous, washable' },
     roots: { name: 'Word parts', icon: '🔬', rule: 'Long words are built from parts with meanings: tele means far, scope means look, micro means small, graph means write. Know the part and you can spell new words.', eg: 'telegraph, microchip' },
+    short: { name: 'Short vowels', icon: '🔡', rule: 'A short vowel between consonants sounds just as it looks: ran, leg, rod. Say each sound and write a letter for it.', eg: 'hat, pig' },
+    'silent-e': { name: 'Silent E', icon: '🪄', rule: 'A silent e at the end makes the vowel before it say its name: late, fine, dive. You cannot hear the e, so remember to write it.', eg: 'cake, bike' },
+    'bossy-r': { name: 'Bossy R', icon: '📣', rule: 'An r changes the vowel before it: car, corn, her, bird, fur. The sounds er, ir and ur are the same, so learn which one each word uses.', eg: 'barn, burn' },
   };
 
   /** What a language usually does to spelling, used when a child asks where a word is from. */
@@ -70,14 +78,20 @@
     Japanese: 'Japanese words are spelled by their sounds, and most end in a vowel.',
     Algonquian: 'Algonquian is a family of Native American languages. Spell these words by their sounds.',
     Swahili: 'Swahili words are spelled by their sounds, and most end in a vowel.',
+    Russian: 'Russian words came into English from a different alphabet, so they are spelled by their sounds.',
+    Chinese: 'Chinese words came into English from a different writing system, so they are spelled by their sounds.',
+    Portuguese: 'Portuguese sailors brought words and place names into English, and many end in a vowel.',
+    Amharic: 'Amharic is the main language of Ethiopia. Its words are spelled in English by their sounds.',
+    'Australian Aboriginal': 'The first languages of Australia gave English words such as kangaroo. Spell them by their sounds.',
   };
 
   const POS = {
-    n: 'noun', v: 'verb', adj: 'adjective', adv: 'adverb', conj: 'conjunction', prep: 'preposition', pron: 'pronoun', num: 'number word',
+    n: 'noun', pn: 'plural noun', v: 'verb', adj: 'adjective', adv: 'adverb', conj: 'conjunction', prep: 'preposition', pron: 'pronoun', num: 'number word', int: 'interjection', geo: 'geographical entry',
   };
 
   const POS_TIPS = {
     noun: 'A noun names a person, place or thing.',
+    'plural noun': 'A plural noun names more than one, so listen for the ending.',
     verb: 'A verb is something you do.',
     adjective: 'An adjective describes something.',
     adverb: 'An adverb tells how, when or where. Many end in -ly.',
@@ -85,6 +99,8 @@
     preposition: 'A preposition tells where or when.',
     pronoun: 'A pronoun stands in for a noun.',
     'number word': 'This word names a number.',
+    interjection: 'An interjection is a short word said on its own, to show a feeling or to greet someone.',
+    'geographical entry': 'This word is the name of a place.',
   };
 
   const TIER_1 = [
@@ -93,45 +109,45 @@
     ['parade', 'n', 'a line of people marching through the streets', 'The band marched in the parade.', 'French', 'schwa', 'a'],
     ['indoors', 'adv', 'inside a building', 'We played indoors because of the rain.', 'English', 'compound', 'oo'],
     ['finish', 'v', 'to come to the end', 'Please finish your lunch.', 'French', 'schwa', 'ish'],
-    ['stout', 'adj', 'thick and strong', 'A stout rope held the boat.', 'French', 'vowel-team', 'ou'],
+    ['stout', 'adj', 'brave and not easily scared', 'The stout knight stood up to the dragon.', 'French', 'vowel-team', 'ou'],
     ['mustard', 'n', 'a spicy yellow sauce', 'I put mustard on my sandwich.', 'French', 'schwa', 'ard'],
     ['narrow', 'adj', 'not wide', 'We walked down a narrow path.', 'Old English', 'double|vowel-team', 'rr'],
     ['hiking', 'v', 'taking a long walk in the country', 'We went hiking in the hills.', 'English', 'drop-e', 'k'],
-    ['source', 'n', 'where something comes from', 'This spring is the source of the river.', 'French', 'vowel-team|soft-cg', 'ou'],
-    ['beasts', 'n', 'large wild animals', 'The beasts roamed the forest.', 'French', 'vowel-team', 'ea'],
+    ['source', 'n', 'a book or paper where you find facts first-hand', 'The old letter was a useful source for her report.', 'French', 'vowel-team|soft-cg', 'ou'],
+    ['beasts', 'pn', 'fierce wild animals', 'The beasts roamed the forest.', 'French', 'vowel-team', 'ea'],
     ['grumpily', 'adv', 'in a cross, bad-tempered way', 'He grumpily got out of bed.', 'English', 'y-to-i|suffix', 'il'],
     ['humble', 'adj', 'not proud, not showing off', 'She stayed humble after she won.', 'French', 'le', 'ble'],
     ['distance', 'n', 'how far it is from one place to another', 'The distance to school is one mile.', 'French', 'soft-cg', 'ance'],
     ['frazzled', 'adj', 'tired and worn out', 'Dad felt frazzled after the long day.', 'English', 'double|drop-e', 'zz'],
-    ['lead', 'v', 'to show the way by going first', 'You lead and we will follow.', 'Old English', 'vowel-team', 'ea', { define: true }],
+    ['lead', 'n', 'a soft, heavy gray metal', 'Old water pipes were sometimes made of lead.', 'Old English', 'vowel-team|homophone', 'ea', { homo: 'led', define: true, say: 'led' }],
     ['knit', 'v', 'to make clothes from yarn and long needles', 'My aunt will knit me a scarf.', 'Old English', 'silent|homophone', 'kn', { homo: 'nit' }],
     ['holiday', 'n', 'a special day when people do not work', 'We visit family on every holiday.', 'Old English', 'compound|schwa', 'i'],
-    ['spiders', 'n', 'small animals with eight legs that spin webs', 'Two spiders spun webs in the barn.', 'Old English', 'er-or-ar', 'er'],
+    ['spiders', 'pn', 'small animals with eight legs that spin webs', 'Two spiders spun webs in the barn.', 'Old English', 'er-or-ar', 'er'],
     ['company', 'n', 'a group of people who run a business', 'My uncle works for a big company.', 'French', 'schwa|heart', 'o'],
     ['medium', 'adj', 'middle in size', 'I would like a medium shirt.', 'Latin', 'schwa', 'ium'],
     ['foolish', 'adj', 'silly and not wise', 'It was foolish to run on the ice.', 'English', 'suffix|vowel-team', 'oo'],
-    ['result', 'n', 'what happens because of something else', 'The result of the game surprised us.', 'Latin', 'schwa|prefix', 'u'],
-    ['pearls', 'n', 'smooth round gems that grow inside oysters', 'She wore a string of pearls.', 'French', 'vowel-team', 'ear'],
-    ['shivering', 'v', 'shaking from cold', 'We were shivering at the bus stop.', 'English', 'er-or-ar|schwa', 'er'],
+    ['result', 'v', 'to happen because of something else', 'Too much rain can result in a flood.', 'Latin', 'schwa|prefix', 'u'],
+    ['pearls', 'pn', 'smooth round gems that grow inside oysters', 'She wore a string of pearls.', 'French', 'vowel-team', 'ear'],
+    ['shivering', 'v', 'shaking from cold or fear', 'We were shivering at the bus stop.', 'English', 'er-or-ar|schwa', 'er'],
     ['smoothly', 'adv', 'in an even way, with no bumps', 'The boat sailed smoothly across the lake.', 'English', 'suffix|vowel-team', 'oo'],
-    ['seventy', 'num', 'the number after sixty-nine', 'My grandfather is seventy years old.', 'Old English', 'schwa|suffix', 'en'],
+    ['seventy', 'n', 'the number after sixty-nine', 'My grandfather is seventy years old.', 'Old English', 'schwa|suffix', 'en'],
     ['breeze', 'n', 'a light gentle wind', 'A cool breeze came off the sea.', 'Spanish', 'vowel-team', 'ee'],
     ['bamboo', 'n', 'a tall plant with hollow woody stems', 'Pandas eat bamboo all day.', 'Dutch', 'borrowed', 'oo'],
     ['groan', 'n', 'a long low sound of pain', 'He gave a groan when he saw the homework.', 'Old English', 'vowel-team|homophone', 'oa', { homo: 'grown' }],
     ['cloak', 'n', 'a loose coat with no sleeves', 'The wizard wore a long cloak.', 'French', 'vowel-team', 'oa'],
-    ['total', 'n', 'the whole amount', 'The total came to ten dollars.', 'Latin', 'le', 'al'],
+    ['total', 'adj', 'making up the whole amount', 'The total cost was ten dollars.', 'Latin', 'le', 'al'],
     ['relax', 'v', 'to rest and feel calm', 'I relax with a book after school.', 'Latin', 'q-x|prefix', 'x'],
     ['safety', 'n', 'being free from danger', 'Wear a helmet for safety.', 'French', 'suffix', 'fe'],
     ['entire', 'adj', 'whole, with nothing left out', 'We ate the entire cake.', 'French', 'heart', 'ire'],
-    ['ginger', 'n', 'a spicy root used in cooking', 'Amma adds ginger to the tea.', 'French', 'soft-cg|er-or-ar', 'gi'],
+    ['ginger', 'adj', 'a spicy root used in cooking', 'We baked ginger cookies.', 'French', 'soft-cg|er-or-ar', 'gi'],
     ['afraid', 'adj', 'feeling scared', 'My puppy is afraid of thunder.', 'French', 'vowel-team', 'ai'],
     ['charming', 'adj', 'very pleasant and delightful', 'They live in a charming little town.', 'French', 'suffix', 'ar'],
     ['tangy', 'adj', 'having a sharp, strong taste', 'The lemon sauce is tangy.', 'English', 'suffix', 'gy'],
     ['barge', 'n', 'a long flat boat for carrying loads', 'A barge carried coal down the river.', 'French', 'soft-cg', 'rge'],
-    ['cottage', 'n', 'a small house in the country', 'They stayed in a cottage by the lake.', 'French', 'double|soft-cg', 'tt'],
+    ['cottage', 'n', 'a small house, often used in summer', 'They stayed in a cottage by the lake.', 'French', 'double|soft-cg', 'tt'],
     ['dangle', 'v', 'to hang and swing loosely', 'My legs dangle over the edge of the dock.', 'Old Norse', 'le', 'gle'],
     ['soared', 'v', 'flew high in the air', 'The eagle soared over the valley.', 'French', 'vowel-team|homophone', 'oa', { homo: 'sored' }],
-    ['guide', 'n', 'a person who shows the way', 'Our guide led us through the caves.', 'French', 'silent', 'gu'],
+    ['guide', 'v', 'to show someone the way', 'Please guide me to the front door.', 'French', 'silent', 'gu'],
     ['hospital', 'n', 'a place where sick people are treated', 'My baby sister was born at the hospital.', 'Latin', 'le', 'al'],
     ['because', 'conj', 'for the reason that', 'I wore a coat because it was cold.', 'French', 'heart', 'au'],
     ['friend', 'n', 'someone you like and enjoy being with', 'My friend saved me a seat at lunch.', 'Old English', 'heart|ie-ei', 'ie', { hook: 'A friEND stays to the END.' }],
@@ -226,7 +242,7 @@
     ['comb', 'n', 'a tool for tidying hair', 'Use a comb after your bath.', 'Old English', 'silent', 'mb'],
     ['wrist', 'n', 'the joint between your arm and hand', 'She wore a watch on her wrist.', 'Old English', 'silent', 'wr'],
     ['castle', 'n', 'a large stone building with towers', 'The king lived in a castle.', 'Latin', 'silent|le', 't'],
-    ['whistle', 'n', 'a high sound made by blowing', 'The coach blew her whistle.', 'Old English', 'silent|le', 't'],
+    ['whistle', 'n', 'a small tube you blow into to make a high sound', 'The coach blew her whistle.', 'Old English', 'silent|le', 't'],
     ['sign', 'n', 'a board that gives information', 'The sign says stop.', 'French', 'silent', 'g'],
     ['honest', 'adj', 'always telling the truth', 'An honest child returned the lost wallet.', 'French', 'silent', 'h'],
     ['field', 'n', 'an open area of land', 'The cows ate grass in the field.', 'Old English', 'ie-ei', 'ie'],
@@ -285,7 +301,7 @@
     ['easily', 'adv', 'without any trouble', 'He easily lifted the box.', 'English', 'y-to-i', 'il'],
     ['stories', 'n', 'tales about people or events', 'Grandma tells the funniest stories.', 'French', 'y-to-i', 'ies'],
     ['hurried', 'v', 'moved or acted quickly', 'We hurried to catch the bus.', 'English', 'y-to-i|double', 'ied'],
-    ['pennies', 'n', 'coins worth one cent each', 'I saved fifty pennies in a jar.', 'Old English', 'y-to-i|double', 'ies'],
+    ['pennies', 'pn', 'coins worth one cent each', 'I saved fifty pennies in a jar.', 'Old English', 'y-to-i|double', 'ies'],
     ['worried', 'v', 'felt upset about what might happen', 'He worried about the math test.', 'Old English', 'y-to-i|double', 'ied'],
     ['copied', 'v', 'made another one just the same', 'I copied the words into my book.', 'French', 'y-to-i', 'ied'],
     ['funnier', 'adj', 'making you laugh more', 'This joke is funnier than the last one.', 'English', 'y-to-i|double', 'ier'],
@@ -699,29 +715,34 @@
     ['biography', 'n', 'the story of a real person\'s life', 'I read a biography of Gandhi.', 'Greek', 'roots|greek', 'ph'],
   ];
 
-  /** The 2026-2027 One Bee Study Words for Third Grade, in the sheet's order. */
-  const BEE_LIST = [
-    'illness', 'sloth', 'parade', 'indoors', 'finish', 'stout', 'library', 'mustard', 'narrow', 'hiking', 'remember', 'source', 'beasts', 'grumpily', 'humble', 'distance', 'frazzled',
-    'lead', 'knit', 'whistle', 'trouble', 'holiday', 'spiders', 'guide', 'company', 'medium', 'foolish', 'result', 'pearls', 'shivering', 'smoothly', 'seventy', 'breeze', 'bamboo',
-    'groan', 'cloak', 'total', 'relax', 'safety', 'entire', 'hospital', 'ginger', 'pennies', 'afraid', 'charming', 'tangy', 'barge', 'cottage', 'dangle', 'soared',
-  ];
+  /** The third-grade sheet: numbers 101 to 150 on the study list. */
+  const BEE_LIST = Object.keys(BEE_SHEET).filter((word) => BEE_SHEET[word][2] >= 101 && BEE_SHEET[word][2] <= 150);
+
+  /** Which of One Bee (1), Two Bee (2) or Three Bee (3) a number on the list belongs to. */
+  const studyOf = (num) => Math.ceil(num / 150);
 
   function toEntries(rows, tier) {
-    return rows.map(([word, pos, def, sentence, origin, patterns, tricky, extras]) => ({
-      word, pos: POS[pos], def, sentence, origin, patterns: patterns.split('|'), tricky, tier, list: BEE_LIST.includes(word), ...(extras || {}),
-    }));
+    return rows.map(([word, pos, def, sentence, origin, patterns, tricky, extras]) => {
+      const sheet = BEE_SHEET[word];
+      const study = sheet ? studyOf(sheet[2]) : 0;
+      return {
+        word, pos: POS[sheet ? sheet[0] : pos], def, sentence, origin, patterns: patterns.split('|'), tricky, tier: study || tier,
+        list: BEE_LIST.includes(word), ...(sheet ? { study, official: sheet[1] } : {}), ...(extras || {}),
+      };
+    });
   }
 
-  const WORDS = [...toEntries(TIER_1, 1), ...toEntries(TIER_2, 2), ...toEntries(TIER_3, 3)];
+  const studyRows = STUDY_ROWS.map(([word, ...rest]) => [word, BEE_SHEET[word][0], ...rest]);
+  const WORDS = [...toEntries(TIER_1, 1), ...toEntries(TIER_2, 2), ...toEntries(TIER_3, 3), ...toEntries(studyRows, 1)];
 
   /** Tier names, shown in My words. */
   const TIERS = {
-    1: { key: 'core', name: 'Core', icon: '🐣', note: 'more third grade' },
-    2: { key: 'stretch', name: 'Stretch', icon: '🐝', note: 'the next level' },
-    3: { key: 'champion', name: 'Champion', icon: '👑', note: 'the last rounds' },
+    1: { key: 'core', name: 'One Bee', icon: '🐣', note: 'the first 150' },
+    2: { key: 'stretch', name: 'Two Bee', icon: '🐝', note: 'the next 150' },
+    3: { key: 'champion', name: 'Three Bee', icon: '👑', note: 'the last 150' },
   };
 
-  const api = { WORDS, BEE_LIST, PATTERNS, ORIGIN_TIPS, POS_TIPS, TIERS };
+  const api = { WORDS, BEE_LIST, BEE_SHEET, POS, PATTERNS, ORIGIN_TIPS, POS_TIPS, TIERS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.KlgBeeWords = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -38,7 +38,7 @@
   /* ---------- the saved record ---------- */
 
   function emptyStore() {
-    return { words: {}, custom: [], focus: 'list', beeDate: '', best: {}, doneDay: 0, wins: 0 };
+    return { words: {}, custom: [], focus: 'list', levelFocus: '', beeDate: '', best: {}, doneDay: 0, wins: 0 };
   }
 
   /** Anything can be in storage: old, hand-edited or damaged. Keep only what makes sense. */
@@ -57,6 +57,7 @@
       store.custom = raw.custom.filter((c) => c && /^[a-z]+$/.test(c.word)).map((c) => ({ word: c.word, def: typeof c.def === 'string' ? c.def : '' }));
     }
     if (['list', 'core', 'stretch', 'champion', 'school'].includes(raw.focus)) store.focus = raw.focus;
+    if (['list', 'stretch'].includes(raw.levelFocus)) store.levelFocus = raw.levelFocus;
     if (dayFromIso(raw.beeDate) !== null) store.beeDate = raw.beeDate;
     if (raw.best && typeof raw.best === 'object') {
       ['class', 'school'].forEach((key) => {
@@ -67,6 +68,18 @@
     store.doneDay = Number(raw.doneDay) || 0;
     store.wins = Number(raw.wins) || 0;
     return store;
+  }
+
+  /**
+   * An age button puts its list in the address, and the address stays there every time the
+   * game opens. So it only counts when it changes: a list picked in My words afterwards, or
+   * a school's list, must not be undone by reopening the game. Returns true if it applied.
+   */
+  function applyLevelFocus(store, focus) {
+    if (!['list', 'stretch'].includes(focus) || focus === store.levelFocus) return false;
+    store.levelFocus = focus;
+    store.focus = focus;
+    return true;
   }
 
   /* ---------- spaced practice ---------- */
@@ -129,9 +142,11 @@
     return out;
   }
 
-  /** The words a bee list or school list puts first, or null when the focus is a plain tier. */
+  /** The words a focus puts first: the third-grade sheet, One, Two or Three Bee, or a school's list. */
   function focusList(store, words) {
     if (store.focus === 'list') return words.filter((w) => w.list);
+    const study = { core: 1, stretch: 2, champion: 3 }[store.focus];
+    if (study) return words.filter((w) => w.study === study);
     if (store.focus === 'school') {
       const onList = new Set(store.custom.map((c) => c.word));
       return words.filter((w) => onList.has(w.word));
@@ -139,9 +154,15 @@
     return null;
   }
 
-  /** The order new words are met in. After the bee list, the next level up is Stretch, not more of Core. */
+  /**
+   * The order new words are met in. After the third-grade list the next level is Two Bee,
+   * not the easier One Bee words. Within a level, study list words come before our own.
+   */
   function newWordOrder(words, store, rng) {
-    const tier = (n) => shuffled(words.filter((w) => w.tier === n), rng);
+    const tier = (n) => {
+      const inTier = shuffled(words.filter((w) => w.tier === n), rng);
+      return [...inTier.filter((w) => w.study), ...inTier.filter((w) => !w.study)];
+    };
     const orders = {
       list: [2, 3, 1, 0],
       core: [1, 2, 3, 0],
@@ -275,20 +296,39 @@
     return { right: false, kind: 'wrong' };
   }
 
+  /** What the voice is given. "lead" the metal must be said as "led", and "a cappella" as two words. */
+  function spoken(entry) {
+    return entry.say || entry.show || entry.word;
+  }
+
+  /** On stage and with a grown-up, the meaning a pronouncer reads. In practice, the simpler one. */
+  function meaningFor(entry, mode) {
+    return mode === 'train' ? entry.def : entry.official || entry.def;
+  }
+
   function display(entry) {
+    if (entry.show) return entry.show;
     return entry.cap ? entry.word[0].toUpperCase() + entry.word.slice(1) : entry.word;
+  }
+
+  /** The keys have letters only. Says what a speller would do on stage for a hyphen or a space. */
+  function stageNote(entry) {
+    const shown = display(entry);
+    if (shown.includes('-')) return `Here you tap only the letters. On stage, say "hyphen" in the right places: ${shown}.`;
+    if (shown.includes(' ')) return `Here you tap only the letters. On stage, pause between the two words: ${shown}.`;
+    return '';
   }
 
   /** The sentence with the word hidden, for reading: it must not give the spelling away. */
   function maskSentence(sentence, word) {
-    return String(sentence).replace(new RegExp(`\\b${word}\\b`, 'gi'), '_____');
+    return String(sentence).replace(new RegExp(`(?<![\\p{L}\\p{M}])${word}(?![\\p{L}\\p{M}])`, 'giu'), '_____');
   }
 
   /** The word split round its tricky part, for highlighting: [before, tricky, after]. */
   function splitTricky(entry) {
-    const at = entry.tricky ? entry.word.indexOf(entry.tricky) : -1;
-    if (at < 0) return [display(entry), '', ''];
     const shown = display(entry);
+    const at = entry.tricky ? shown.toLowerCase().indexOf(entry.tricky) : -1;
+    if (at < 0) return [shown, '', ''];
     return [shown.slice(0, at), shown.slice(at, at + entry.tricky.length), shown.slice(at + entry.tricky.length)];
   }
 
@@ -344,12 +384,13 @@
   /**
    * start/step set how often rivals spell correctly, so a bee lasts about as many
    * rounds as a small real one. onList is how many rounds use a pasted school list, and
-   * beeList how many use the third-grade list, before harder words: real bees also
-   * end with words from outside the study lists.
+   * beeList how many use the third-grade list, before harder words. Until studyRounds
+   * the words are from the study list for that round's level. After it they can be from
+   * outside the list, because real bees end that way.
    */
   const BEES = {
-    class: { key: 'class', name: 'Classroom Bee', icon: '🏫', rivals: 7, start: 0.92, step: 0.09, floor: 0.4, tierAt: (r) => (r <= 3 ? 1 : 2), vocab: [], onList: 5, beeList: 5 },
-    school: { key: 'school', name: 'School Bee', icon: '🏆', rivals: 11, start: 0.95, step: 0.06, floor: 0.4, tierAt: (r) => (r <= 3 ? 1 : r <= 6 ? 2 : 3), vocab: [3, 6, 9], onList: 7, beeList: 3 },
+    class: { key: 'class', name: 'Classroom Bee', icon: '🏫', rivals: 7, start: 0.92, step: 0.09, floor: 0.4, tierAt: (r) => (r <= 3 ? 1 : 2), vocab: [], onList: 5, beeList: 5, studyRounds: 6 },
+    school: { key: 'school', name: 'School Bee', icon: '🏆', rivals: 11, start: 0.95, step: 0.06, floor: 0.4, tierAt: (r) => (r <= 3 ? 1 : r <= 6 ? 2 : 3), vocab: [3, 6, 9], onList: 7, beeList: 3, studyRounds: 8 },
   };
 
   function isVocabRound(bee, round) {
@@ -371,6 +412,8 @@
     }
     const tier = bee.tierAt(round);
     const inTier = fresh.filter((w) => w.tier === tier);
+    const onStudyList = round <= bee.studyRounds ? inTier.filter((w) => w.study) : [];
+    if (onStudyList.length) return pick(onStudyList);
     if (inTier.length) return pick(inTier);
     return pick(fresh.length ? fresh : words);
   }
@@ -419,7 +462,7 @@
 
   const api = {
     STORE_KEY, SESSION_SIZE, PATTERN_SIZE, MASTERED_BOX, INTERVALS, RIVALS, BEES,
-    dayNumber, dayFromIso, emptyStore, normalizeStore, daysLeft, intervalFor, recordResult, stateOf, allWords,
+    spoken, meaningFor, stageNote, dayNumber, dayFromIso, emptyStore, normalizeStore, applyLevelFocus, daysLeft, intervalFor, recordResult, stateOf, allWords,
     planSession, planPattern, stats, dailyGoal, compare, judge, display, maskSentence, splitTricky, parseList,
     isVocabRound, rivalChance, pickMockWord, vocabQuestion, settleRound, ordinal, saveBest,
   };

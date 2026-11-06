@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   const store = loadStore();
-  // The level buttons at the top of the page choose which words come first.
-  if (['list', 'stretch'].includes(query.get('focus'))) store.focus = query.get('focus');
   function persist() {
     try {
       localStorage.setItem(Core.STORE_KEY, JSON.stringify(store));
     } catch (e) { /* blocked storage: the record lasts for this visit */ }
   }
+  // The level buttons at the top of the page choose which words come first.
+  if (Core.applyLevelFocus(store, query.get('focus'))) persist();
   const pool = () => Core.allWords(WORDS, store.custom);
 
   /* ---------- small helpers ---------- */
@@ -142,10 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function answerClue(kind, entry, mode, box) {
     const show = (text) => { box.textContent = text; };
     if (kind === 'meaning') {
-      show(`Meaning: ${entry.def}.`);
-      speak(entry.def);
+      show(`Meaning: ${Core.meaningFor(entry, mode)}.`);
+      speak(Core.meaningFor(entry, mode));
     } else if (kind === 'sentence') {
-      show(Core.maskSentence(entry.sentence, entry.word));
+      show(Core.maskSentence(entry.sentence, Core.display(entry)));
       speak(entry.sentence);
     } else if (kind === 'pos') {
       show(`${capitalize(entry.pos)}. ${mode === 'train' ? POS_TIPS[entry.pos] || '' : ''}`.trim());
@@ -207,12 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const ask = el('div', 'bee-ask');
     const hearRow = el('div', 'bee-hear-row');
-    const hear = iconButton('bee-hear', '🔊', 'Hear the word', () => speak(entry.word));
+    const hear = iconButton('bee-hear', '🔊', 'Hear the word', () => speak(Core.spoken(entry)));
     hear.id = 'bee-hear';
     hearRow.append(hear);
     // A real pronouncer will not say a word more slowly, so only practice offers that.
     if (mode === 'train') {
-      const slow = iconButton('bee-clue bee-slow', '🐢', 'Slowly', () => speak(entry.word, 0.5));
+      const slow = iconButton('bee-clue bee-slow', '🐢', 'Slowly', () => speak(Core.spoken(entry), 0.5));
       slow.dataset.clue = 'slow';
       hearRow.append(slow);
     }
@@ -287,16 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Rule 4: a word with a sound-alike is always defined, so the speller knows which one is meant.
     // So is a word that can be read two ways, in case the voice picks the other reading.
     if ((entry.homo || entry.define) && entry.def) {
-      clueText.textContent = `Meaning: ${entry.def}.`;
-      speak(`${entry.word}. ${entry.def}`);
+      clueText.textContent = `Meaning: ${Core.meaningFor(entry, mode)}.`;
+      speak(`${Core.spoken(entry)}. ${Core.meaningFor(entry, mode)}`);
     } else {
-      speak(entry.word);
+      speak(Core.spoken(entry));
     }
     // With no voice the clues have to carry the word.
     if (noVoice) {
       const parts = [];
-      if (entry.def) parts.push(`Meaning: ${entry.def}.`);
-      if (entry.sentence) parts.push(Core.maskSentence(entry.sentence, entry.word));
+      if (entry.def) parts.push(`Meaning: ${Core.meaningFor(entry, mode)}.`);
+      if (entry.sentence) parts.push(Core.maskSentence(entry.sentence, Core.display(entry)));
       clueText.textContent = parts.join(' ') || 'This word has no clues saved. Ask a grown-up to read it to you.';
     }
     window.scrollTo(0, 0);
@@ -418,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (verdict.kind === 'variant') feedback.append(el('p', 'bee-rule', `Your spelling counts. In the United States it is usually spelled ${Core.display(entry)}.`));
       feedback.append(typedDisplay(typed, entry));
       if (entry.def) feedback.append(el('p', 'bee-rule', `${Core.display(entry)}: ${entry.def}.`));
+      if (Core.stageNote(entry)) feedback.append(el('p', 'bee-rule', Core.stageNote(entry)));
       const next = nextButton();
       feedback.append(next);
       next.focus({ preventScroll: true });
@@ -439,6 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `That is a real word, but it means something else. Listen for the meaning: ${entry.def}.`
       : 'Not quite. Look closely.'));
     feedback.append(typedDisplay(typed, entry), wordDisplay(entry), patternTips(entry));
+    if (Core.stageNote(entry)) feedback.append(el('p', 'bee-rule', Core.stageNote(entry)));
     if (covers < 2) {
       const cover = button('bee-next', '🙈 Cover it and spell it', () => {
         renderTurn(entry, 'train', (again) => checkPractice(entry, again, covers + 1));
@@ -452,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
       feedback.append(next);
       next.focus({ preventScroll: true });
     }
-    speak(entry.word);
+    speak(Core.spoken(entry));
     reveal(feedback, feedback.querySelector('button'));
   }
 
@@ -536,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     question.append(el('b', '', Core.display(entry)), document.createTextNode(' mean?'));
     const hear = button('bee-hear', '🔊 Hear the question', () => say());
     hear.id = 'bee-hear';
-    const say = () => speak(`What does ${entry.word} mean? A: ${q.options[0]}. Or B: ${q.options[1]}.`);
+    const say = () => speak(`What does ${Core.spoken(entry)} mean? A: ${q.options[0]}. Or B: ${q.options[1]}.`);
     const feedback = el('div', 'bee-feedback');
     feedback.id = 'bee-feedback';
     feedback.setAttribute('aria-live', 'polite');
@@ -642,8 +644,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const words = el('div', 'bee-recap-word');
         words.append(wordDisplay(entry));
         if (entry.def) words.append(el('small', '', entry.def));
-        const say = button('kid-say', '🔊', () => speak(entry.word));
-        say.setAttribute('aria-label', `Hear ${entry.word}`);
+        const say = button('kid-say', '🔊', () => speak(Core.spoken(entry)));
+        say.setAttribute('aria-label', `Hear ${Core.display(entry)}`);
         row.append(words, say);
         const key = entry.patterns && entry.patterns[0];
         box.append(row);
@@ -727,10 +729,10 @@ document.addEventListener('DOMContentLoaded', () => {
     openView(`${oral.index + 1} / ${oral.queue.length}`, `⭐ ${oral.right}`);
     const word = el('div', 'bee-word bee-word-big', Core.display(entry));
     word.id = 'bee-oral-word';
-    const say = button('bee-hear', '🔊 Say it for me', () => speak(entry.word));
+    const say = button('bee-hear', '🔊 Say it for me', () => speak(Core.spoken(entry)));
     say.id = 'bee-hear';
     const facts = el('dl', 'bee-facts');
-    [['Meaning', entry.def], ['Sentence', entry.sentence], ['Part of speech', entry.pos], ['Origin', entry.origin]].forEach(([name, value]) => {
+    [['Meaning', Core.meaningFor(entry, 'oral')], ['In simple words', entry.official ? entry.def : ''], ['Sentence', entry.sentence], ['Part of speech', entry.pos], ['Origin', entry.origin]].forEach(([name, value]) => {
       if (value) facts.append(el('dt', '', name), el('dd', '', value));
     });
     const judgeRow = el('div', 'bee-judge');
@@ -793,9 +795,9 @@ document.addEventListener('DOMContentLoaded', () => {
       tile.append(el('span', 'bee-choice-pic', icon), el('b', '', name), el('small', '', note), el('small', '', `${row.mastered} of ${row.total} mastered`), bar);
       choose.append(tile);
     };
-    const beeList = words.filter((w) => w.list);
-    addTier('list', '🎯', 'Bee list', '2026–27 third grade', { total: beeList.length, mastered: beeList.filter((w) => Core.stateOf(store, w.word) === 'mastered').length });
-    [1, 2, 3].forEach((n) => addTier(TIERS[n].key, TIERS[n].icon, TIERS[n].name, TIERS[n].note, summary.tiers[n]));
+    const listRow = (list) => ({ total: list.length, mastered: list.filter((w) => Core.stateOf(store, w.word) === 'mastered').length });
+    addTier('list', '🎯', 'Third grade', '2026–27 study list', listRow(words.filter((w) => w.list)));
+    [1, 2, 3].forEach((n) => addTier(TIERS[n].key, TIERS[n].icon, TIERS[n].name, TIERS[n].note, listRow(words.filter((w) => w.study === n))));
     if (store.custom.length) {
       const onList = new Set(store.custom.map((c) => c.word));
       const row = { total: store.custom.length, mastered: words.filter((w) => onList.has(w.word) && Core.stateOf(store, w.word) === 'mastered').length };
@@ -807,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body.append(el('h2', 'bee-subhead', 'Tricky words'));
       const list = el('div', 'bee-chips');
       summary.tricky.slice(0, 12).forEach((entry) => {
-        const chip = button('bee-chip', `🔊 ${Core.display(entry)}`, () => speak(entry.word));
+        const chip = button('bee-chip', `🔊 ${Core.display(entry)}`, () => speak(Core.spoken(entry)));
         list.append(chip);
       });
       body.append(list);
@@ -854,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
       note.scrollIntoView({ block: 'nearest' });
     });
     save.id = 'bee-list-save';
-    const where = el('p', 'bee-rule', 'Paste the full study list from the teacher here, with the Two Bee and Three Bee words, or any other list the school uses.');
+    const where = el('p', 'bee-rule', 'Paste any other list the school uses here. The 2026–27 study list is already in the game.');
     body.append(listLabel, where, area, save, saved);
     const rules = button('bee-quiet', '📖 How a bee works', renderRules);
     body.append(rules);

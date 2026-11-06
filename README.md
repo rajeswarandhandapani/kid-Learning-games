@@ -553,19 +553,27 @@ page, and each removes the other's screens at start-up so ids stay unique.
 | --- | --- |
 | ▶ Play | Today's 10 words: words due first, then new ones |
 | 🔔 Mock Bee | A full bee on stage against animal rivals, Classroom (8 spellers) or School (12, with vocabulary rounds) |
-| 🧩 Patterns | 25 spelling rules, each with a 5-word practice |
+| 🧩 Patterns | 28 spelling rules, each with a 5-word practice |
 | 🗣️ Grown-up | The word and its clues on screen for a grown-up to read; the child spells out loud, because real bees are spoken |
 | 📋 My words | Progress, which words to learn first, the bee's date and a daily goal, and the school's own word list |
 
-**Words.** 603 words in `bee-words.js`. Training and the Mock Bee start with `BEE_LIST`,
-the 50 words on the 2026-2027 One Bee Study Words for Third Grade sheet from Scripps,
-supplied by a parent. The next level is our own Stretch tier (grades 4 to 6), then
-Champion (the last rounds), with Core as more third-grade practice. Those tiers stand in
-for the Two Bee and Three Bee lists, which were not supplied: paste the teacher's full
-450-word list into My words to practice the real ones. Each word has a meaning, a sentence,
-part of speech, origin, patterns and a highlighted tricky part, all written for this game.
-Words the voice could read two ways (read, tear, separate) are left out, except *lead*,
-which is on the list and always comes with its meaning.
+**Words.** 978 words. `bee-study.js` holds the 2026-2027 school spelling bee study list,
+all 450 words with their official part of speech and meaning, supplied by a parent. My words
+offers the 50 third-grade words (the default), One Bee (the first 150), Two Bee (the next 150)
+and Three Bee (the last 150). The list file does not label the three lists: they are taken
+from the third-grade sheet being numbers 101 to 150, and from difficulty starting over at 151
+and 301. Each list is followed by words of our own at that level from `bee-words.js`, because
+real bees end with words from outside the list, and any other list can be pasted into My words.
+
+Each word has a meaning, a sentence, part of speech, origin, patterns and a highlighted
+tricky part. Apart from the official part of speech and meaning, these are written for this
+game, so the origins are not official, and 11 uncertain ones are left out. The Mock Bee and
+Grown-up modes use the official meaning, as a pronouncer would, and practice uses simpler
+wording. Words the voice could read two ways (read, tear, separate) are left out unless they
+are on the study list. *wind*, *permit* and *lead* are, so their meaning is always given, and
+the voice is told "led" for *lead*, the metal. Eleven words have a hyphen, a space or an
+accent (*self-sufficient*, *a cappella*, *piñata*): the child taps only the letters, and sees
+and hears the word as it is written.
 
 **Typing.** Letters are typed on the game's own A to Z keys or a physical keyboard,
 never in a text box, because a phone keyboard would autocorrect the word.
