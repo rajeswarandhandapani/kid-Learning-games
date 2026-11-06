@@ -38,8 +38,10 @@ const lastSaid = (page) => page.evaluate(() => window.__said[window.__said.lengt
 const spokenAs = (word) => Core.spoken(byWord.get(word) || { word });
 const heardAs = new Map(WORDS.map((w) => [Core.spoken(w), w.word]));
 
-/** Listens to the word, the way a child would. */
+/** Listens to the word, the way a child would, after its study card if it is a new word. */
 async function hearWord(page) {
+ const ready = page.locator('#bee-study-go');
+ if (await ready.count()) await ready.click();
  await page.locator('#bee-hear').click();
  const said = await lastSaid(page);
  return heardAs.get(said) || said;
@@ -120,6 +122,79 @@ section('both modes have one of each id, and the older quiz still plays through'
  await close();
 });
 
+section('a new word is studied first, a returning word is not', async ({ newPage, fail, assert }) => {
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
+  await page.goto(URL_BEE);
+  await page.locator('#start-btn').click();
+  const seen = await page.evaluate(inView, '#bee-study-go');
+  if (!seen.ok) fail(`study card at ${w}x${h}: ready button ${seen.why}`);
+  for (const small of await page.evaluate(tooSmall)) fail(`study card at ${w}x${h}: ${small}`);
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) fail(`study card at ${w}x${h}: sideways scroll`);
+  await close();
+ }
+ const { page, close } = await newPage(390, 844);
+ await page.goto(URL_BEE);
+ await page.locator('#start-btn').click();
+ const shown = (await page.locator('#bee-body .bee-word').textContent()).toLowerCase();
+ assert.ok(byWord.has(shown), `${shown} is shown before it is spelled`);
+ assert.ok((await lastSaid(page)).startsWith(spokenAs(shown)), 'and is said');
+ assert.equal(await page.locator('.bee-key').count(), 0, 'no keys until the child is ready');
+ assert.equal(((await readStore(page)) || { words: {} }).words[shown], undefined, 'studying alone is not a result');
+ await page.locator('#bee-study-go').click();
+ assert.equal(await page.locator('#bee-body .bee-word').count(), 0, 'the word is covered for spelling');
+ assert.ok(await page.locator('.bee-key').first().isVisible());
+ await spell(page, shown);
+ assert.equal((await readStore(page)).words[shown].b, 1);
+ await page.evaluate(([k, word]) => {
+  const s = JSON.parse(localStorage.getItem(k));
+  s.words = { [word]: { b: 2, due: 0, tries: 1, miss: 0 } };
+  localStorage.setItem(k, JSON.stringify(s));
+ }, [KEY, shown]);
+ await page.goto(URL_BEE);
+ await page.locator('#start-btn').click();
+ assert.equal(await page.locator('#bee-study-go').count(), 0, 'a word that is due comes back with no study card');
+ assert.ok(await page.locator('.bee-key').first().isVisible());
+ await close();
+});
+
+section('every word on a list can be read, and reading changes no record', async ({ newPage, fail, assert }) => {
+ for (const [w, h] of SIZES) {
+  const { page, close } = await newPage(w, h);
+  await page.goto(URL_BEE);
+  await page.locator('#bee-words-btn').click();
+  await page.locator('#bee-read-words').click();
+  for (const small of await page.evaluate(tooSmall)) fail(`word list at ${w}x${h}: ${small}`);
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) fail(`word list at ${w}x${h}: sideways scroll`);
+  await close();
+ }
+ const { page, close } = await newPage(390, 844);
+ await page.goto(URL_BEE);
+ await page.locator('#bee-words-btn').click();
+ await page.locator('#bee-read-words').click();
+ assert.equal(await page.locator('.bee-wordrow').count(), WORDS.filter((w) => w.list).length, 'the third grade list first');
+ assert.equal(await page.locator('.bee-list-tabs [aria-pressed=true]').getAttribute('data-list'), 'list');
+ await page.locator('.bee-list-tabs [data-list="champion"]').click();
+ assert.equal(await page.locator('.bee-wordrow').count(), WORDS.filter((w) => w.study === 3).length);
+ const row = page.locator('.bee-wordrow').nth(20);
+ await row.scrollIntoViewIfNeeded();
+ const word = await row.getAttribute('data-word');
+ const listScroll = await page.evaluate(() => scrollY);
+ await row.click();
+ assert.equal((await page.locator('#bee-body .bee-word').textContent()).toLowerCase(), Core.display(byWord.get(word)).toLowerCase());
+ assert.equal(await lastSaid(page), spokenAs(word));
+ await page.locator('#bee-word-next').click();
+ assert.equal(await lastSaid(page), spokenAs(WORDS.filter((w) => w.study === 3)[21].word), 'Next word moves down the list');
+ await page.locator('#bee-back').click();
+ assert.equal(await page.locator('.bee-list-tabs [aria-pressed=true]').getAttribute('data-list'), 'champion', 'Back returns to the same list');
+ assert.equal(await page.evaluate(() => scrollY), listScroll, 'at the same place');
+ await page.locator('#bee-back').click();
+ assert.ok(await page.locator('#bee-read-words').isVisible(), 'and then to My words');
+ const store = await readStore(page);
+ assert.deepEqual(store ? store.words : {}, {}, 'reading is not practice');
+ await close();
+});
+
 section('a right answer: the word is scheduled, and the way on is in view', async ({ newPage, assert }) => {
  const { page, close } = await newPage(390, 844);
  await page.goto(URL_BEE);
@@ -134,8 +209,8 @@ section('a right answer: the word is scheduled, and the way on is in view', asyn
  assert.equal((await page.evaluate(inView, '#bee-next')).ok, true);
  assert.equal(await page.locator('#bee-entry').isVisible(), false, 'the keys go away');
  const saved = (await readStore(page)).words[word];
- assert.equal(saved.b, 2, 'right first time');
- assert.equal(saved.due, Core.dayNumber() + 3);
+ assert.equal(saved.b, 1, 'right straight after its study card only shows it was just seen');
+ assert.equal(saved.due, Core.dayNumber() + 1);
  assert.equal(await page.locator('#bee-pill').textContent(), '⭐ 1');
  await page.locator('#bee-next').click();
  assert.equal(await page.locator('#bee-progress').textContent(), '2 / 10');

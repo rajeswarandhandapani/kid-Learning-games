@@ -54,7 +54,7 @@ The home page has one job per view. The address hash picks the view, so the Back
 
 | View | Address | What it shows |
 | ---- | ------- | ------------- |
-| Home | none | **▶ Play next**, **🔁 Try again** when questions are due, and six picture tiles |
+| Home | none | **▶ Play next**, **🔁 Try again** when questions are due, rank and streak, and six picture tiles showing each subject's progress |
 | Subject | `#world/math` | All of that subject's games, easiest first, each showing the ages it suits |
 | Favorites | `#world/favorites` | Games marked with a heart |
 | My stars | `#me` | Rank, XP, streak and badges |
@@ -69,7 +69,7 @@ Nobody is asked their age, and progress is shared on one device. `gamesFor`, `ne
 - **Play screen:** back, progress and score on one row, with the speaker beside the question. Feedback scrolls into view and **Next** sticks to the bottom of the screen.
 - **Finish:** **▶ Next game**, Play again and Home come before any list of missed questions.
 
-The colours and sizes are the `Kid theme` section at the end of `assets/css/common.css`. `npm run test:ux` holds the layout to numbers at five screen sizes, so it cannot quietly slip back.
+The colours and sizes are the `Kid theme` section at the end of `assets/css/common.css`: a twilight storybook, with a sky in each subject's colour and gold for anything that means "go". The pictures (sky, hills, the owl and one scene per subject) are SVG files in `assets/art`, saved for offline use like everything else. `npm run test:ux` holds the layout to numbers at five screen sizes, so it cannot quietly slip back.
 
 ### Review My Mistakes
 
@@ -551,10 +551,10 @@ page, and each removes the other's screens at start-up so ids stay unique.
 
 | Mode | What it does |
 | --- | --- |
-| ▶ Play | Today's 10 words: words due first, then new ones |
+| ▶ Play | Today's 10 words: words due first, then new ones. Each new word gets a study card first |
 | 🔔 Mock Bee | A full bee on stage against animal rivals, Classroom (8 spellers) or School (12, with vocabulary rounds) |
-| 🧩 Patterns | 28 spelling rules, each with a 5-word practice |
-| 🗣️ Grown-up | The word and its clues on screen for a grown-up to read; the child spells out loud, because real bees are spoken |
+| 🧩 Spelling rules | 28 spelling rules, each with a 5-word practice |
+| 🗣️ Spell aloud | The word and its clues on screen for a grown-up to read; the child spells out loud, because real bees are spoken |
 | 📋 My words | Progress, which words to learn first, the bee's date and a daily goal, and the school's own word list |
 
 **Words.** 978 words. `bee-study.js` holds the 2026-2027 school spelling bee study list,
@@ -577,6 +577,8 @@ and hears the word as it is written.
 
 **Typing.** Letters are typed on the game's own A to Z keys or a physical keyboard,
 never in a text box, because a phone keyboard would autocorrect the word.
+
+**Studying.** A new word opens on a card with its spelling, tricky part, sound, meaning, sentence and tip, then it is covered for spelling. A word that comes back has no card, because remembering it unaided is what makes it stick. Right straight after a card brings the word back the next day, not after 3 days, since it only shows the word was just seen. **Read the words** in My words shows every word on a list, and reading changes no record.
 
 **Practice.** After a miss the child sees the word, covers it and spells it again,
 and it returns at the end of the round. Words come back after 1, 3, 7, 14 and 30

@@ -194,6 +194,9 @@ test('a word comes back on a spaced schedule', () => {
  const s = store();
  Core.recordResult(s, 'because', true, TODAY);
  assert.deepEqual(s.words.because, { b: 2, due: TODAY + 3, tries: 1, miss: 0 }, 'right first time waits three days');
+ Core.recordResult(s, 'people', true, TODAY, true);
+ assert.deepEqual(s.words.people, { b: 1, due: TODAY + 1, tries: 1, miss: 0 }, 'right straight after its study card comes back tomorrow');
+ delete s.words.people;
  Core.recordResult(s, 'friend', false, TODAY);
  assert.deepEqual(s.words.friend, { b: 1, due: TODAY + 1, tries: 1, miss: 1 }, 'a miss returns tomorrow');
  Core.recordResult(s, 'because', true, TODAY + 3);

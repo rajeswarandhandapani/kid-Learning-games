@@ -8,11 +8,22 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-dbe967db5f21";
+const CACHE = "klg-a48f2e52e730";
 const FILES = [
  "./",
  "./index.html",
  "./manifest.webmanifest",
+ "./assets/art/clouds.svg",
+ "./assets/art/hills.svg",
+ "./assets/art/moon.svg",
+ "./assets/art/owl.svg",
+ "./assets/art/stars.svg",
+ "./assets/art/world-english.svg",
+ "./assets/art/world-favorites.svg",
+ "./assets/art/world-logic.svg",
+ "./assets/art/world-math.svg",
+ "./assets/art/world-science.svg",
+ "./assets/art/world-tamil.svg",
  "./assets/audio/tamil/0b83.mp3",
  "./assets/audio/tamil/0b85-0b95-0bcd-0b9f-0bcb-0baa-0bb0-0bcd.mp3",
  "./assets/audio/tamil/0b85-0ba3-0bbf-0bb2-0bcd.mp3",

@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progress = $('bee-progress');
   const pill = $('bee-pill');
   let turn = null;
+  let backAction = null; // Where ⬅ Back goes, when it is not the start screen.
 
   function showScreen(which) {
     turn = null;
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pill.textContent = pillText || '';
     pill.hidden = !pillText;
     body.replaceChildren();
+    backAction = null;
   }
 
   function goHome() {
@@ -364,13 +366,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return box;
   }
 
+  /** A word to learn: the spelling, the sound of it, what it means and how to remember it. */
+  function appendStudyCard(entry) {
+    const word = wordDisplay(entry);
+    word.classList.add('bee-word-big');
+    body.append(el('p', 'bee-coachline', 'Look at it. Listen. Say it out loud.'), word);
+    const hearRow = el('div', 'bee-hear-row');
+    const hear = iconButton('bee-hear', '🔊', 'Hear it', () => speak(Core.spoken(entry)));
+    hear.id = 'bee-study-hear';
+    hearRow.append(hear, iconButton('bee-clue bee-slow', '🐢', 'Slowly', () => speak(Core.spoken(entry), 0.5)));
+    body.append(hearRow);
+    if (entry.def) body.append(el('p', 'bee-rule bee-study-line', `📖 ${capitalize(entry.def)}.`));
+    if (entry.sentence) body.append(el('p', 'bee-rule bee-study-line', `💬 ${entry.sentence}`));
+    body.append(patternTips(entry));
+    speak(Core.spoken(entry));
+  }
+
   /* ---------- practice: a round of words ---------- */
   let session = null;
 
   function startSession(entries, options) {
     session = {
       queue: [...entries], total: entries.length, index: 0, score: 0, streak: 0, bestStreak: 0,
-      firstMissed: [], returned: new Set(), seen: new Set(), daily: !!options.daily, again: options.again, title: options.title,
+      firstMissed: [], returned: new Set(), seen: new Set(), studied: new Set(), daily: !!options.daily, again: options.again, title: options.title,
     };
     mock = null;
     nextWord();
@@ -380,8 +398,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (session.index >= session.queue.length) return finishSession();
     const entry = session.queue[session.index];
     openView(`${session.index + 1} / ${session.queue.length}`, `⭐ ${session.score}`);
-    renderTurn(entry, 'train', (typed) => checkPractice(entry, typed, 0));
+    const spellIt = () => renderTurn(entry, 'train', (typed) => checkPractice(entry, typed, 0));
+    // A new word is learned before it is tested. A word coming back is not shown first:
+    // remembering it unaided is what makes it stick.
+    if (store.words[entry.word]) spellIt();
+    else renderStudy(entry, spellIt);
     return undefined;
+  }
+
+  function renderStudy(entry, spellIt) {
+    session.studied.add(entry.word);
+    appendStudyCard(entry);
+    const go = button('bee-next bee-study-go', "✏️ I'm ready to spell", spellIt);
+    go.id = 'bee-study-go';
+    body.append(go);
+    go.focus({ preventScroll: true });
   }
 
   function nextButton() {
@@ -402,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
     feedback.replaceChildren();
 
     if (first) {
-      Core.recordResult(store, entry.word, verdict.right, today);
+      Core.recordResult(store, entry.word, verdict.right, today, session.studied.has(entry.word));
       persist();
     }
     if (verdict.right) {
@@ -464,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     persist();
     const note = firstMissed.length
       ? `${score} of ${total} right first time. ${firstMissed.length === 1 ? 'The tricky word comes' : 'The tricky words come'} back tomorrow.`
-      : 'All right first time! These words come back in a few days to make sure they stick.';
+      : 'All right first time! These words come back soon to make sure they stick.';
     showFinish({ score, total, note, recap: firstMissed, recapTitle: 'Tricky words', bestStreak: session.bestStreak, mode: 'training', again: session.again });
   }
 
@@ -770,12 +801,71 @@ document.addEventListener('DOMContentLoaded', () => {
     return goal.fresh ? `${days} Learn ${goal.perDay} new ${goal.perDay === 1 ? 'word' : 'words'} a day to meet all ${goal.scope}.` : `${days} You have met every word in this set. Keep practicing, and run a Mock Bee.`;
   }
 
+  /** The word lists, in the order they are offered. The school's own is there once it has been pasted in. */
+  function wordLists() {
+    const words = pool();
+    const lists = [{ key: 'list', icon: '🎯', name: 'Third grade', note: '2026–27 study list', words: words.filter((w) => w.list) }];
+    [1, 2, 3].forEach((n) => lists.push({ ...TIERS[n], words: words.filter((w) => w.study === n) }));
+    if (store.custom.length) {
+      const onList = new Set(store.custom.map((c) => c.word));
+      lists.push({ key: 'school', icon: '🏫', name: 'My school list', note: 'your bee', words: words.filter((w) => onList.has(w.word)) });
+    }
+    return lists;
+  }
+
+  /** Every word on a list, to read and learn at any time. Reading one changes nothing in the record. */
+  function renderWordList(key, scrollTo) {
+    const lists = wordLists();
+    const list = lists.find((l) => l.key === key) || lists[0];
+    openView('📖 Read the words');
+    backAction = renderMyWords;
+    const tabs = el('div', 'bee-chips bee-list-tabs');
+    tabs.setAttribute('role', 'group');
+    tabs.setAttribute('aria-label', 'Which words to read');
+    lists.forEach((l) => {
+      const tab = button('bee-chip', `${l.icon} ${l.name}`, () => renderWordList(l.key));
+      tab.dataset.list = l.key;
+      tab.setAttribute('aria-pressed', String(l === list));
+      tabs.append(tab);
+    });
+    const rows = el('div', 'bee-wordlist');
+    list.words.forEach((entry, index) => {
+      const row = button('bee-wordrow', '', () => renderWordCard(list, index, window.scrollY));
+      row.dataset.word = entry.word;
+      const mastered = Core.stateOf(store, entry.word) === 'mastered';
+      row.append(el('b', '', `${mastered ? '✅ ' : ''}${Core.display(entry)}`));
+      if (entry.def) row.append(el('small', '', entry.def));
+      rows.append(row);
+    });
+    body.append(tabs, el('p', 'bee-rule', `${list.words.length} words. Tap one to see it and hear it.`), rows);
+    if (scrollTo) window.scrollTo(0, scrollTo);
+  }
+
+  function renderWordCard(list, index, listScroll) {
+    const entry = list.words[index];
+    openView(`${list.icon} ${index + 1} / ${list.words.length}`);
+    backAction = () => renderWordList(list.key, listScroll);
+    appendStudyCard(entry);
+    if (index + 1 < list.words.length) {
+      const next = button('bee-next bee-study-go', 'Next word ▶', () => renderWordCard(list, index + 1, listScroll));
+      next.id = 'bee-word-next';
+      body.append(next);
+      next.focus({ preventScroll: true });
+    }
+  }
+
   function renderMyWords() {
     openView('📋 My words');
     const words = pool();
     const summary = Core.stats(store, words, today);
     const count = (n) => `${n} ${n === 1 ? 'word' : 'words'}`;
     body.append(el('p', 'bee-lead', `Mastered: ${count(summary.all.mastered)}. On the way: ${count(summary.all.learning)}. A word is mastered when you spell it right on three different days.`));
+
+    const focusKey = wordLists().some((l) => l.key === store.focus) ? store.focus : 'list';
+    const read = button('bee-choice', '', () => renderWordList(focusKey));
+    read.id = 'bee-read-words';
+    read.append(el('span', 'bee-choice-pic', '📖'), el('b', '', 'Read the words'), el('small', '', 'See and hear every word'));
+    body.append(read);
 
     const choose = el('div', 'bee-tiers');
     choose.setAttribute('role', 'group');
@@ -795,14 +885,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tile.append(el('span', 'bee-choice-pic', icon), el('b', '', name), el('small', '', note), el('small', '', `${row.mastered} of ${row.total} mastered`), bar);
       choose.append(tile);
     };
-    const listRow = (list) => ({ total: list.length, mastered: list.filter((w) => Core.stateOf(store, w.word) === 'mastered').length });
-    addTier('list', '🎯', 'Third grade', '2026–27 study list', listRow(words.filter((w) => w.list)));
-    [1, 2, 3].forEach((n) => addTier(TIERS[n].key, TIERS[n].icon, TIERS[n].name, TIERS[n].note, listRow(words.filter((w) => w.study === n))));
-    if (store.custom.length) {
-      const onList = new Set(store.custom.map((c) => c.word));
-      const row = { total: store.custom.length, mastered: words.filter((w) => onList.has(w.word) && Core.stateOf(store, w.word) === 'mastered').length };
-      addTier('school', '🏫', 'My school list', 'your bee', row);
-    }
+    wordLists().forEach((l) => addTier(l.key, l.icon, l.name, l.note, {
+      total: l.words.length,
+      mastered: l.words.filter((w) => Core.stateOf(store, w.word) === 'mastered').length,
+    }));
     body.append(el('h2', 'bee-subhead', 'Learn first'), choose);
 
     if (summary.tricky.length) {
@@ -890,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   $('start-btn').addEventListener('click', startToday);
-  $('bee-back').addEventListener('click', goHome);
+  $('bee-back').addEventListener('click', () => (backAction || goHome)());
   $('bee-mock-btn').addEventListener('click', renderMockIntro);
   $('bee-patterns-btn').addEventListener('click', renderPatterns);
   $('bee-oral-btn').addEventListener('click', renderOralIntro);

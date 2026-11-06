@@ -12,7 +12,7 @@
   />
   <link href="assets/css/common.css" rel="stylesheet" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#203e45" />
+  <meta name="theme-color" content="#1b1250" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Little Learners" />
@@ -21,13 +21,14 @@
 </head>
 <body class="learning-home">
   <a class="skip-link" href="#main">Skip to games</a>
+  <div class="kid-clouds" aria-hidden="true"></div>
   <header class="kid-top">
-    <a class="kid-logo" href="#home" aria-label="Little Learners home"><span aria-hidden="true">🎓</span><b>Little Learners</b></a>
+    <a class="kid-logo" href="#home" aria-label="Little Learners home"><img src="assets/art/owl.svg" alt="" width="46" height="46"><b>Little Learners</b></a>
     <a class="kid-chip" id="stars-chip" href="#me"></a>
   </header>
   <main id="main" class="kid-main">
     <section class="kid-view" data-view="home" hidden>
-      <div class="kid-title"><h1 tabindex="-1">What shall we play?</h1><span id="home-title-say"></span></div>
+      <div class="kid-title kid-hello"><img class="kid-owl" src="assets/art/owl.svg" alt="" width="84" height="84"><div class="kid-bubble"><h1 tabindex="-1">What shall we play?</h1><span id="home-title-say"></span></div></div>
       <div id="play-next-wrap" class="kid-next-wrap">
         <a id="play-next" class="kid-play-next" href="#"><span class="kid-play-arrow" aria-hidden="true">▶</span><span class="kid-play-words"><b>Play next</b><small id="play-next-name"></small></span><span id="play-next-pic" class="kid-play-pic" aria-hidden="true"></span></a>
       </div>
@@ -36,6 +37,7 @@
         <div><div id="review-count" class="fw-bold"></div><div id="review-note" class="small"></div></div>
         <a id="review-link" class="kid-review-go" href="#">🔁 Try again</a>
       </div>
+      <div id="home-level" class="kid-levelcard"></div>
       <div id="worlds" class="kid-worlds"></div>
       <div class="kid-row">
         <a id="daily-link" class="kid-soft" href="#"><small>Today’s game</small><span id="daily-name"></span></a>
@@ -181,7 +183,7 @@
       </nav>
     </noscript>
   </main>
-  <footer class="home-footer"><button class="kid-quiet parent-link" id="parent-open">For grown-ups</button><span>Progress stays on this device. No account needed.</span></footer>
+  <footer class="home-footer"><button class="kid-quiet parent-link" id="parent-open">For grown-ups</button><span>Progress stays on this device.</span></footer>
   <dialog id="parent-dialog"><div class="dialog-heading"><h2>For grown-ups</h2><button id="parent-close" aria-label="Close grown-up information">✕</button></div><p>Your child chooses an age on the first visit, and the games follow it. Ages are a guide, not a limit: tap the age at the top of the page, or Easier and Harder under a subject's games, to change it. <a id="see-all-grownup" href="#all">See and search all 80 games</a>.</p><h3>Learning without pressure</h3><p>Every game starts in untimed practice. Children can read feedback and move on when ready. A timed challenge is optional, under More ways to play.</p><h3>Progress &amp; privacy</h3><p>Stars, favorites, and achievements are saved in this browser. They are not synced between devices. Clearing browser data removes them.</p><h3>Use it offline</h3><p>Every game, picture and Tamil recording is saved on this device the first time you visit, so the games keep working without internet. On an iPad or iPhone, tap Share → <b>Add to Home Screen</b> to open it like an app.</p><p id="offline-status" class="small"></p><p id="parent-summary"></p><div id="parent-report"></div><button id="reset-progress" class="reset-button">Reset learning progress</button><p class="small">This removes earned progress on this browser after confirmation.</p><h3>Badges</h3><div id="parent-badge-list" class="parent-badges"></div></dialog>
   <script src="assets/js/sounds.js"></script>
   <script src="assets/js/catalogue.js"></script>

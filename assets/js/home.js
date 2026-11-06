@@ -2,7 +2,7 @@
  * The home page: one job per view, so a child who cannot read yet can still get
  * to a game. The address hash picks the view, so the Back button and links work.
  *
- *   (none)        ▶ Play next, 🔁 Try again when due, six picture tiles
+ *   (none)        ▶ Play next, 🔁 Try again when due, rank and streak, six picture tiles with progress
  *   #world/math   that subject's games, easiest first
  *   #world/favorites  the games marked with a heart
  *   #me           rank, XP, streak and badges
@@ -233,7 +233,7 @@
       link.className = "kid-world-link";
       link.href = "#world/" + key;
       link.setAttribute("aria-label", words);
-      link.innerHTML = '<span class="kid-world-icon" aria-hidden="true">' + esc(icon) + "</span><b></b>";
+      link.innerHTML = '<span class="kid-world-icon" aria-hidden="true">' + esc(icon) + '</span><b></b><span class="kid-world-count" aria-hidden="true"></span>';
       link.querySelector("b").textContent = name;
       tile.append(link, speaker(words));
       box.appendChild(tile);
@@ -245,8 +245,35 @@
     add("favorites", "Favorites", "♥", "Favorites", { world: "favorites" });
   }
 
+  /** How many of a subject's games have a star: { done, total }. */
+  function subjectProgress(key) {
+    const list = KlgCatalogue.gamesFor(key);
+    return { done: list.filter((g) => summary.games[g.id] && summary.games[g.id].bestStars > 0).length, total: list.length };
+  }
+
+  function progressHtml(key) {
+    const p = subjectProgress(key);
+    return "⭐ " + p.done + "/" + p.total + '<span class="kid-world-bar"><i style="width:' + Math.round((p.done / p.total) * 100) + '%"></i></span>';
+  }
+
+  function paintWorldCounts() {
+    document.querySelectorAll(".kid-world").forEach((tile) => {
+      tile.querySelector(".kid-world-count").innerHTML = tile.dataset.subject ? progressHtml(tile.dataset.subject) : "♥ " + favorites.length;
+    });
+  }
+
+  /** The rank, how far to the next one, and the numbers a child is proud of. */
+  function paintLevel() {
+    const rank = summary.rank;
+    const fill = rank.next ? Math.min(100, ((summary.xp - rank.min) / (rank.next.min - rank.min)) * 100) : 100;
+    $("home-level").innerHTML = '<span class="kid-levelcard-pic" aria-hidden="true">' + rank.emoji + '</span><div class="kid-levelcard-rank"><b>' + esc(rank.name) + '</b><div class="kid-xp"><i style="width:' + fill + '%"></i></div></div>' +
+      '<div class="kid-levelcard-stats"><span>🔥 ' + summary.dayStreak + "</span><span>🎮 " + summary.plays + "</span><span>🏅 " + Object.keys(summary.badges).length + "</span></div>";
+  }
+
   function renderHome() {
     const cat = window.KlgCatalogue;
+    paintWorldCounts();
+    paintLevel();
     const next = cat.nextFor(summary.games, readPref("klg-path", ""));
     if (next) {
       $("play-next").setAttribute("href", "games/" + next.id + "/index.html");

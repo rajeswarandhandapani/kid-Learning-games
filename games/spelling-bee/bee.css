@@ -1,6 +1,8 @@
 /* Spelling Bee training. Colours come from the kid theme in common.css. */
 .bee-modes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; max-width:420px; margin:12px auto 4px; }
-.bee-mode { min-height:64px; padding:8px; border:3px solid var(--kid-accent); border-radius:18px; background:#fff; color:var(--kid-accent); font-size:1.05rem; font-weight:800; line-height:1.15; box-shadow:0 3px 0 var(--kid-line); }
+/* Filled, with the picture on top, so these read as places to go and not as more settings like the ages. */
+.bee-mode { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:76px; padding:8px; border:0; border-radius:20px; background:var(--kid-accent-soft); color:var(--kid-ink); font-size:1.02rem; font-weight:800; line-height:1.15; box-shadow:0 4px 0 var(--kid-line); }
+.bee-mode span { font-size:1.6rem; line-height:1.1; }
 .bee-mode:active { transform:translateY(2px); box-shadow:none; }
 .bee-levels-title { margin:0 0 6px; font-size:1rem; font-weight:700; }
 
@@ -50,8 +52,18 @@
 .bee-tips { max-width:620px; margin:6px auto; }
 .bee-hook, .bee-rule { margin:6px 0; color:var(--kid-ink); font-size:1.02rem; line-height:1.4; text-align:center; }
 .bee-hook { font-weight:800; }
-.bee-next { display:block; width:100%; max-width:420px; min-height:64px; margin:10px auto 4px; padding:8px 16px; border:0; border-radius:20px; background:var(--kid-accent); color:#fff; font-size:1.3rem; font-weight:800; box-shadow:0 5px 0 #00000040; }
-.bee-next:active { transform:translateY(3px); box-shadow:0 2px 0 #00000040; }
+.bee-next { display:block; width:100%; max-width:420px; min-height:64px; margin:10px auto 4px; padding:8px 16px; border:0; border-radius:20px; background-color:var(--kid-gold); background-image:var(--kid-gold-shine); color:var(--kid-gold-ink); font-size:1.3rem; font-weight:800; box-shadow:0 6px 0 var(--kid-gold-edge); }
+.bee-next:active { transform:translateY(3px); box-shadow:0 2px 0 var(--kid-gold-edge); }
+/* The study card can be long on a phone: the way on stays in view. */
+.bee-study-go { position:sticky; bottom:10px; z-index:5; }
+.bee-study-line { max-width:620px; margin-left:auto; margin-right:auto; font-size:1.1rem; }
+.bee-list-tabs { justify-content:center; margin-bottom:6px; }
+.bee-chip[aria-pressed=true] { background:var(--kid-accent); color:#fff; }
+.bee-wordlist { display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+.bee-wordrow { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; min-height:60px; padding:8px 14px; border:0; border-radius:16px; background:var(--kid-accent-soft); color:var(--kid-ink); text-align:left; line-height:1.25; }
+.bee-wordrow b { font-size:1.2rem; font-weight:800; overflow-wrap:anywhere; }
+.bee-wordrow small { color:var(--kid-muted); font-size:.98rem; font-weight:600; }
+.bee-wordrow:active { transform:translateY(2px); }
 .bee-quiet { display:block; min-height:48px; margin:10px auto 0; padding:8px 16px; border:0; background:transparent; color:var(--kid-accent); font-size:1.05rem; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
 
 .bee-stage { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; margin-bottom:8px; }
@@ -103,6 +115,7 @@
   .bee-key { min-height:50px; }
   .bee-clues { grid-template-columns:repeat(4,minmax(0,1fr)); }
   .bee-pattern-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .bee-wordlist { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .bee-tiers { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .bee-modes { grid-template-columns:repeat(4,minmax(0,1fr)); max-width:640px; }
 }

@@ -88,6 +88,7 @@
     const current = currentLevel(keys);
     const row = make("nav", "kid-levels");
     row.setAttribute("aria-label", "Choose a level");
+    row.append(make("span", "kid-levels-label", "Age"));
     game.levels.forEach((level) => {
       const info = KlgCatalogue.LEVELS[level.band];
       const next = new URLSearchParams(location.search);

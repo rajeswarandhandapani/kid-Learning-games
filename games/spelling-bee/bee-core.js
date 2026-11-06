@@ -96,12 +96,13 @@
     return Math.min(usual, Math.max(1, Math.ceil(left / 2)));
   }
 
-  function recordResult(store, word, right, today) {
+  function recordResult(store, word, right, today, studied) {
     const left = daysLeft(store, today);
     const state = store.words[word];
     if (!state) {
       // Right the very first time: probably known already, so it waits longer.
-      const box = right ? 2 : 1;
+      // Not straight after its study card, though: that only shows it was just seen.
+      const box = right && !studied ? 2 : 1;
       store.words[word] = { b: box, due: today + intervalFor(box, left), tries: 1, miss: right ? 0 : 1 };
       return store.words[word];
     }
