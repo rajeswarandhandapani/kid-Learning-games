@@ -48,6 +48,19 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
     assert.ok(playing > 0, `${path} plays offline`);
     console.log('PASS offline:', path);
   }
+  // A review round is played from saved data alone.
+  await page.goto(`${base}/games/counting/index.html`);
+  await page.evaluate(() => localStorage.setItem('klg-review-v1', JSON.stringify({ epoch: 1, cleared: 0, items: [
+    { id: 'counting||x', gameId: 'counting', query: '', snapshot: { prompt: 'How many?', correctAnswer: 3, choices: [3, 4], dedupeKey: 'x' }, step: 0, due: '2000-01-01', misses: 1 },
+  ] })));
+  await page.goto(base + '/index.html');
+  assert.ok(await page.locator('#review-card').isVisible(), 'the review card shows offline');
+  await page.locator('#review-link').click();
+  await page.locator('#start-btn').click();
+  await page.locator('.quiz-choice-btn[data-answer="3"]').click();
+  await page.locator('.quiz-next').click();
+  await page.locator('#klg-review-home').waitFor();
+  console.log('PASS offline: a review round');
   // Recorded Tamil audio and the emoji font come from the saved copy.
   await page.goto(`${base}/games/tamil-days-colours/index.html`);
   const assets = await page.evaluate(async () => {

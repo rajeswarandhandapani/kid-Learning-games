@@ -176,7 +176,7 @@ const readQuestion = () => {
  for (const spec of [...quizGames, ...QUIZ_EXTRA]) await attempt(spec, checkQuiz);
  for (const spec of [...roundGames, ...ROUND_EXTRA]) await attempt(spec, checkRound);
 
- await attempt('flow: real tap in a hand-built game, next-game link, clearing', async () => {
+ await attempt('flow: next-game link and clearing', async () => {
   await page.goto(href('sort-it'));
   await clear();
   // Two games due: finishing one must offer the other, then home.

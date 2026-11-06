@@ -28,7 +28,7 @@ npm run test:offline      # visits once, goes offline, then plays games from the
 - Four **learning paths** (Math, English, Tamil, Science & world) put the games in a sensible order. Each step shows a ✓ once it has a star, and a *Next up* chip points at the first step without one.
 - The **For grown-ups** panel has a progress report: stars, the last five scores and the last-played date for every skill, plus *Needs practice* and *Ready for next* lists. It stays on this browser and has a print button.
 - Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
-- Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, or 10 pairs.
+- Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, 10, or 15 pairs.
 - Sentence questions are spoken automatically when the browser has speech synthesis. A Listen button replays them; word answer tiles and game instructions have their own speaker buttons. Shapes & Colors uses picture and color tiles where reading the label is unnecessary. Existing letter, number, and Tamil audio modes keep their dedicated pronunciation.
 - Picture Words, Feelings Faces, and What Do We Use? let children answer entirely with pictures. Spoken words and stories build vocabulary, emotional recognition, and everyday reasoning.
 - Shared keyboard focus, audio replay with Enter/Space, visible answer symbols, feedback announcements, and reduced-motion support.

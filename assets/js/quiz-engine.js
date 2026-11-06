@@ -627,7 +627,9 @@ class QuizEngine {
     this.el.resultsStars.innerHTML = '';
     this.el.resultsMessage.textContent = cleared
       ? `You mastered ${cleared} tricky ${cleared === 1 ? 'question' : 'questions'}!`
-      : right ? 'Nice work! These will come back once more to make sure they stick.' : 'Good try! These will come back tomorrow.';
+      : right ? 'Nice work! Tricky questions come back once more to make sure they stick.' : 'Good try! Tricky questions come back tomorrow.';
+    const heading = this.el.resultsScreen.querySelector('h1, h2');
+    if (heading) heading.textContent = 'Review complete!';
     if (right && window.KlgSounds) KlgSounds.fanfare();
     this._renderReview();
     const time = document.getElementById('results-time');
@@ -636,6 +638,8 @@ class QuizEngine {
     this._renderReward(reward);
     const again = document.getElementById('play-again-btn');
     if (again) { again.hidden = true; again.style.display = 'none'; }
+    // The review's own links say where to go next, so the usual "More games" link would repeat them.
+    this.el.resultsScreen.querySelectorAll('a[href$="index.html"]').forEach((a) => { a.style.display = 'none'; });
     document.getElementById('klg-review-links')?.remove();
     const links = KlgProgress.review.finishLinks();
     links.id = 'klg-review-links';

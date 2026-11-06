@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('memory-screen').classList.remove('d-none');
     board.replaceChildren();
     board.classList.toggle('memory-board-large', pairCount === 10);
+    board.classList.toggle('memory-board-giant', pairCount === 15);
     feedback.textContent = 'Choose two cards to find a pair.';
     update();
     const selected = shuffle(pictures).slice(0, pairCount);

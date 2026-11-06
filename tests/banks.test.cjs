@@ -272,3 +272,66 @@ test('new Tamil sentence targets all have a human recording', () => {
  const missing = sentences.filter((s) => !context.window.KLG_TAMIL_AUDIO[s.word]).map((s) => s.word);
  assert.deepEqual(missing, []);
 });
+
+test('Odd One Out', () => {
+ const { SETS } = bank('odd-one-out');
+ for (const list of Object.values(SETS)) {
+  enough(list, 5, 'sets');
+  unique(list.map((r) => r[3][1] + r[0][1]), 'sets');
+  for (const [a, b, c, odd, why] of list) {
+   assert.ok(why, odd[1]);
+   unique([a, b, c, odd].map((p) => p[1]), odd[1]);
+   unique([a, b, c, odd].map((p) => p[0]), odd[1] + ' pictures');
+   picturesDrawable([a, b, c, odd].map((p) => p[0]), odd[1]);
+  }
+ }
+});
+
+test('Who Am I?', () => {
+ const { RIDDLES } = bank('who-am-i');
+ enough(RIDDLES, 8, 'riddles');
+ unique(RIDDLES.map((r) => r[0][1]), 'riddles');
+ for (const [answer, clues, others] of RIDDLES) {
+  assert.equal(clues.length, 3, answer[1]);
+  assert.equal(others.length, 3, answer[1]);
+  unique([answer, ...others].map((o) => o[1]), answer[1]);
+  picturesDrawable([answer, ...others].map((o) => o[0]), answer[1]);
+  for (const clue of clues) assert.ok(!clue.toLowerCase().includes(answer[1].toLowerCase()), `${answer[1]}: a clue gives it away: ${clue}`);
+ }
+});
+
+test('Word Detective', () => {
+ const { WORDS } = bank('word-detective');
+ unique(Object.values(WORDS).flat(), 'a word in two groups');
+ for (const list of Object.values(WORDS)) assert.ok(list.length >= 18, 'three rounds of six');
+});
+
+test('Punctuation Pals', () => {
+ const { SENTENCES } = bank('punctuation-pals');
+ enough(SENTENCES, 8, 'sentences');
+ unique(SENTENCES.map((r) => r[0]), 'sentences');
+ for (const mark of ['.', '?', '!']) assert.ok(SENTENCES.filter((r) => r[1] === mark).length >= 8, mark);
+ for (const [s, mark, why] of SENTENCES) {
+  assert.match(s, /^[A-Z]/, s);
+  assert.doesNotMatch(s, /[.?!]$/, s + ' must not show its answer');
+  assert.ok(['.', '?', '!'].includes(mark) && why, s);
+ }
+});
+
+test('Stay Safe & Healthy', () => {
+ const { SITUATIONS } = bank('stay-safe');
+ enough(SITUATIONS, 8, 'situations');
+ unique(SITUATIONS.map((r) => r[1]), 'situations');
+ for (const [emoji, story, safe, unsafe, why] of SITUATIONS) {
+  assert.ok(story && why, story);
+  assert.equal(unsafe.length, 2, story);
+  oneRight(safe, unsafe, story);
+  picturesDrawable([emoji], story);
+ }
+});
+
+test('Tamil word order has enough sentences of three words or more', () => {
+ const { sentences } = require('../assets/js/tamil-sentences-data.js');
+ const usable = sentences.filter((s) => (s.before + s.word + s.after).trim().split(/\s+/).length >= 3);
+ enough(usable, 8, 'usable sentences');
+});

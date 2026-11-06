@@ -101,7 +101,7 @@ const section = (name, fn) => sections.push([name, fn]);
   section('layout: new and upgraded games fit a 320px phone', async ({ page, assert, go, noOverflow }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     const cat = require('../assets/js/catalogue.js');
-    const fresh = cat.GAMES.filter((g) => g.isNew).map((g) => g.id);
+    const fresh = cat.GAMES.filter((g) => g.isNew || g.v3).map((g) => g.id);
     const upgraded = ['fractions', 'time', 'money', 'measurement', 'rounding-place-value', 'comparing-numbers', 'addition-subtraction', 'counting', 'patterns', 'calendar', 'science-quiz', 'solar-system', 'world-capitals', 'rhyming-words', 'opposites', 'spelling-bee', 'english-alphabets', 'shapes-colors', 'tamil-words', 'animal-habitats', 'baby-animals', 'reading-stories'];
     for (const id of [...fresh, ...upgraded]) {
       await go(`${id}/index.html`);

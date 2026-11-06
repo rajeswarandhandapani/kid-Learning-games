@@ -110,6 +110,11 @@ const base=process.env.BASE_URL||'http://localhost:4173';
  await page.locator('#start-btn').click();
  assert.equal(await page.locator('.memory-card').count(),20);
  assert.match(await page.locator('#memory-status').textContent(),/0 of 10 pairs/);
+ await page.locator('#memory-change-size').click();
+ await page.locator('#memory-size').selectOption('15');
+ await page.locator('#start-btn').click();
+ assert.equal(await page.locator('.memory-card').count(),30);
+ assert.match(await page.locator('#memory-status').textContent(),/0 of 15 pairs/);
  // Start with invalid storage and with localStorage unavailable.
  await page.evaluate(()=>localStorage.setItem('klg-progress-v1','null'));await page.goto(base);assert.equal(await page.locator('.game-card').count(),GAME_COUNT);
  const blocked=await browser.newPage();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('Storage disabled');}});});await blocked.goto(base);assert.equal(await blocked.locator('.game-card').count(),GAME_COUNT);await blocked.close();

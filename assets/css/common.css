@@ -742,6 +742,7 @@ dialog p { color:#52636b; line-height:1.65; }
 #memory-status { margin:18px 0; color:var(--muted); }
 .memory-board { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
 .memory-board.memory-board-large { grid-template-columns:repeat(5,1fr); }
+.memory-board.memory-board-giant { grid-template-columns:repeat(6,1fr); }
 .memory-card { border:2px solid #315e55; border-bottom-width:5px; border-radius:15px; min-height:105px; background:#315e55; color:#d9ed9b; font-size:36px; }
 .memory-card.flipped { background:#fff; border-color:#d6e2dc; }
 .memory-card.matched { background:#eaf5d9; border-color:#82a968; opacity:1; }
@@ -750,7 +751,7 @@ dialog p { color:#52636b; line-height:1.65; }
 .memory-size-label select { min-height:44px; border:2px solid #bacbd2; border-radius:10px; padding:8px; background:#fff; }
 #memory-change-size { margin-right:16px; }
 .quiz-question-sm { white-space:pre-line; line-height:1.65; }
-@media(max-width:480px) { .memory-board,.memory-board.memory-board-large { grid-template-columns:repeat(4,1fr); gap:6px; } .memory-card { min-height:70px; font-size:29px; } .memory-size-label { flex-direction:column; } }
+@media(max-width:480px) { .memory-board,.memory-board.memory-board-large { grid-template-columns:repeat(4,1fr); gap:6px; } .memory-card { min-height:70px; font-size:29px; } .memory-size-label { flex-direction:column; } .memory-board.memory-board-giant { grid-template-columns:repeat(5,1fr); gap:5px; } .memory-board-giant .memory-card { min-height:60px; padding:0; border-radius:11px; font-size:25px; } }
 @font-face { font-family:'Learning Emoji'; src:url('../fonts/NotoColorEmoji.ttf') format('truetype'); font-display:swap; unicode-range:U+2300-23FF,U+2600-27FF,U+2B00-2BFF,U+1F000-1FAFF; }
 body { font-family:'Segoe UI','Learning Emoji','Noto Sans Tamil',Arial,sans-serif; }
 .learning-home .klg-card-stars { position:static; }

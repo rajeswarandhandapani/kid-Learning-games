@@ -193,6 +193,13 @@
         KlgGameKit.finishReview({ right: reviewing.right, cleared: reviewing.cleared, total, el: $("finish-summary") });
         $("play-again").hidden = true;
         $("play-again").style.display = "none";
+        // The review's own links say where to go next, so the usual "More games" link would repeat them.
+        const finishScreen = $("finish-screen");
+        const heading = finishScreen.querySelector("h1, h2");
+        if (heading) heading.textContent = "Review complete!";
+        finishScreen.querySelectorAll('a[href$="index.html"]').forEach((a) => {
+          if (!a.closest("#finish-summary")) a.style.display = "none";
+        });
       } else {
         KlgGameKit.finish({ score, total, bestStreak, el: $("finish-summary") });
       }

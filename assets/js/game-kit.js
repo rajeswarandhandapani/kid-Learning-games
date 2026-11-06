@@ -52,7 +52,7 @@
     note.className = "tg-finish-note";
     note.textContent = cleared
       ? `You mastered ${cleared} tricky ${cleared === 1 ? "question" : "questions"}!`
-      : right ? "Nice work! These will come back once more to make sure they stick." : "Good try! These will come back tomorrow.";
+      : right ? "Nice work! Tricky questions come back once more to make sure they stick." : "Good try! Tricky questions come back tomorrow.";
     const xp = document.createElement("p");
     xp.className = "tg-finish-xp";
     xp.textContent = `+${reward.xp} XP · ${reward.rank.emoji} ${reward.rank.name}` +
