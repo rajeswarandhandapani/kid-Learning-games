@@ -26,35 +26,7 @@ function shuffle(array) {
 
 // avoid: other names for THIS animal's baby — never offered as wrong
 // choices against it (and this animal is never a wrong choice for them).
-const ANIMALS = [
-  { emoji: "🐶", animal: "dog", baby: "puppy", avoid: ["pup"] },
-  { emoji: "🐱", animal: "cat", baby: "kitten", avoid: ["kit"] },
-  { emoji: "🐮", animal: "cow", baby: "calf" },
-  { emoji: "🐴", animal: "horse", baby: "foal" },
-  { emoji: "🐑", animal: "sheep", baby: "lamb" },
-  { emoji: "🐷", animal: "pig", baby: "piglet" },
-  { emoji: "🐐", animal: "goat", baby: "kid" },
-  { emoji: "🐔", animal: "chicken", baby: "chick" },
-  { emoji: "🦆", animal: "duck", baby: "duckling" },
-  { emoji: "🦢", animal: "swan", baby: "cygnet" },
-  { emoji: "🦉", animal: "owl", baby: "owlet" },
-  { emoji: "🦅", animal: "eagle", baby: "eaglet" },
-  { emoji: "🦘", animal: "kangaroo", baby: "joey" },
-  { emoji: "🐻", animal: "bear", baby: "cub" },
-  { emoji: "🦁", animal: "lion", baby: "cub" },
-  { emoji: "🐯", animal: "tiger", baby: "cub" },
-  { emoji: "🦊", animal: "fox", baby: "kit", avoid: ["cub", "pup", "kitten"] },
-  { emoji: "🐺", animal: "wolf", baby: "pup", avoid: ["cub", "puppy"] },
-  { emoji: "🦭", animal: "seal", baby: "pup", avoid: ["puppy"] },
-  { emoji: "🐰", animal: "rabbit", baby: "bunny", avoid: ["kit", "kitten"] },
-  { emoji: "🦌", animal: "deer", baby: "fawn" },
-  { emoji: "🐘", animal: "elephant", baby: "calf" },
-  { emoji: "🐋", animal: "whale", baby: "calf" },
-  { emoji: "🐸", animal: "frog", baby: "tadpole" },
-  { emoji: "🦋", animal: "butterfly", baby: "caterpillar" },
-  { emoji: "🐟", animal: "fish", baby: "fry" },
-  { emoji: "🐧", animal: "penguin", baby: "chick" },
-];
+const { ANIMALS } = window.KlgQuestions;
 
 /** True when `name` is a right (or defensible) answer for this animal. */
 function nameFits(entry, name) {

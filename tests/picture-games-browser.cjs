@@ -258,7 +258,7 @@ const section = (name, fn) => sections.push([name, fn]);
   });
 
   section('map-explorer: the region tapped is the continent or ocean asked for', async ({ page, assert, startRound, finishRound, noOverflow }) => {
-    const HOME = { kangaroo: 'oceania', koala: 'oceania', 'giant panda': 'asia', tiger: 'asia', lion: 'africa', giraffe: 'africa', zebra: 'africa', 'emperor penguin': 'antarctica', llama: 'south-america', bison: 'north-america', 'the Eiffel Tower': 'europe', 'the Statue of Liberty': 'north-america', 'the pyramids': 'africa', 'a Japanese castle': 'asia', 'an ancient Greek temple': 'europe' };
+    const HOME = Object.fromEntries(require('../games/map-explorer/questions.js').HOMES.map(([, name, home]) => [name, home]));
     const NAMES = { 'North America': 'north-america', 'South America': 'south-america', Europe: 'europe', Africa: 'africa', Asia: 'asia', Oceania: 'oceania', Antarctica: 'antarctica', 'Pacific Ocean': 'pacific', 'Atlantic Ocean': 'atlantic', 'Indian Ocean': 'indian', 'Arctic Ocean': 'arctic', 'Southern Ocean': 'southern' };
     for (const level of [1, 2, 3]) {
       await startRound(`map-explorer/index.html?level=${level}`);

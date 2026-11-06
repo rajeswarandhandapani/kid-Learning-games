@@ -8,7 +8,7 @@
  *             Settings in the address (?level=2) don't matter for the saved copy.
  * - activate: deletes caches from older versions.
  */
-const CACHE = "klg-5d90497d9d61";
+const CACHE = "klg-96783f8be0ff";
 const FILES = [
  "./",
  "./index.html",
@@ -264,10 +264,12 @@ const FILES = [
  "./games/addition-subtraction/index.html",
  "./games/animal-habitats/game.js",
  "./games/animal-habitats/index.html",
+ "./games/animal-habitats/questions.js",
  "./games/array-garden/game.js",
  "./games/array-garden/index.html",
  "./games/baby-animals/game.js",
  "./games/baby-animals/index.html",
+ "./games/baby-animals/questions.js",
  "./games/block-builder/game.js",
  "./games/block-builder/index.html",
  "./games/calendar/game.js",
@@ -288,10 +290,12 @@ const FILES = [
  "./games/english-alphabets/index.html",
  "./games/everyday-tools/game.js",
  "./games/everyday-tools/index.html",
+ "./games/everyday-tools/questions.js",
  "./games/fact-families/game.js",
  "./games/fact-families/index.html",
  "./games/feelings-faces/game.js",
  "./games/feelings-faces/index.html",
+ "./games/feelings-faces/questions.js",
  "./games/fraction-pizza/game.js",
  "./games/fraction-pizza/index.html",
  "./games/fractions/game.js",
@@ -300,6 +304,7 @@ const FILES = [
  "./games/life-cycles/index.html",
  "./games/map-explorer/game.js",
  "./games/map-explorer/index.html",
+ "./games/map-explorer/questions.js",
  "./games/market-day/game.js",
  "./games/market-day/index.html",
  "./games/measure-lab/game.js",
@@ -330,14 +335,17 @@ const FILES = [
  "./games/picture-words/index.html",
  "./games/reading-stories/game.js",
  "./games/reading-stories/index.html",
+ "./games/reading-stories/questions.js",
  "./games/rhyming-words/game.js",
  "./games/rhyming-words/index.html",
  "./games/rounding-place-value/game.js",
  "./games/rounding-place-value/index.html",
  "./games/science-quiz/game.js",
  "./games/science-quiz/index.html",
+ "./games/science-quiz/questions.js",
  "./games/sentence-builder/game.js",
  "./games/sentence-builder/index.html",
+ "./games/sentence-builder/questions.js",
  "./games/shape-detectives/game.js",
  "./games/shape-detectives/index.html",
  "./games/shapes-colors/game.js",
@@ -348,14 +356,18 @@ const FILES = [
  "./games/sight-word-pop/index.html",
  "./games/solar-system/game.js",
  "./games/solar-system/index.html",
+ "./games/solar-system/questions.js",
  "./games/sort-it/game.js",
  "./games/sort-it/index.html",
+ "./games/sort-it/questions.js",
  "./games/sound-it-out/game.js",
  "./games/sound-it-out/index.html",
  "./games/spelling-bee/game.js",
  "./games/spelling-bee/index.html",
+ "./games/spelling-bee/questions.js",
  "./games/story-order/game.js",
  "./games/story-order/index.html",
+ "./games/story-order/questions.js",
  "./games/tamil-alphabets/game.js",
  "./games/tamil-alphabets/index.html",
  "./games/tamil-days-colours/game.js",
@@ -400,8 +412,10 @@ const FILES = [
  "./games/weather-wear/index.html",
  "./games/word-families/game.js",
  "./games/word-families/index.html",
+ "./games/word-families/questions.js",
  "./games/world-capitals/game.js",
- "./games/world-capitals/index.html"
+ "./games/world-capitals/index.html",
+ "./games/world-capitals/questions.js"
 ];
 
 self.addEventListener("install", (event) => {
