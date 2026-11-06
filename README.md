@@ -1,6 +1,6 @@
 # Little Learners · Kid Learning Games
 
-72 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+80 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
 
 ## Run and verify
 
@@ -14,6 +14,10 @@ npm run build            # validates game links and copies static assets to site
 npm run test:tamil-games  # plays every Tamil activity with recorded audio (server running)
 npm run test:math         # plays the visual × and ÷ games; checks every picture matches its answer
 npm run test:pictures     # plays every new and picture-upgraded game; checks each picture against its answer
+npm run test:review       # for each covered game, misses a question and checks it comes back in a review
+npm run test:levels       # plays the harder number levels and works out every answer again from the screen
+npm run test:newgames     # plays the eight v4 games with real taps at phone widths
+npm run test:ux           # the layout checks: taps to a game, words on screen, button sizes, contrast, keyboard
 npm run new-game -- <id> "<Name>" <icon> …   # scaffolds a hand-built game and lists it in the catalogue
 npm run sync:index        # keeps the home page title count and <noscript> list in step with the catalogue
 npm run sw                # rewrites sw.js, the offline file list (npm run build does this too)
@@ -24,8 +28,9 @@ npm run test:offline      # visits once, goes offline, then plays games from the
 
 ## Learning experience
 
-- Search 72 games, filter by subject (Math, English, Tamil · தமிழ், Science & world, Thinking skills) and learning stage, and save favorites. The home page is built from one list, `assets/js/catalogue.js`.
-- Four **learning paths** (Math, English, Tamil, Science & world) put the games in a sensible order. Each step shows a ✓ once it has a star, and a *Next up* chip points at the first step without one.
+- A child chooses an age once, then taps **Play next** or a picture tile to see that subject's games for that age. Every tile and card has a speaker that says its name, so no reading is needed. The whole home page is built from one list, `assets/js/catalogue.js`.
+- Five **learning paths** (Math, English, Tamil, Science & world, Thinking skills) put each subject's games in a sensible order. Each game shows a ✓ once it has a star, and a *Next up* chip points at the first one without.
+- **All games** (`#all`) has search and filters by subject and age, for grown-ups and older children. A heart saves a favorite.
 - The **For grown-ups** panel has a progress report: stars, the last five scores and the last-played date for every skill, plus *Needs practice* and *Ready for next* lists. It stays on this browser and has a print button.
 - Untimed practice is the default. Children read feedback and choose when to continue. Optional timed challenge rounds retain speed records.
 - Story Detectives adds short-story comprehension; Animal Homes teaches habitats with explanations; Memory Garden draws a new picture mix for 6, 8, 10, or 15 pairs.
@@ -36,6 +41,89 @@ npm run test:offline      # visits once, goes offline, then plays games from the
 - Existing Bootstrap, confetti, emoji, and Tamil font assets are bundled locally. No CDN or external font requests are needed to load the app. Speech synthesis still depends on browser/OS voice availability; some voices may require network access.
 
 This is an educational practice app, not a standardized assessment. Age ranges are starting points. Progress belongs to the current browser and is not synchronized across devices. Practice awards stars and XP but does not set speed records. Memory Garden awards completion stars, not an accuracy assessment.
+
+## Version 4
+
+Version 4 adds Review My Mistakes, much bigger question banks, 8 games, harder number levels and a layout a 3-year-old can use.
+
+### A layout children can use alone
+
+The home page has one job per view. The address hash picks the view, so the Back button works.
+
+| View | Address | What it shows |
+| ---- | ------- | ------------- |
+| Age | `#age` | Four big tiles (3–5, 5–7, 7–9, 9+). Shown first until an age is chosen, then remembered as `klg-stage` |
+| Home | none | **▶ Play next**, **🔁 Try again** when questions are due, and six picture tiles |
+| Subject | `#world/math` | That subject's games for this age in path order, with **Easier** and **Harder** buttons |
+| Favorites | `#world/favorites` | Games marked with a heart |
+| My stars | `#me` | Rank, XP, streak and badges |
+| All games | `#all` | Search and filters over all 80 games |
+
+The age is a filter and not a child profile, and progress is still shared on one device. `gamesFor`, `nextFor` and `nextAfter` in `catalogue.js` choose the games. The 9+ stage also gets the 7–9 games, because few games are written for 9+ alone, and a subject with nothing at an age falls back to the nearest level.
+
+`assets/js/page-shell.js` (`KlgShell`) loads last on every game page and needs no per-game code:
+
+- **Top bar:** 🏠 Home back to the child's subject, the game's name and 🔊 sound, in the subject's colour.
+- **Start screen:** picture, name, one big **▶ Play** and 🔊 Hear how to play. Levels, modes and tips fold under **⚙️ More ways to play**, which opens by itself when the address already has a setting.
+- **Play screen:** back, progress and score on one row, with the speaker beside the question. Feedback scrolls into view and **Next** sticks to the bottom of the screen.
+- **Finish:** **▶ Next game**, Play again and Home come before any list of missed questions.
+
+The colours and sizes are the `Kid theme` section at the end of `assets/css/common.css`. `npm run test:ux` holds the layout to numbers at five screen sizes, so it cannot quietly slip back.
+
+### Review My Mistakes
+
+A missed question comes back the next day, inside its own game. One right answer brings it back after 3 days, and a second right answer clears it. A wrong answer restarts the schedule. It earns 5 XP per right answer and keeps the day streak, but never changes stars or recent scores. The grown-up report lists the trickiest questions.
+
+Each miss is saved as a self-contained copy, since most questions are random. Pictures are stored as HTML. It covers the 69 games built on `QuizEngine` or `KlgRound`. It does not cover memory-match, tamil-memory, tamil-letter-chart, tamil-letter-pop, tamil-tracing, array-garden, multiples-hunt, share-fairly, tamil-word-puzzle, tamil-sentence-words or tamil-missing-letters.
+
+For review to work, a game must:
+
+- Put per-question page setup (speaking, prompt classes) in the `prepareQuestion` option, not in `generateQuestion`.
+- Return plain data from `KlgRound`'s `make()`, draw everything in `render()` from it, compare data by value and not by object, and decide what is asked in `make()`.
+
+### Bigger question banks
+
+Hand-written banks now live in `games/<id>/questions.js`, where `tests/banks.test.cjs` can check them without a browser. The rule is at least three rounds' worth of questions for each level or mode.
+
+| Game | Before | Now |
+| ---- | ------ | --- |
+| Story Detectives | 12 | 40 |
+| Animal Homes | 12 | 43 |
+| Science Quiz | 57 | 120 (a single topic now plays a 10-question round) |
+| Solar System written facts | 25 | 45 |
+| Feelings Faces | 18 | 40 |
+| What Do We Use? | 24 | 41 |
+| Baby Animals | 27 | 45 |
+| Sort It! sets | 3 and 3 | 15 and 17 |
+| Sentence Builder | 15 and 14 | 30 and 30 |
+| Story Order | 12 | 24 |
+| Word Families | 10 families | 19 |
+| Spelling Bee | 24 a level | 45 a level |
+| World Capitals | 69 | 119 |
+| Map Explorer places | 15 | 30 |
+| Tamil sentence bank | 32 | 60 |
+| Tamil Story Time | 6 | 12 |
+
+**Harder number levels:** tables to 12, three-digit adding and subtracting (`?max=1000`), two-digit division (`?level=4`), fractions with different denominators (`?level=4`), comparing to 10,000 (`?max=10000`) and five-digit rounding and place value (`?level=4`).
+
+Memory Garden also has a 15-pair board.
+
+### New games
+
+| Subject | Game | What the child does |
+| ------- | ---- | ------------------- |
+| Thinking skills | Odd One Out | Find the picture that does not belong, then hear why |
+| Thinking skills | Who Am I? | Read clues one at a time and tap the answer |
+| Thinking skills | Robot Path | Plan arrow steps to guide a robot to the star |
+| English | Word Detective | Sort naming, doing and describing words |
+| English | Punctuation Pals | Choose . ? or ! to finish a sentence |
+| Math | Number Bonds | Find the missing part of a whole |
+| Science & world | Stay Safe & Healthy | Choose the safe thing to do in a little story |
+| Tamil | சொல் வரிசை | Put Tamil word tiles in order to make a sentence |
+
+### Tamil review
+
+New Tamil was written by Claude and has not been read by a native speaker. [`docs/TAMIL-REVIEW-v4.md`](docs/TAMIL-REVIEW-v4.md) lists every new line with its English meaning, plus the older lines that were never checked. Please read it before pushing.
 
 ## Picture everything (v3)
 
@@ -182,7 +270,7 @@ orthographic splitting, numbers), `assets/js/tamil-audio.js`
 
 ### The Tamil activities
 
-The home page has a 13-step **Tamil learning path** and a Tamil filter tab (20 games).
+The home page has a Tamil tile, with a 14-step **Tamil learning path** across the ages (21 games).
 
 | Game | What the child does | Modes |
 | ---- | ------------------- | ----- |
@@ -205,7 +293,7 @@ games have a 🔊 Hear the word button.
 
 ## Tamil sentence typing
 
-Two separate activities use a 32-sentence bank covering animals, nature, and everyday life:
+Two separate activities use a 60-sentence bank covering animals, nature, and everyday life:
 
 - **Tamil Sentence Words** (`games/tamil-sentence-words/`): type the whole missing Tamil word in a sentence. An English word clue and picture identify the intended answer. Common alternatives such as பசு / மாடு are accepted.
 - **Tamil Missing Letters** (`games/tamil-missing-letters/`): type one missing Tamil orthographic letter within the sentence's target word. Vowel signs and pulli stay attached; one-letter words are excluded from this mode.
@@ -226,7 +314,8 @@ The shared content is in `assets/js/tamil-sentences-data.js`; UI logic is in `as
 index.html                 landing page, rendered from the catalogue (count and <noscript> list synced by scripts/sync-index.cjs)
 assets/css/common.css      shared styling used by every game
 assets/css/visuals.css     styling for the shared pictures and play mechanics
-assets/js/catalogue.js     KlgCatalogue — every game, its level, subject, skills and the learning paths
+assets/js/catalogue.js     KlgCatalogue — every game, its level, subject, skills and the learning paths; picks games by age
+assets/js/page-shell.js    KlgShell — the same top bar, start screen and play header on every game page
 assets/js/visuals/         clock, fractions, money, measuring, blocks, graphs, shapes, scenes
 assets/js/play-kit.js      KlgPlayKit — sort, order, tap-a-part and tile-building mechanics
 assets/js/round-kit.js     KlgRound — the question loop of the hand-built picture games
@@ -244,19 +333,19 @@ assets/audio/tamil/        recorded Tamil letters & words + CREDITS.md
 scripts/fetch-tamil-audio.cjs  rebuilds the Tamil audio from Wikimedia Commons
 scripts/new-game.cjs       scaffolds a new hand-built game
 scripts/sync-index.cjs     keeps index.html's count and <noscript> list in step with the catalogue
-games/<game-name>/         one folder per game (index.html + game.js)
+games/<game-name>/         one folder per game (index.html + game.js, and questions.js when it has a hand-written bank)
 ```
 
 ## Levels
 
-The landing page (built from `assets/js/catalogue.js`) sorts every game into four levels, roughly by age. Levels
-are a property of the landing page only — each game is still a standalone
+`assets/js/catalogue.js` sorts every game into four levels, roughly by age. A child's chosen age shows the games at that
+level. Levels are a property of the home page only — each game is still a standalone
 page you can link to directly.
 
 | Level | Name | Ages | Games |
 | ----- | ---- | ---- | ----- |
-| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers, Sound It Out, Word Families, Sight Word Pop, Story Order, Tamil Days & Colours, My Body, Sort It!, Weather & Seasons |
-| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly, Set the Clock, Block Builder, Shape Detectives, Picture Graphs, Sentence Builder, Tamil Picture Sentences, Tamil–English Match, Life Cycles |
+| 1 | First Steps 🐣 | 3–5 | Number Sounds, Counting, Shapes & Colors, English Alphabets, Tamil Alphabets, Rhyming Words, Baby Animals, Memory Garden, Picture Words, Feelings Faces, What Do We Use?, Tamil Letter Chart, Listen & Find, Letter Bubbles, Trace Tamil Letters, Tamil Numbers, Sound It Out, Word Families, Sight Word Pop, Story Order, Tamil Days & Colours, My Body, Sort It!, Weather & Seasons, Odd One Out, Number Bonds, Stay Safe & Healthy |
+| 2 | Building Blocks 🧱 | 5–7 | Comparing Numbers, Addition & Subtraction, Patterns & Skip Counting, Opposites, Calendar, Tamil Words, Story Detectives, Animal Homes, Tamil Sentence Words, Tamil Missing Letters, Short or Long?, Sound Blender, First Letter, Tamil Memory, What Comes Next?, Picture Multiplication, Picture Division, Share It Fairly, Set the Clock, Block Builder, Shape Detectives, Picture Graphs, Sentence Builder, Tamil Picture Sentences, Tamil–English Match, Life Cycles, Who Am I?, Robot Path, Word Detective, Punctuation Pals, சொல் வரிசை |
 | 3 | Level Up 🚀 | 7–9 | Multiplication, Division, Fractions, Time, Money, Measurement, Spelling Bee, Tamil Word Builder, Tamil Word Puzzle, Market Day, Fact Family Triangles, Array Garden, Multiples Hunt, Pizza Fractions, Coin Shop, Measure Lab, Tamil Story Time |
 | 4 | Brain Boost 🧠 | 9+ | Rounding & Place Value, Solar System, Science Quiz, World Capitals, Map Explorer |
 
@@ -273,15 +362,15 @@ it earned:
   confetti burst and fanfare on each promotion.
 - **Stars** — up to 3 a game (90% / 70% / 50%), shown on the game's card.
 - **Day streak** — consecutive days played, so coming back tomorrow counts.
-- **Badges** — 16 one-off unlocks (first quiz, perfect score, 10 in a row,
+- **Badges** — 17 one-off unlocks (first quiz, perfect score, 10 in a row,
   full marks under 4s a question, 5 and 12 games tried, 25 and 100 quizzes,
-  3- and 7-day streaks, and in v3: Picture Pro, Path Finder, All-Rounder and Comeback).
+  3- and 7-day streaks, and later: Picture Pro, Path Finder, All-Rounder, Comeback and Second Chance).
 - **Per-game history** — each game also keeps its last five scores, the date last
   played and stars per mode or level, which feed the grown-up report.
 
-The landing page turns that into a player card, a **daily challenge** (the
-same game for the whole day, a different one tomorrow), a **🎲 Surprise me**
-button, and a per-card star rating with a `MASTERED` flag at 3 stars.
+The home page turns that into a **My stars** page, a **Today's game** (the
+same game for the whole day, a different one tomorrow, chosen for the child's
+age), a **🎲 Surprise me** button, and a star rating on each card.
 The grown-up panel resets XP, stars, badges, and streaks after confirmation. Favorites and legacy per-game speed records are kept.
 
 The engine wires this up itself — no per-game code. Games only need to load
@@ -295,10 +384,10 @@ name in the URL.
 2. **Quiz game:** create `games/<name>/index.html` (copy `games/multiplication/index.html`) and `game.js` with a
    question generator `(askedSet) => ({ prompt, correctAnswer, choices, visual?, choiceVisuals?, explanation? })`, then
    `new QuizEngine({ totalQuestions, timePerQuestion, generateQuestion }).start()`. Add one line to `GAMES` in `assets/js/catalogue.js`
-   (name, icon, blurb, level, subject, skills, `isNew`) and a `SKILL_NAMES` entry for any new skill tag.
+   (name, icon, blurb, level, subject, skills, `isNew`) and a `SKILL_NAMES` entry for any new skill tag. Load `assets/js/page-shell.js` last on the page.
 3. Optionally list it in a learning path in the same file (`PATHS`).
 4. Run `npm run sync:index`, `npm test` (the catalogue test fails if a folder and its entry disagree) and
-   `npm run test:pictures`. Add a section to `tests/picture-games-browser.cjs` that checks the picture against the answer.
+   `npm run test:pictures`. Add a section to `tests/picture-games-browser.cjs` that checks the picture against the answer. `npm run test:review` and `npm run test:ux` pick up a new game by themselves.
 
 Two rules worth keeping when writing a generator: never ask for more unique
 questions than the data can supply (cap `totalQuestions` by pool size), and
@@ -308,7 +397,7 @@ overlapping data (baby animals, opposites, rhymes) each carry an explicit
 
 ## Multiplication Tables Quiz
 
-25 random questions from tables 1-11 (capped to the number of unique
+25 random questions from tables 1-12 (capped to the number of unique
 questions available for narrower selections), 10 seconds per question,
 4-choice multiple choice, auto-advances (counted wrong) on timeout.
 Restrict to specific tables via a query param, e.g.
@@ -457,7 +546,7 @@ Speech synthesis says a word out loud (tap the 🔊 to repeat it) and the
 child picks the correct spelling from four choices. Three levels via the
 start-screen buttons or `?level=1|2|3`: short phonetic words (cat, ship),
 longer everyday words (banana, school) and tricky spellings (because,
-knight, scissors) — 24 words per level, 15 questions per round.
+knight, scissors) — 45 words per level, 15 questions per round.
 
 Wrong choices are misspellings generated in code, ordered by how
 convincing they are: sound-alike substitutions kids actually write
@@ -470,7 +559,7 @@ degrades to the word's emoji and a clue ("🐱 a pet that says meow").
 
 ## World Capitals Quiz
 
-~70 countries with flag emoji, grouped by continent. Two directions via
+119 countries with flag emoji, grouped by continent. Countries with a disputed or shared capital are left out. Two directions via
 `?mode=` (country → capital by default, `?mode=country` for capital →
 country) and a continent filter via `?region=asia|europe|africa|americas|
 oceania`; direction and region combine freely. Distractors prefer capitals
@@ -627,7 +716,7 @@ Four topics, mixed by default and playable alone: animal groups
 and matter, weather and forces (`?mode=matter`). Each question carries its
 own three wrong answers rather than sharing a pool, because in a bank this
 broad a generic decoy is too often quietly correct. A single-topic round is
-capped at the size of that topic's bank. 15 questions, 25 seconds each.
+10 questions, and a mixed round is 15. 25 seconds each.
 
 All of the above quizzes track per-mode best-time records with the same
 perfect-score-only rule as the multiplication quiz.
@@ -645,7 +734,7 @@ python3 -m http.server 8000
 
 The site works with no internet after one visit. `sw.js` (a service worker,
 generated by `scripts/build-sw.cjs` from `scripts/sw-template.js`) saves all
-393 files on the device the first time any page is opened: every game, script,
+429 files on the device the first time any page is opened: every game, script,
 picture, the emoji and Tamil fonts and the Tamil recordings (about 15 MB).
 It always tries the network first, so updates appear as soon as you are online,
 and it falls back to the saved copy with no network (or after 4 seconds).

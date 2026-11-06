@@ -77,3 +77,62 @@ Reviewed Chromium screenshots of the desktop home, phone home/library, counting,
 - The same test passed with the build copied into a `games/` sub-folder of another site (`BASE_URL=http://localhost:8123/games`). The worker's scope was `/games/`, so the rest of the website is not affected.
 - `tests/catalogue.test.cjs` fails if `sw.js` misses a file or lists one that no longer exists.
 - Practical limit: tested in Chromium only. iPad Safari supports service workers and Add to Home Screen, but it was not tried on a real iPad. Safari may clear saved data for sites not opened for several weeks, unless the site was added to the Home Screen.
+
+## Version 4 · November 5, 2026
+
+The library has 80 games. This release adds Review My Mistakes, bigger question banks, 8 games, harder number levels, and a home page and game frame a child can use alone.
+
+### Layout, measured on a 390×844 phone
+
+| | Version 3 | Version 4 |
+| --- | --- | --- |
+| Distance to the first way into a game | 1,876px | 130px |
+| Words to read on the home view | 291 before the first game | 36 |
+| Places to tap on the home view | 40 before the first game | 14, not counting speakers |
+| Home page height | 23,514px, about 28 screens | 844px, one screen |
+| Taps from a first visit to playing | scrolling, then 2 | 3 |
+| Words on a game's start screen | 62 on average | 20 typical, 29 at most |
+| Play button below the screen | 8 games | none |
+| Question starts at | y≈358 | y≈198 |
+| Next below the screen after an answer | 16 of 40 quiz games (15 on a landscape iPad) | none |
+
+### Automated checks
+
+- `npm test` (74 tests): progress, the review schedule at each step, game ids inside the website's folder, every hand-written bank (size against round length, no repeats, one right answer, every picture in the bundled font), the catalogue, and the new game-choosing helpers. Every game can be reached from an age and a subject.
+- `npm run test:ux`, at 320×568, 390×844, 810×1080, 1080×810 and 1366×900:
+  - A first visit reaches a game in three taps. Play next is always on the first screen, and all six tiles are too, except at 320×568.
+  - All 79 start screens: Play is on screen with no scrolling, with at most 30 words.
+  - Controls are at least 44×44px on the home page, start screens and play screens, with the exceptions listed below.
+  - After an answer, Next and feedback are on screen and uncovered, in all 69 games with a shared engine.
+  - All answers fit on the screen from 390×844 up, with the exception listed below. 320×568 was not held to this.
+  - Back, Home, Easier and Harder work. The age survives a reload, and everything works with storage blocked or from the keyboard alone. Each speaker says the right words (checked with a recording stub). Key text passes 4.5:1 contrast.
+- `npm run test:review` plays all 69 covered games, plus 35 other settings: miss a question, reopen with `?review=1`, and check the same prompt, picture and answer come back and move along the schedule. Also run at 320px.
+- `npm run test:levels` works every answer out again from the screen. `npm run test:newgames` plays the eight new games with real taps at 320 and 390px, including a real wrong tap carried into a review round, and a whole 15-pair Memory Garden.
+- All earlier suites were updated for the new navigation, keeping what each one checks, and pass: `test:e2e`, `test:math`, `test:pictures` (also at 320px), `test:tamil`, `test:tamil-games`, `test:offline`, `npm run build`. The offline test now plays a review round with no network. 429 files are saved for offline use.
+- The built site was also served from inside a `games/` folder, as on the website: the offline test, a review run and the navigation checks pass there.
+
+### Bugs found and fixed
+
+- **Live on the website:** every game reported its id as `games`, because the path there is `/games/games/counting/`. All stars and scores were lumped into one entry. Records already saved under that entry stay there.
+- **Next below the screen** after an answer, in the numbers above.
+- Picture Pro, Path Finder and All-Rounder could never be earned, because game pages did not load the catalogue. The 21 hand-built games could never earn the streak badges.
+- Spelling Bee could offer real words as misspellings, including a rude word generated from "sock".
+- Word Families cards for "pan" and "pet" had no picture. Animal Homes said "a emperor penguin".
+- Block Builder could only remove a one cube by tapping a 12px target. It now has − buttons.
+- Card descriptions showed literal `&ndash;` text.
+
+### Exceptions the checks allow
+
+- Array Garden and Multiples Hunt use ten-by-ten boards, which cannot give each square 44px on a phone. Their squares are as big as the screen allows (about 23px at 320px wide). They reach 44px on tablets.
+- Block Builder's small blocks can still be tapped, but its − buttons do the same job at full size.
+- கதை நேரம் shows a four-picture story, so it scrolls before its question.
+- Memory Garden, the Tamil typing games and the Tamil Letter Chart have the new top bar and start screen, but keep their own play and end screens.
+
+### Practical limits
+
+- **No child has used this.** The layout checks measure size, position and wording, not whether a 4-year-old understands it. Please watch one try it.
+- Tested in Linux Chromium only, not on a real iPad, phone, Safari or Firefox, and not with a real finger. Lettering uses the device's own rounded font where there is one, so an iPad will look different from the screenshots checked here.
+- **The new Tamil has not been read by a native speaker.** `docs/TAMIL-REVIEW-v4.md` lists every new line, and the older lines that were never checked. It also asks one question about the word order game, which accepts only the written order although Tamil word order is flexible.
+- New English and science questions are checked by tests for structure, and for accuracy only by Claude's own reading.
+- Speakers on the home page use the device's voice, in English, so Tamil-named games speak their English description.
+- Age bands are suggestions, and the choice is a shared setting on the device, not a child profile.
