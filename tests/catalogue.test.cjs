@@ -73,7 +73,7 @@ test('a child can reach every game from a subject, with no age question', () => 
  }
  assert.deepEqual(cat.GAMES.map((g) => g.id).filter((id) => !reached.has(id)), []);
  assert.equal(cat.gamesFor().length, cat.GAMES.length);
- for (const file of ['index.html', 'assets/js/home.js', 'assets/js/page-shell.js']) assert.ok(!/klg-stage|How old are you/.test(fs.readFileSync(file, 'utf8')), file + ' still asks for an age');
+ for (const file of ['src/index.html', 'src/app/app.ts', 'assets/js/page-shell.js']) assert.ok(!/klg-stage|How old are you/.test(fs.readFileSync(file, 'utf8')), file + ' still asks for an age');
 });
 
 test('every subject has a tile, and every age band has words to say', () => {
@@ -142,21 +142,25 @@ test('the Picture Pro badge can still be earned', () => {
  assert.ok(cat.GAMES.filter((g) => g.v3).length >= 10);
 });
 
-test('index.html game count and noscript list match the catalogue (run npm run sync:index)', () => {
+test('src/index.html game count and noscript list match the catalogue (run npm run sync:index)', () => {
  const { synced } = require('../scripts/sync-index.cjs');
- const html = fs.readFileSync('index.html', 'utf8');
+ const html = fs.readFileSync('src/index.html', 'utf8');
  assert.equal(synced(html), html);
 });
 
-test('the offline service worker saves every page, script, picture, font and recording (run npm run sw)', () => {
- const sw = fs.readFileSync('sw.js', 'utf8');
- const listed = new Set(JSON.parse(sw.match(/const FILES = (\[[\s\S]*?\]);/)[1]).map((f) => f.replace(/^\.\//, '')));
- const walk = (p) => fs.statSync(p).isDirectory() ? fs.readdirSync(p).flatMap((f) => walk(path.join(p, f))) : [p.split(path.sep).join('/')];
- const needed = ['index.html', 'manifest.webmanifest', ...walk('assets'), ...walk('games')].filter((f) => !/(^|\/)\.|\.md$/.test(f));
- const missing = needed.filter((f) => !listed.has(f));
- assert.deepEqual(missing, [], 'sw.js is missing files — run npm run sw');
- for (const f of listed) if (f) assert.ok(fs.existsSync(f), 'sw.js lists a file that no longer exists: ' + f);
- const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
- for (const icon of manifest.icons) assert.ok(fs.existsSync(icon.src), icon.src);
- assert.match(fs.readFileSync('index.html', 'utf8'), /rel="manifest"/);
+test('ngsw-config.json covers offline hub, assets, and all games without hijacking game URLs', () => {
+ const ngsw = JSON.parse(fs.readFileSync('ngsw-config.json', 'utf8'));
+ assert.ok(Array.isArray(ngsw.navigationUrls) && ngsw.navigationUrls.includes('!/**/games/**'), 'ngsw-config.json must exclude !/**/games/** from SPA navigation');
+ const urls = (ngsw.assetGroups || []).flatMap((g) => (g.resources && (g.resources.files || g.resources.urls)) || []);
+ for (const required of ['/index.html', '/manifest.webmanifest', '/assets/**', '/games/**']) {
+  assert.ok(urls.includes(required), 'ngsw-config.json missing assetGroup url: ' + required);
+ }
+ const assetsGroup = (ngsw.assetGroups || []).find((g) => g.name === 'assets');
+ assert.equal(assetsGroup && assetsGroup.cacheQueryOptions && assetsGroup.cacheQueryOptions.ignoreSearch, true, 'assets group must set cacheQueryOptions.ignoreSearch: true for parameterized game URLs offline');
+ const manifest = JSON.parse(fs.readFileSync('public/manifest.webmanifest', 'utf8'));
+ for (const icon of manifest.icons) {
+  const pubPath = path.join('public', icon.src);
+  assert.ok(fs.existsSync(pubPath) || fs.existsSync(icon.src), 'Missing manifest icon: ' + icon.src);
+ }
+ assert.match(fs.readFileSync('src/index.html', 'utf8'), /rel="manifest"/);
 });

@@ -1,16 +1,19 @@
 {
   "name": "little-learners",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "private": true,
-  "description": "Accessible, browser-based learning games for curious kids",
+  "description": "Accessible, browser-based learning games for curious kids built with Angular, Tailwind CSS, DaisyUI, and localStorage",
+  "packageManager": "npm@11.16.0",
   "scripts": {
-    "start": "python3 -m http.server 4173",
+    "ng": "ng",
+    "start": "ng serve --port 4173",
+    "build": "node scripts/sync-index.cjs && ng build --configuration production --base-href ./",
+    "build:pages": "node scripts/sync-index.cjs && ng build --configuration production --base-href /kid-Learning-games/",
+    "watch": "ng build --watch --configuration development",
     "test": "node --test tests/*.test.cjs",
     "test:e2e": "node tests/browser.cjs",
-    "build": "node scripts/build.cjs",
     "sync:index": "node scripts/sync-index.cjs",
     "new-game": "node scripts/new-game.cjs",
-    "sw": "node scripts/build-sw.cjs",
     "test:offline": "node tests/offline-browser.cjs",
     "test:tamil": "node tests/tamil-browser.cjs",
     "test:tamil-games": "node tests/tamil-games-browser.cjs",
@@ -23,7 +26,27 @@
     "test:bee": "node tests/bee-browser.cjs",
     "audio:tamil": "node scripts/fetch-tamil-audio.cjs"
   },
+  "dependencies": {
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
+    "@angular/router": "^22.3.0",
+    "@angular/service-worker": "^22.3.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
   "devDependencies": {
-    "playwright": "1.63.0"
+    "@angular/build": "^22.3.0",
+    "@angular/cli": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
+    "@tailwindcss/postcss": "latest",
+    "daisyui": "latest",
+    "playwright": "1.63.0",
+    "postcss": "latest",
+    "prettier": "^3.8.1",
+    "tailwindcss": "latest",
+    "typescript": "~6.0.2"
   }
 }

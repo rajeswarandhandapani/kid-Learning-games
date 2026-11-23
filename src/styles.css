@@ -1,0 +1,18 @@
+/* Little Learners layers angular-pwa-kit (Tailwind CSS v4 + DaisyUI v5) beneath the kid storybook theme in assets/css/common.css. */
+@import "./app/kit/theme.css";
+
+html {
+  background-color: #1b1250;
+}
+
+body.learning-home {
+  margin: 0;
+  background: transparent;
+  color: var(--kid-ink);
+  padding-bottom: 0;
+  font-family: var(--kid-font);
+}
+
+body.learning-home [hidden] {
+  display: none !important;
+}

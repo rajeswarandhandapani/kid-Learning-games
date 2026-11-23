@@ -138,5 +138,5 @@ if (!cat.includes(`id: "${id}"`) && !cat.includes(`"id":"${id}"`)) {
  cat = cat.replace(/\n  \];\n\n  var PATHS/, `\n    ${entry},\n  ];\n\n  var PATHS`);
  fs.writeFileSync(catPath, cat);
 }
-require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'build-sw.cjs')], { stdio: 'inherit' });
-console.log(`Created games/${id}/, listed it in the catalogue and added it to the offline list. Add its levels to GAME_LEVELS in catalogue.js, then run: npm run sync:index`);
+require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'sync-index.cjs')], { stdio: 'inherit' });
+console.log(`Created games/${id}/, listed it in the catalogue, and updated src/index.html. Add its levels to GAME_LEVELS in catalogue.js.`);

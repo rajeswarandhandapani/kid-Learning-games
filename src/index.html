@@ -6,10 +6,7 @@
   <title>Little Learners | 84 learning games for kids</title>
   <meta name="description" content="Explore 84 playful learning activities for kids: math, English, Tamil (with real voice recordings), science, stories, pictures, and memory. Learn at your own pace with untimed practice." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>" />
-  <link
-    href="assets/vendor/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="assets/vendor/bootstrap.min.css" rel="stylesheet" />
   <link href="assets/css/common.css" rel="stylesheet" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#1b1250" />
@@ -18,75 +15,16 @@
   <meta name="apple-mobile-web-app-title" content="Little Learners" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <script src="assets/js/sounds.js"></script>
+  <script src="assets/js/catalogue.js"></script>
+  <script src="assets/js/progress.js"></script>
 </head>
 <body class="learning-home">
-  <a class="skip-link" href="#main">Skip to games</a>
-  <div class="kid-clouds" aria-hidden="true"></div>
-  <header class="kid-top">
-    <a class="kid-logo" href="#home" aria-label="Little Learners home"><img src="assets/art/owl.svg" alt="" width="46" height="46"><b>Little Learners</b></a>
-    <a class="kid-chip" id="stars-chip" href="#me"></a>
-  </header>
-  <main id="main" class="kid-main">
-    <section class="kid-view" data-view="home" hidden>
-      <div class="kid-title kid-hello"><img class="kid-owl" src="assets/art/owl.svg" alt="" width="84" height="84"><div class="kid-bubble"><h1 tabindex="-1">What shall we play?</h1><span id="home-title-say"></span></div></div>
-      <div id="play-next-wrap" class="kid-next-wrap">
-        <a id="play-next" class="kid-play-next" href="#"><span class="kid-play-arrow" aria-hidden="true">▶</span><span class="kid-play-words"><b>Play next</b><small id="play-next-name"></small></span><span id="play-next-pic" class="kid-play-pic" aria-hidden="true"></span></a>
-      </div>
-      <!-- Review My Mistakes: shown only when questions are ready -->
-      <div id="review-card" class="klg-review-card" hidden>
-        <div><div id="review-count" class="fw-bold"></div><div id="review-note" class="small"></div></div>
-        <a id="review-link" class="kid-review-go" href="#">🔁 Try again</a>
-      </div>
-      <div id="home-level" class="kid-levelcard"></div>
-      <div id="worlds" class="kid-worlds"></div>
-      <div class="kid-row">
-        <a id="daily-link" class="kid-soft" href="#"><small>Today’s game</small><span id="daily-name"></span></a>
-        <button id="surprise-btn" type="button" class="kid-soft">🎲 Surprise me</button>
-      </div>
-    </section>
-
-    <section class="kid-view" data-view="me" hidden>
-      <div class="kid-title kid-title-back"><a class="kid-back" href="#home">⬅ Back</a><h1 tabindex="-1">⭐ My stars</h1></div>
-      <div id="learning-progress" class="card klg-player-card">
-        <div class="card-body">
-          <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div id="player-rank-emoji" class="klg-player-rank">🐣</div>
-            <div class="flex-grow-1" style="min-width: 200px;">
-              <div class="h4 fw-bold mb-1" id="player-rank-name">Curious Chick</div>
-              <div class="klg-xp-track"><div id="player-xp-fill" class="klg-xp-fill"></div></div>
-              <div class="small fw-bold mt-1" id="player-xp-caption"></div>
-            </div>
-            <div class="d-flex gap-2 flex-wrap" id="player-stats"></div>
-          </div>
-        </div>
-      </div>
-      <h2 class="kid-subhead">🏅 My badges</h2>
-      <div class="kid-badges" id="player-badges"></div>
-    </section>
-
-    <section class="kid-view" data-view="world" hidden>
-      <div id="world-head" class="kid-world-head"><a class="kid-back" href="#home">⬅ Back</a><h1 id="world-title" tabindex="-1"></h1><span id="world-say"></span></div>
-      <p id="path-next" class="path-next" role="status"></p>
-      <p id="world-empty" class="kid-empty" hidden>♡ Tap the heart on a game to keep it here.</p>
-    </section>
-
-    <section id="library" class="kid-view library-controls" data-view="all" hidden>
-      <div class="kid-title kid-title-back"><a class="kid-back" href="#home">⬅ Back</a><h1 tabindex="-1">All games</h1></div>
-      <div class="search-row"><label class="search-box"><span aria-hidden="true">⌕</span><input id="game-search" type="search" placeholder="Find a game…" aria-label="Search games"></label><label class="level-select">Age <select id="level-filter"><option value="all">All ages</option><option value="1">🐣 Ages 3–5</option><option value="2">🧱 Ages 5–7</option><option value="3">🚀 Ages 7–9</option><option value="4">🧠 Ages 9+</option></select></label></div>
-      <div class="subject-tabs" id="subject-tabs" role="group" aria-label="Filter by subject"></div>
-      <p id="filter-status" class="filter-status" role="status"></p>
-      <div id="empty-games" hidden><h3>No games found yet</h3><p>Try another word or age.</p><button id="clear-filters">Show all games</button></div>
-    </section>
-
-    <div id="levels" class="kid-cards" hidden></div>
-
-    <section class="kid-view kid-world-foot" data-view="world" hidden>
-      <a class="kid-quiet" href="#all">See every game</a>
-    </section>
-    <noscript>
-      <nav aria-label="All games">
-        <h2>All games</h2>
-        <!-- noscript:start -->
+  <app-root></app-root>
+  <noscript>
+    <nav aria-label="All games">
+      <h2>All games</h2>
+      <!-- noscript:start -->
         <h3>First Steps · Ages 3–5</h3>
         <ul>
             <li><a href="games/memory-match/index.html">🌻 Memory Garden</a> — Find pairs. Grow your memory.</li>
@@ -184,14 +122,7 @@
             <li><a href="games/map-explorer/index.html">🗺️ Map Explorer</a> — Find continents and oceans, and where animals and landmarks belong.</li>
         </ul>
         <!-- noscript:end -->
-      </nav>
-    </noscript>
-  </main>
-  <footer class="home-footer"><button class="kid-quiet parent-link" id="parent-open">For grown-ups</button><span>Progress stays on this device.</span></footer>
-  <dialog id="parent-dialog"><div class="dialog-heading"><h2>For grown-ups</h2><button id="parent-close" aria-label="Close grown-up information">✕</button></div><p>Your child chooses an age on the first visit, and the games follow it. Ages are a guide, not a limit: tap the age at the top of the page, or Easier and Harder under a subject's games, to change it. <a id="see-all-grownup" href="#all">See and search all 84 games</a>.</p><h3>Learning without pressure</h3><p>Every game starts in untimed practice. Children can read feedback and move on when ready. A timed challenge is optional, under More ways to play.</p><h3>Progress &amp; privacy</h3><p>Stars, favorites, and achievements are saved in this browser. They are not synced between devices. Clearing browser data removes them.</p><h3>Use it like an app, even offline</h3><p>Every game, picture and Tamil recording is saved on this device the first time you visit, so the games keep working without internet.</p><p id="offline-status" class="small"></p><p id="install-help"></p><button type="button" id="install-app" class="install-app" hidden>Install Little Learners</button><p id="parent-summary"></p><div id="parent-report"></div><button id="reset-progress" class="reset-button">Reset learning progress</button><p class="small">This removes earned progress on this browser after confirmation.</p><h3>Badges</h3><div id="parent-badge-list" class="parent-badges"></div></dialog>
-  <script src="assets/js/sounds.js"></script>
-  <script src="assets/js/catalogue.js"></script>
-  <script src="assets/js/progress.js"></script>
-  <script src="assets/js/home.js"></script>
+    </nav>
+  </noscript>
 </body>
 </html>

@@ -638,12 +638,12 @@
     },
   };
 
-  // Offline support: every page loads this file, so it registers the service
-  // worker (sw.js at the site root, built by scripts/build-sw.cjs).
+  // Offline support: every page loads this file, so it registers Angular's service
+  // worker (ngsw-worker.js at the site root).
   try {
     if (typeof document !== "undefined" && document.currentScript && typeof navigator !== "undefined" &&
         "serviceWorker" in navigator && location.protocol !== "file:") {
-      var swUrl = new URL("../../sw.js", document.currentScript.src).href;
+      var swUrl = new URL("../../ngsw-worker.js", document.currentScript.src).href;
       window.addEventListener("load", function () {
         navigator.serviceWorker.register(swUrl).catch(function () { /* offline support is optional */ });
       });
