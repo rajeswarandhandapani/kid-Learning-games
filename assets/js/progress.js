@@ -521,9 +521,9 @@
     },
 
     /** Questions ready now for this page's game and settings, oldest miss first. */
-    dueHere: function (limit) {
-      var gameId = currentGameId();
-      var query = reviewQuery();
+    dueHere: function (limit, opts) {
+      var gameId = (opts && opts.gameId) || currentGameId();
+      var query = opts && opts.query !== undefined ? opts.query : reviewQuery();
       var day = today();
       var list = loadReview().items.filter(function (it) { return it.gameId === gameId && it.query === query && it.due <= day; });
       return limit ? list.slice(0, limit) : list;

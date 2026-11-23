@@ -12,6 +12,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "node --test tests/*.test.cjs",
     "test:e2e": "node tests/browser.cjs",
+    "test:ng-games": "node tests/angular-games-browser.cjs",
     "sync:index": "node scripts/sync-index.cjs",
     "new-game": "node scripts/new-game.cjs",
     "test:offline": "node tests/offline-browser.cjs",

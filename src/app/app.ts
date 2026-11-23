@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { ParentDialogComponent } from './components/parent-dialog.component';
+import { QuizEngineComponent } from './game/quiz-engine.component';
 import { ConfirmDialogComponent } from './kit/confirm-dialog.component';
 import { ToastComponent } from './kit/toast.component';
 import { KlgHubService } from './services/klg-hub.service';
@@ -8,8 +9,20 @@ import { KlgHubService } from './services/klg-hub.service';
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ParentDialogComponent, ToastComponent, ConfirmDialogComponent],
+  imports: [ParentDialogComponent, QuizEngineComponent, ToastComponent, ConfirmDialogComponent],
   template: `
+    @if (hub.view() === 'play' && hub.activeGame() && hub.activeDefinition()) {
+      <klg-quiz-engine
+        [game]="hub.activeGame()!"
+        [definition]="hub.activeDefinition()!"
+        [query]="hub.activeGameQuery()"
+        [angularGameIds]="hub.angularGameIds"
+        (navigateQuery)="hub.setActiveGameQuery($event)"
+        (goWorld)="hub.go(null, 'world/' + $event)"
+        (goHome)="hub.go(null, 'home')"
+        (openGame)="hub.openGame(null, $event.gameId, $event.query)"
+      />
+    } @else {
     <a class="skip-link" href="#main" (click)="skipToMain($event)">Skip to games</a>
     <div class="kid-clouds" aria-hidden="true"></div>
 
@@ -66,8 +79,9 @@ import { KlgHubService } from './services/klg-hub.service';
           <a
             id="play-next"
             class="kid-play-next"
-            [href]="hub.playNextGame() ? 'games/' + hub.playNextGame()!.id + '/index.html' : '#'"
+            [href]="hub.playNextGame() ? hub.gameHref(hub.playNextGame()!.id) : '#'"
             [attr.data-subject]="hub.playNextGame()?.subject || null"
+            (click)="openIfReady($event, hub.playNextGame()?.id)"
           >
             <span class="kid-play-arrow" aria-hidden="true">▶</span>
             <span class="kid-play-words">
@@ -174,7 +188,8 @@ import { KlgHubService } from './services/klg-hub.service';
           <a
             id="daily-link"
             class="kid-soft"
-            [href]="hub.dailyGame() ? 'games/' + hub.dailyGame()!.id + '/index.html' : '#'"
+            [href]="hub.dailyGame() ? hub.gameHref(hub.dailyGame()!.id) : '#'"
+            (click)="openIfReady($event, hub.dailyGame()?.id)"
           >
             <small>Today’s game</small>
             <span id="daily-name">
@@ -335,7 +350,11 @@ import { KlgHubService } from './services/klg-hub.service';
             [hidden]="!card.visible"
             [style.order]="card.order"
           >
-            <a [href]="'games/' + card.game.id + '/index.html'" class="text-decoration-none">
+            <a
+              [href]="hub.gameHref(card.game.id)"
+              class="text-decoration-none"
+              (click)="hub.openGame($event, card.game.id)"
+            >
               <div
                 class="card game-card"
                 [class.done]="card.done"
@@ -396,6 +415,7 @@ import { KlgHubService } from './services/klg-hub.service';
     </footer>
 
     <klg-parent-dialog />
+    }
     <kit-toast />
     <kit-confirm-dialog />
   `,
@@ -440,5 +460,10 @@ export class App {
   clearSearch(input: HTMLInputElement): void {
     this.hub.clearFilters();
     input.focus();
+  }
+
+  openIfReady(event: Event, id?: string): void {
+    if (!id) return;
+    this.hub.openGame(event, id);
   }
 }

@@ -1,97 +1,31 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { KlgCatalogueService, type KlgGame, type KlgLevelDef, type KlgSubjectDef } from '../core/klg-catalogue.service';
+import {
+  KlgProgressService,
+  type KlgBadge,
+  type KlgGameStats,
+  type KlgProgressSummary,
+  type KlgRank,
+  type KlgReviewGroup,
+  type KlgReviewSummary,
+  type KlgTrickyItem,
+} from '../core/klg-progress.service';
+import { KlgSoundsService } from '../core/klg-sounds.service';
+import { ANGULAR_GAME_IDS, getAngularQuizGame, isAngularGame } from '../games/game-registry';
+import type { QuizGameDefinition } from '../game/quiz-types';
 
-export interface KlgLevelDef {
-  name: string;
-  emoji: string;
-  ages: string;
-  short: string;
-  say: string;
-  note: string;
-}
-
-export interface KlgSubjectDef {
-  label: string;
-  kid: string;
-  icon: string;
-  say: string;
-}
-
-export interface KlgGameLevel {
-  band: number;
-  query: string;
-}
-
-export interface KlgGame {
-  id: string;
-  name: string;
-  icon: string;
-  blurb: string;
-  level: number;
-  subject: string;
-  skills: string[];
-  levels: KlgGameLevel[];
-  isNew?: boolean;
-  v3?: boolean;
-}
-
-export interface KlgRank {
-  index: number;
-  name: string;
-  emoji: string;
-  min: number;
-  next?: { index: number; name: string; emoji: string; min: number } | null;
-}
-
-export interface KlgBadge {
-  id: string;
-  emoji: string;
-  name: string;
-  hint: string;
-}
-
-export interface KlgGameStats {
-  plays: number;
-  bestScore: number;
-  total: number;
-  bestStars: number;
-  bestMs: number;
-  lastPlayed?: string;
-  recent?: number[];
-}
-
-export interface KlgProgressSummary {
-  xp: number;
-  plays: number;
-  dayStreak: number;
-  bestDayStreak: number;
-  gamesPlayed: number;
-  stars: number;
-  threeStarGames: number;
-  games: Record<string, KlgGameStats>;
-  badges: Record<string, string>;
-  rank: KlgRank;
-}
-
-export interface KlgReviewGroup {
-  gameId: string;
-  query: string;
-  count: number;
-  href: string;
-}
-
-export interface KlgReviewSummary {
-  due: number;
-  waiting: number;
-  cleared: number;
-  groups: KlgReviewGroup[];
-}
-
-export interface KlgTrickyItem {
-  gameId: string;
-  prompt: string;
-  answer: string;
-  misses: number;
-}
+export type {
+  KlgLevelDef,
+  KlgSubjectDef,
+  KlgGame,
+  KlgRank,
+  KlgBadge,
+  KlgGameStats,
+  KlgProgressSummary,
+  KlgReviewGroup,
+  KlgReviewSummary,
+  KlgTrickyItem,
+};
 
 export interface SkillReportRow {
   tag: string;
@@ -122,50 +56,8 @@ export interface RenderedGameCard {
   spokenName: string;
 }
 
-interface CatalogueGlobal {
-  LEVELS: Record<number, KlgLevelDef>;
-  SUBJECTS: Record<string, KlgSubjectDef>;
-  GAMES: KlgGame[];
-  PATHS: Record<string, { steps: Array<{ game: string; label: string }> }>;
-  SKILL_NAMES: Record<string, string>;
-  byId(id: string): KlgGame | undefined;
-  agesLabel(g: KlgGame): string;
-  gamesFor(subject?: string): KlgGame[];
-  nextFor(games: Record<string, KlgGameStats>, prefer: string): KlgGame | null;
-}
-
-interface ProgressGlobal {
-  RANKS: Array<{ name: string; emoji: string; min: number }>;
-  BADGES: KlgBadge[];
-  summary(): KlgProgressSummary;
-  reset(): void;
-  review: {
-    summary(): KlgReviewSummary;
-    tricky(limit?: number): KlgTrickyItem[];
-  };
-}
-
-interface SoundsGlobal {
-  isMuted(): boolean;
-  toggleMuted(): boolean;
-  click(): void;
-}
-
 const FAVORITES_KEY = 'klg-favorites';
 const PATH_KEY = 'klg-path';
-
-const EMPTY_SUMMARY: KlgProgressSummary = {
-  xp: 0,
-  plays: 0,
-  dayStreak: 0,
-  bestDayStreak: 0,
-  gamesPlayed: 0,
-  stars: 0,
-  threeStarGames: 0,
-  games: {},
-  badges: {},
-  rank: { index: 0, name: 'Curious Chick', emoji: '🐣', min: 0, next: { index: 1, name: 'Bright Spark', emoji: '✨', min: 250 } },
-};
 
 function readPref(key: string, fallback: string): string {
   try {
@@ -202,12 +94,20 @@ function dailyIndex(count: number): number {
 
 @Injectable({ providedIn: 'root' })
 export class KlgHubService {
-  readonly view = signal<'home' | 'world' | 'me' | 'all'>('home');
+  private readonly catService = inject(KlgCatalogueService);
+  private readonly progressService = inject(KlgProgressService);
+  private readonly soundsService = inject(KlgSoundsService);
+
+  readonly view = signal<'home' | 'world' | 'me' | 'all' | 'play'>('home');
   readonly world = signal('');
-  readonly summary = signal<KlgProgressSummary>(EMPTY_SUMMARY);
-  readonly reviewSummary = signal<KlgReviewSummary>({ due: 0, waiting: 0, cleared: 0, groups: [] });
+  readonly activeGameId = signal('');
+  readonly activeGameQuery = signal('');
+  readonly angularGameIds = ANGULAR_GAME_IDS;
+
+  readonly summary = this.progressService.summary;
+  readonly reviewSummary = this.progressService.reviewSummary;
   readonly favorites = signal<string[]>([]);
-  readonly muted = signal(false);
+  readonly muted = this.soundsService.muted;
 
   // Filters on #all view
   readonly search = signal('');
@@ -227,37 +127,20 @@ export class KlgHubService {
   private initialized = false;
   private firstRoute = true;
 
-  private get cat(): CatalogueGlobal | null {
-    return (window as unknown as { KlgCatalogue?: CatalogueGlobal }).KlgCatalogue ?? null;
-  }
-
-  private get prog(): ProgressGlobal | null {
-    return (window as unknown as { KlgProgress?: ProgressGlobal }).KlgProgress ?? null;
-  }
-
-  private get sounds(): SoundsGlobal | null {
-    return (window as unknown as { KlgSounds?: SoundsGlobal }).KlgSounds ?? null;
-  }
-
-  readonly subjects = computed(() => {
-    const c = this.cat;
-    if (!c) return [];
-    return Object.keys(c.SUBJECTS).map(key => ({ key, ...c.SUBJECTS[key] }));
-  });
-
-  readonly badges = computed<KlgBadge[]>(() => this.prog?.BADGES ?? []);
-  readonly allGames = computed<KlgGame[]>(() => this.cat?.GAMES ?? []);
+  readonly subjects = computed(() => this.catService.subjects());
+  readonly badges = computed<KlgBadge[]>(() => this.progressService.badges());
+  readonly allGames = computed<KlgGame[]>(() => this.catService.games());
   readonly totalGamesCount = computed(() => this.allGames().length);
+  readonly activeGame = computed<KlgGame | null>(() => {
+    const id = this.activeGameId();
+    return id ? this.catService.byId(id) || null : null;
+  });
+  readonly activeDefinition = computed<QuizGameDefinition | null>(() => getAngularQuizGame(this.activeGameId()));
 
-  readonly canSpeak = (): boolean =>
-    typeof window !== 'undefined' &&
-    Boolean((window as unknown as { speechSynthesis?: unknown }).speechSynthesis) &&
-    typeof (window as unknown as { SpeechSynthesisUtterance?: unknown }).SpeechSynthesisUtterance !== 'undefined';
+  readonly canSpeak = (): boolean => this.soundsService.canSpeak();
 
   readonly playNextGame = computed<KlgGame | null>(() => {
-    const c = this.cat;
-    if (!c) return null;
-    return c.nextFor(this.summary().games, readPref(PATH_KEY, ''));
+    return this.catService.nextFor(this.summary().games, readPref(PATH_KEY, ''));
   });
 
   readonly dailyGame = computed<KlgGame | null>(() => {
@@ -286,8 +169,8 @@ export class KlgHubService {
 
   readonly worldMeta = computed(() => {
     const w = this.world();
-    const c = this.cat;
-    const sub = c?.SUBJECTS[w];
+    const subs = this.catService.subjectMap();
+    const sub = subs[w];
     return {
       key: w,
       isSubject: Boolean(sub),
@@ -297,13 +180,12 @@ export class KlgHubService {
   });
 
   readonly worldGamesList = computed<KlgGame[]>(() => {
-    const c = this.cat;
-    if (!c || this.view() !== 'world') return [];
+    if (this.view() !== 'world') return [];
     const w = this.world();
     if (w === 'favorites') {
-      return this.favorites().map(id => c.byId(id)).filter((g): g is KlgGame => Boolean(g));
+      return this.favorites().map(id => this.catService.byId(id)).filter((g): g is KlgGame => Boolean(g));
     }
-    return c.gamesFor(w);
+    return this.catService.gamesFor(w);
   });
 
   readonly worldNextUp = computed<KlgGame | null>(() => {
@@ -316,15 +198,14 @@ export class KlgHubService {
     if (this.view() !== 'world' || this.world() === 'favorites') return '';
     const next = this.worldNextUp();
     if (!next) return '🎉 You have a star in every game here!';
-    const steps = this.cat?.PATHS[next.subject]?.steps ?? [];
+    const steps = this.catService.pathsMap()[next.subject]?.steps ?? [];
     const step = steps.find(s => s.game === next.id);
     return `Next up: ${step ? `${step.label} · ${next.name}` : next.name}`;
   });
 
   readonly renderedGames = computed<RenderedGameCard[]>(() => {
-    const c = this.cat;
-    if (!c) return [];
     const list = this.allGames();
+    if (!list.length) return [];
     const gamesMap = this.summary().games;
     const favs = new Set(this.favorites());
     const v = this.view();
@@ -341,7 +222,7 @@ export class KlgHubService {
       const earned = stats ? stats.bestStars : 0;
       const done = Boolean(stats && stats.bestStars > 0);
       const ages = game.levels.map(l => String(l.band));
-      const agesLabel = c.agesLabel(game);
+      const agesLabel = this.catService.agesLabel(game);
 
       let visible = false;
       let order = index;
@@ -390,11 +271,14 @@ export class KlgHubService {
   });
 
   readonly reportData = computed(() => {
-    const c = this.cat;
+    const games = this.catService.games();
+    const paths = this.catService.pathsMap();
+    const subs = this.catService.subjectMap();
+    const skills = this.catService.skillNames();
     const current = this.summary();
     const review = this.reviewSummary();
-    const tricky = this.prog?.review.tricky(10) ?? [];
-    if (!c) {
+    const tricky = this.progressService.tricky(10);
+    if (!games.length) {
       return {
         hasPlays: false,
         practiseNames: [] as string[],
@@ -410,7 +294,7 @@ export class KlgHubService {
       string,
       { tag: string; subject: string; played: KlgGame[]; stars: number; recent: number[]; last: string }
     >();
-    for (const g of c.GAMES) {
+    for (const g of games) {
       const st = current.games[g.id];
       for (const tag of g.skills) {
         let entry = rowMap.get(tag);
@@ -430,7 +314,7 @@ export class KlgHubService {
     }
 
     const skillName = (tag: string) =>
-      c.SKILL_NAMES[tag] || tag.split('.')[1]?.replace(/-/g, ' ') || tag;
+      skills[tag] || tag.split('.')[1]?.replace(/-/g, ' ') || tag;
 
     const allRows: SkillReportRow[] = [];
     for (const r of rowMap.values()) {
@@ -460,13 +344,13 @@ export class KlgHubService {
     const practiseNames = allRows.filter(r => r.weak).map(r => r.name);
 
     const nextGameAfter = (game: KlgGame): KlgGame | null => {
-      for (const key of Object.keys(c.PATHS)) {
-        const steps = c.PATHS[key].steps;
+      for (const key of Object.keys(paths)) {
+        const steps = paths[key].steps;
         const idx = steps.findIndex(s => s.game === game.id);
         if (idx >= 0) {
           for (let j = idx + 1; j < steps.length; j++) {
             const st = current.games[steps[j].game];
-            if (!st || !st.bestStars) return c.byId(steps[j].game) || null;
+            if (!st || !st.bestStars) return this.catService.byId(steps[j].game) || null;
           }
         }
       }
@@ -481,10 +365,10 @@ export class KlgHubService {
       if (next && !readyNext.some(x => x.id === next.id)) readyNext.push(next);
     }
 
-    const subjectSections = Object.keys(c.SUBJECTS)
+    const subjectSections = Object.keys(subs)
       .map(key => ({
         key,
-        label: c.SUBJECTS[key].label,
+        label: subs[key].label,
         rows: allRows.filter(r => r.subject === key && rowMap.get(r.tag)!.played.length > 0),
       }))
       .filter(s => s.rows.length > 0);
@@ -525,38 +409,75 @@ export class KlgHubService {
 
   refreshState(): void {
     this.favorites.set(readFavorites());
-    if (this.prog) {
-      this.summary.set(this.prog.summary());
-      this.reviewSummary.set(this.prog.review.summary());
-    }
-    if (this.sounds) {
-      this.muted.set(this.sounds.isMuted());
-    }
+    this.progressService.refresh();
+    this.soundsService.sync();
   }
 
   syncFromHash(): void {
-    const hash = (typeof location !== 'undefined' ? location.hash : '').replace(/^#\/?/, '');
-    let nextView: 'home' | 'world' | 'me' | 'all' = 'home';
-    let nextWorld = '';
+    const rawHash = (typeof location !== 'undefined' ? location.hash : '').replace(/^#\/?/, '');
+    const qIdx = rawHash.indexOf('?');
+    const hashPath = qIdx >= 0 ? rawHash.slice(0, qIdx) : rawHash;
+    let hashQuery = qIdx >= 0 ? rawHash.slice(qIdx + 1) : '';
+    const subs = this.catService.subjectMap();
 
-    if (hash === 'me' || hash === 'all') {
-      nextView = hash;
-    } else if (hash.startsWith('world/')) {
-      const key = hash.slice(6);
-      if (this.cat?.SUBJECTS[key] || key === 'favorites') {
+    let nextView: 'home' | 'world' | 'me' | 'all' | 'play' = 'home';
+    let nextWorld = '';
+    let nextGameId = '';
+    let nextGameSubject = '';
+
+    if (hashPath === 'me' || hashPath === 'all') {
+      nextView = hashPath;
+    } else if (hashPath.startsWith('world/')) {
+      const key = hashPath.slice(6);
+      if (subs[key] || key === 'favorites') {
         nextView = 'world';
         nextWorld = key;
-        if (this.cat?.SUBJECTS[key]) writePref(PATH_KEY, key);
+        if (subs[key]) writePref(PATH_KEY, key);
       }
+    } else if (hashPath.startsWith('play/')) {
+      const id = hashPath.slice(5);
+      const game = this.catService.byId(id);
+      const def = getAngularQuizGame(id);
+      if (game && def) {
+        if (!hashQuery) {
+          const saved = this.progressService.readSavedQuery(game);
+          if (saved) {
+            hashQuery = saved;
+            if (typeof history !== 'undefined' && typeof location !== 'undefined') {
+              history.replaceState(null, '', `#play/${id}?${saved}`);
+            }
+          }
+        }
+        nextView = 'play';
+        nextGameId = id;
+        nextGameSubject = game.subject;
+        writePref(PATH_KEY, game.subject);
+      }
+    }
+
+    if (this.view() === 'play' && nextView !== 'play') {
+      this.soundsService.cancelSpeech();
     }
 
     this.view.set(nextView);
     this.world.set(nextWorld);
+    this.activeGameId.set(nextGameId);
+    this.activeGameQuery.set(nextGameId ? hashQuery : '');
+
     if (typeof document !== 'undefined') {
       document.body.dataset['view'] = nextView;
       document.body.dataset['world'] = nextWorld;
+      if (nextView === 'play') {
+        document.body.classList.remove('learning-home');
+        document.body.classList.add('kid-game');
+        document.body.dataset['subject'] = nextGameSubject;
+      } else {
+        document.body.classList.remove('kid-game');
+        document.body.classList.add('learning-home');
+        delete document.body.dataset['subject'];
+      }
       window.scrollTo(0, 0);
-      if (!this.firstRoute) {
+      if (!this.firstRoute && nextView !== 'play') {
         queueMicrotask(() => {
           const title = document.querySelector<HTMLElement>(`.kid-view[data-view="${nextView}"] h1`);
           title?.focus({ preventScroll: true });
@@ -566,8 +487,39 @@ export class KlgHubService {
     this.firstRoute = false;
   }
 
-  go(event: Event, hashTarget: string): void {
-    event.preventDefault();
+  gameHref(gameId: string, query?: string): string {
+    const q = query ? `?${query}` : '';
+    return isAngularGame(gameId) ? `#play/${gameId}${q}` : `games/${gameId}/index.html${q}`;
+  }
+
+  openGame(event: Event | null, gameId: string, query?: string): void {
+    if (isAngularGame(gameId)) {
+      event?.preventDefault();
+      this.soundsService.click();
+      const target = `#play/${gameId}${query ? `?${query}` : ''}`;
+      if (typeof location !== 'undefined') {
+        location.hash = target;
+      }
+      this.syncFromHash();
+      return;
+    }
+    if (event === null && typeof window !== 'undefined') {
+      window.location.href = this.gameHref(gameId, query);
+    }
+  }
+
+  setActiveGameQuery(nextQuery: string): void {
+    const id = this.activeGameId();
+    if (!id) return;
+    const target = `#play/${id}${nextQuery ? `?${nextQuery}` : ''}`;
+    if (typeof location !== 'undefined') {
+      location.hash = target;
+    }
+    this.syncFromHash();
+  }
+
+  go(event: Event | null, hashTarget: string): void {
+    event?.preventDefault();
     const clean = hashTarget.replace(/^#\/?/, '');
     if (typeof location !== 'undefined') {
       location.hash = '#' + clean;
@@ -576,7 +528,7 @@ export class KlgHubService {
   }
 
   worldProgress(key: string): { done: number; total: number; pct: number } {
-    const list = this.cat?.gamesFor(key) ?? [];
+    const list = this.catService.gamesFor(key);
     const games = this.summary().games;
     const done = list.filter(g => games[g.id] && games[g.id].bestStars > 0).length;
     const total = list.length;
@@ -588,24 +540,11 @@ export class KlgHubService {
   }
 
   say(text: string): void {
-    if (!this.canSpeak() || !text) return;
-    const synth = (window as unknown as { speechSynthesis: SpeechSynthesis }).speechSynthesis;
-    const Utterance = (window as unknown as { SpeechSynthesisUtterance: typeof SpeechSynthesisUtterance })
-      .SpeechSynthesisUtterance;
-    synth.cancel();
-    const cleaned = String(text).replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
-    const utt = new Utterance(cleaned);
-    utt.lang = 'en-US';
-    utt.rate = 0.88;
-    synth.speak(utt);
+    this.soundsService.speak(text);
   }
 
   toggleMuted(): void {
-    if (this.sounds) {
-      const nowMuted = this.sounds.toggleMuted();
-      this.muted.set(nowMuted);
-      if (!nowMuted) this.sounds.click();
-    }
+    this.soundsService.toggleMuted();
   }
 
   toggleFavorite(id: string): void {
@@ -618,9 +557,9 @@ export class KlgHubService {
   surpriseGame(): void {
     const list = this.allGames();
     if (!list.length) return;
-    this.sounds?.click();
+    this.soundsService.click();
     const pick = list[Math.floor(Math.random() * list.length)];
-    window.location.href = `games/${pick.id}/index.html`;
+    this.openGame(null, pick.id);
   }
 
   clearFilters(): void {
@@ -651,12 +590,12 @@ export class KlgHubService {
     if (!window.confirm('Start over? This clears your XP, stars, badges and streak on this device.')) {
       return;
     }
-    this.prog?.reset();
+    this.progressService.reset();
     window.location.reload();
   }
 
   gameNameFor(id: string): string {
-    return this.cat?.byId(id)?.name ?? '';
+    return this.catService.byId(id)?.name ?? '';
   }
 
   private isStandalone(): boolean {
