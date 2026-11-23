@@ -3,8 +3,11 @@ artifacts/*.png
 artifacts/*.json
 site-output/
 dist/
+.angular/
+test-output/
 
 # Local Claude Code settings
+.claude/
 .claude/settings.local.json
 
 # Raw audio downloads (scripts/fetch-tamil-audio.cjs)

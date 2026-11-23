@@ -1,31 +1,39 @@
 # Little Learners · Kid Learning Games
 
-84 browser-based learning activities for children, built with HTML, CSS, and JavaScript. Runs as a static site, including on GitHub Pages. No account or application server is required.
+84 browser-based learning activities for children. The Home Hub shell is built with **Angular v22 (standalone, zoneless, Signals)**, **Tailwind CSS v4**, **DaisyUI v5**, **`@angular/service-worker`**, and **`angular-pwa-kit`**, while keeping all 84 games (`games/*/`), shared JS engines, offline assets/audio, and existing `klg-*` `localStorage` user data (`klg-progress-v1`, `klg-favorites`, `klg-review-v1`, `klg-path`, `klg-muted`, `klg-bee-v1`) backward-compatible.
+
+Runs as a static Progressive Web App (PWA) with zero account or backend required, deployed automatically via GitHub Actions to `https://rajeswarandhandapani.com/kid-Learning-games/`. The pre-Angular vanilla snapshot is preserved at tag `v1-vanilla`.
 
 ## Run and verify
 
 ```sh
 npm install
-npm start                 # http://localhost:4173
-npm test                  # progress and storage regression tests
-npx playwright install chromium
-npm run test:e2e          # keep the local server running in another terminal
-npm run test:bee          # Spelling Bee training: rules, words and every screen size
-npm run build            # validates game links and copies static assets to site-output/
-npm run test:tamil-games  # plays every Tamil activity with recorded audio (server running)
-npm run test:math         # plays the visual × and ÷ games; checks every picture matches its answer
-npm run test:pictures     # plays every new and picture-upgraded game; checks each picture against its answer
-npm run test:review       # for each covered game, misses a question and checks it comes back in a review
-npm run test:levels       # plays the harder number levels and works out every answer again from the screen
-npm run test:newgames     # plays the eight v4 games with real taps at phone widths
-npm run test:ux           # the layout checks: taps to a game, words on screen, button sizes, contrast, keyboard
+npm start                 # ng serve on http://localhost:4173
+npm test                  # unit, bank, catalogue, ngsw-config, progress, review & Tamil tests
+npm run build             # syncs src/index.html and builds dist/kid-Learning-games/browser (--base-href ./)
+npm run build:pages       # production build for GitHub Pages (--base-href /kid-Learning-games/)
+npm run test:e2e          # builds/uses dist/ (auto-starts serve-dist.cjs) and tests Hub + all 84 games
+npm run test:offline      # caches with ngsw-worker.js, goes offline, plays parameterized games & audio
+node scripts/serve-dist.cjs   # serves dist/kid-Learning-games/browser at http://localhost:4173
+npm run test:bee          # Spelling Bee training rules, words & viewports (with server running)
+npm run test:tamil-games  # Tamil activities with recorded MP3s (with server running)
+npm run test:math         # visual multiplication & division checks (with server running)
+npm run test:pictures     # picture game accuracy checks (with server running)
+npm run test:review       # Review My Mistakes end-to-end across all covered games (with server running)
+npm run test:levels       # harder number levels check (with server running)
+npm run test:newgames     # v4 games at mobile widths (with server running)
+npm run test:ux           # layout, button sizes, contrast & keyboard checks (with server running)
 npm run new-game -- <id> "<Name>" <icon> …   # scaffolds a hand-built game and lists it in the catalogue
-npm run sync:index        # keeps the home page title count and <noscript> list in step with the catalogue
-npm run sw                # rewrites sw.js, the offline file list (npm run build does this too)
-npm run test:offline      # visits once, goes offline, then plays games from the saved copy
+npm run sync:index        # keeps src/index.html title count and <noscript> list in step with the catalogue
 ```
 
-`BASE_URL` can point the browser tests at another local server. Screenshots are saved under `artifacts/` and ignored by Git.
+`BASE_URL` can point the browser tests at another local server (and `CHROME_PATH` can point Playwright at an installed Chrome/Edge binary). Screenshots are saved under `artifacts/` and ignored by Git.
+
+## Architecture & deployment
+
+- **Hub shell (`src/`):** Angular v22 zoneless Hub (`app.ts`, `klg-hub.service.ts`, `parent-dialog.component.ts`) + vendored `src/app/kit/` components (`angular-pwa-kit`).
+- **Offline service worker (`ngsw-config.json`):** Prefetches the Angular Hub, `assets/**`, and `games/**` with `cacheQueryOptions.ignoreSearch: true` for parameterized game URLs while excluding `!/**/games/**` from SPA navigation rewrites.
+- **Deployment (Path A):** `.github/workflows/deploy.yml` builds on push to `main` (`npm ci` → `npm test` → `ng build --configuration production --base-href /kid-Learning-games/`) and deploys `dist/kid-Learning-games/browser` via `actions/deploy-pages`.
 
 ## Learning experience
 

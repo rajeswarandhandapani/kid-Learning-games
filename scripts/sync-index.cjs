@@ -22,10 +22,10 @@ function synced(html) {
 }
 
 if (require.main === module) {
- const html = fs.readFileSync('index.html', 'utf8');
+ const html = fs.readFileSync('src/index.html', 'utf8');
  const next = synced(html);
  if (process.argv.includes('--check')) { process.exit(next === html ? 0 : 1); }
- if (next !== html) fs.writeFileSync('index.html', next);
- console.log(`index.html lists ${cat.GAMES.length} games`);
+ if (next !== html) fs.writeFileSync('src/index.html', next);
+ console.log(`src/index.html lists ${cat.GAMES.length} games`);
 }
 module.exports = { synced };

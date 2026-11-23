@@ -3,10 +3,18 @@
 // BASE_URL=http://localhost:8000/games when the site is copied into a website's games/ folder.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
-const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, '');
+async function launchBrowser() {
+  const opts = { headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) };
+  return chromium.launch(opts)
+    .catch(() => chromium.launch({ ...opts, channel: 'chrome' }))
+    .catch(() => chromium.launch({ ...opts, channel: 'msedge' }));
+}
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
+  const server = process.env.BASE_URL ? null : await require('../scripts/serve-dist.cjs').start(4173);
+  const base = (process.env.BASE_URL || 'http://127.0.0.1:4173').replace(/\/$/, '');
+  const browser = await launchBrowser();
+  try {
   const context = await browser.newContext({ viewport: { width: 820, height: 1180 }, serviceWorkers: 'allow' });
   const page = await context.newPage();
   const errors = [];
@@ -14,13 +22,14 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
 
   // First visit, online: the service worker saves everything.
   await page.goto(base + '/index.html');
+  await page.locator('.game-card').first().waitFor({ state: 'attached' });
   // The grown-up panel must not claim the games are saved before they are.
   await page.locator('#parent-open').click();
   const early = await page.evaluate(async () => {
     const text = document.getElementById('offline-status').textContent;
-    const keys = (await caches.keys()).filter((k) => k.startsWith('klg-'));
+    const keys = (await caches.keys()).filter((k) => (k.startsWith('ngsw:') && k.includes(':cache')) || k.startsWith('klg-'));
     const counts = await Promise.all(keys.map(async (k) => (await (await caches.open(k)).keys()).length));
-    return { text, saved: Math.max(0, ...counts) };
+    return { text, saved: counts.reduce((a, b) => a + b, 0) };
   });
   assert.ok(early.saved > 0 || !/Saved on this device/.test(early.text), `said "${early.text}" with ${early.saved} files saved`);
   assert.ok((await page.locator('#install-help').textContent()).length > 0, 'the panel explains how to install');
@@ -28,14 +37,15 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
   const scope = await page.evaluate(async () => (await navigator.serviceWorker.ready).scope);
   assert.ok(scope.startsWith(base + '/'), `service worker scope ${scope} stays inside ${base}/`);
   const expected = await page.evaluate(async () => {
-    const text = await (await fetch('sw.js')).text();
-    return (text.match(/"\.\//g) || []).length;
+    const manifest = JSON.parse(await (await fetch('ngsw.json')).text());
+    return Object.keys(manifest.hashTable || {}).length;
   });
   let saved = 0;
   for (let i = 0; i < 120 && saved < expected; i++) {
     saved = await page.evaluate(async () => {
-      const key = (await caches.keys()).find((k) => k.startsWith('klg-'));
-      return key ? (await (await caches.open(key)).keys()).length : 0;
+      const keys = (await caches.keys()).filter((k) => (k.startsWith('ngsw:') && k.includes(':cache')) || k.startsWith('klg-'));
+      const counts = await Promise.all(keys.map(async (k) => (await (await caches.open(k)).keys()).length));
+      return counts.reduce((a, b) => a + b, 0);
     });
     if (saved < expected) await page.waitForTimeout(500);
   }
@@ -45,6 +55,7 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
   // No network from here on.
   await context.setOffline(true);
   await page.goto(base + '/index.html');
+  await page.locator('.game-card').first().waitFor({ state: 'attached' });
   assert.ok(await page.locator('.game-card').count() > 70, 'home page and catalogue load offline');
   await page.locator('#parent-open').click();
   await page.waitForTimeout(300);
@@ -87,6 +98,9 @@ const base = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/$/, ''
   const fonts = await page.evaluate(async () => Promise.all(['NotoColorEmoji.ttf', 'NotoSansTamil.ttf'].map(async (f) => (await fetch('../../assets/fonts/' + f)).status)));
   assert.deepEqual(fonts, [200, 200], 'emoji and Tamil fonts load offline');
   assert.deepEqual(errors, [], errors.join('; '));
-  await browser.close();
   console.log('PASS all games work offline after one visit; no page errors.');
+  } finally {
+    await browser.close();
+    if (server) server.close();
+  }
 })().catch((e) => { console.error(e); process.exit(1); });
