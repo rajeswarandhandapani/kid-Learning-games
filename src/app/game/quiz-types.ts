@@ -8,6 +8,7 @@ export interface QuizQuestion {
   hintVisual?: Node | (() => Node | null) | null;
   solution?: Node | (() => Node | null) | null;
   choiceVisuals?: Record<string, Node | (() => Node | null)>;
+  choiceDisplay?: Record<string, string>;
   choiceLabels?: Record<string, string>;
   noChoiceListen?: boolean;
   promptTappable?: boolean;
@@ -18,6 +19,7 @@ export interface QuizQuestion {
   reviewPrompt?: string;
   reviewId?: string;
   smallQuestion?: boolean;
+  questionClass?: string;
 }
 
 export interface QuizModeLink {
@@ -43,6 +45,7 @@ export interface QuizGameConfig {
   finishTitle: string;
   mascot?: string;
   bigChoices?: boolean;
+  questionClass?: string;
   bestTimeKey?: string;
   modeGroups?: QuizModeGroup[];
   generateQuestion: (askedSet: Set<string | number>) => QuizQuestion;

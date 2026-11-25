@@ -46,3 +46,12 @@ body.kid-game .quiz-choice-btn.incorrect {
   color: #fff;
   opacity: 1;
 }
+
+body.kid-game .quiz-choice-btn.has-visual > span {
+  display: block;
+  width: 100%;
+}
+
+body.kid-game .quiz-choice-btn.has-visual .kv-bar {
+  width: 100%;
+}

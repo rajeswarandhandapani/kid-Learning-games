@@ -13,7 +13,7 @@ npm test                  # unit, bank, catalogue, ngsw-config, progress, review
 npm run build             # syncs src/index.html and builds dist/kid-Learning-games/browser (--base-href ./)
 npm run build:pages       # production build for GitHub Pages (--base-href /kid-Learning-games/)
 npm run test:e2e          # builds/uses dist/ (auto-starts serve-dist.cjs) and tests Hub + all 84 games
-npm run test:ng-games     # Playwright suite for Angular-hosted Math Quiz games (#play/<id>)
+npm run test:ng-games     # Playwright suite for all 17 Angular-hosted Math Quiz games (#play/<id>)
 npm run test:offline      # caches with ngsw-worker.js, goes offline, plays parameterized games & audio
 node scripts/serve-dist.cjs   # serves dist/kid-Learning-games/browser at http://localhost:4173
 npm run test:bee          # Spelling Bee training rules, words & viewports (with server running)
@@ -33,7 +33,7 @@ npm run sync:index        # keeps src/index.html title count and <noscript> list
 ## Architecture & deployment
 
 - **Hub shell (`src/`):** Angular v22 zoneless Hub (`app.ts`, `klg-hub.service.ts`, `parent-dialog.component.ts`) + vendored `src/app/kit/` components (`angular-pwa-kit`).
-- **Angular game runtime (Phase 2A):** Core Signal services (`KlgCatalogueService`, `KlgSoundsService`, `KlgProgressService`), `GameTopBarComponent` / `GameLevelRowComponent`, and `QuizEngineComponent` power native SPA routes (`#play/<id>`) for the 5 Math Quiz pilot games (`number-sounds`, `counting`, `addition-subtraction`, `multiplication`, `division`), while preserving all legacy `games/*/` pages and `klg-*` / `klg-*-best-ms:*` `localStorage` data.
+- **Angular game runtime (Phase 2A + 2B):** Core Signal services (`KlgCatalogueService`, `KlgSoundsService`, `KlgProgressService`), `GameTopBarComponent` / `GameLevelRowComponent`, and `QuizEngineComponent` power native SPA routes (`#play/<id>`) for all **17 Math `QuizEngine` games** (`number-sounds`, `counting`, `shapes-colors`, `comparing-numbers`, `calendar`, `addition-subtraction`, `multiply-pictures`, `divide-pictures`, `fact-families`, `multiplication`, `division`, `fractions`, `time`, `money`, `measurement`, `market-day`, `rounding-place-value`), while preserving all 84 legacy `games/*/` pages and `klg-*` / `klg-*-best-ms:*` `localStorage` data.
 - **Offline service worker (`ngsw-config.json`):** Prefetches the Angular Hub, `assets/**`, and `games/**` with `cacheQueryOptions.ignoreSearch: true` for parameterized game URLs while excluding `!/**/games/**` from SPA navigation rewrites.
 - **Deployment (Path A):** `.github/workflows/deploy.yml` builds on push to `main` (`npm ci` → `npm test` → `ng build --configuration production --base-href /kid-Learning-games/`) and deploys `dist/kid-Learning-games/browser` via `actions/deploy-pages`.
 

@@ -1,4 +1,4 @@
-// End-to-end verification of the Phase 2A Angular-hosted Math Quiz pilot suite
+// End-to-end verification of the Phase 2A + 2B Angular-hosted Math Quiz suite (all 17 Math QuizEngine games)
 // (#play/<id> SPA routing, level persistence, visuals/hints, Practice/Challenge,
 // live Hub progress sync, Review My Mistakes, offline ngsw play, and mobile layout).
 const { chromium } = require('playwright');
@@ -150,6 +150,50 @@ async function launchBrowser() {
     await page.locator('.quiz-next').click();
     console.log('PASS all 5 Angular Math Quiz games (visuals, hints, speech, challenge bestMs)');
 
+    // 9B. Phase 2B — all 12 remaining Math QuizEngine games
+    const phase2bRoutes = [
+      { route: 'shapes-colors', check: null },
+      { route: 'comparing-numbers', check: null },
+      { route: 'calendar?type=grid', check: '.quiz-visual .kv-month' },
+      { route: 'multiply-pictures', check: '.quiz-visual > *' },
+      { route: 'divide-pictures', check: '.quiz-visual > *' },
+      { route: 'fact-families', check: '.quiz-visual .mv-triangle' },
+      { route: 'fractions?type=picture', check: '.quiz-choice-btn.has-visual .kv-frac', screenshot: 'artifacts/ng-phase2b-fractions.png' },
+      { route: 'time', check: null },
+      { route: 'money', check: null },
+      { route: 'measurement?mode=read', check: '.quiz-visual > *' },
+      { route: 'market-day', check: '.quiz-visual .mv-scene' },
+      { route: 'rounding-place-value', check: null },
+    ];
+    for (const item of phase2bRoutes) {
+      await page.goto(`${base}/#play/${item.route}`);
+      await page.locator('#start-btn').waitFor();
+      await page.locator('#start-btn').click();
+      await page.waitForFunction(() => {
+        const prompt = (document.getElementById('question-text')?.textContent || '').trim();
+        const btns = document.querySelectorAll('.quiz-choice-btn:not([disabled])');
+        return prompt.length > 0 && btns.length >= 2;
+      });
+      if (item.check) {
+        await page.locator(item.check).first().waitFor();
+      }
+      if (item.route.startsWith('fractions')) {
+        const box = await page.locator('.quiz-choice-btn.has-visual .kv-frac').first().boundingBox();
+        assert.ok(box && box.width >= 80 && box.height >= 30, `fraction choice visual should not collapse: ${JSON.stringify(box)}`);
+      }
+      if (item.screenshot) {
+        await page.screenshot({ path: item.screenshot });
+      }
+      await page.locator('.quiz-choice-btn').first().click();
+      await page.waitForFunction(() => {
+        const fb = (document.getElementById('quiz-feedback')?.textContent || '').trim();
+        const nextBtn = document.querySelector('.quiz-next');
+        return fb.length > 0 && nextBtn && !nextBtn.closest('.d-none');
+      });
+      await page.locator('.quiz-next').click();
+    }
+    console.log('PASS all 12 Phase 2B Angular Math Quiz games');
+
     // 10. Review My Mistakes inside Angular (#play/counting?max=10&review=1)
     await page.evaluate(() => {
       localStorage.setItem('klg-review-v1', JSON.stringify({
@@ -198,7 +242,13 @@ async function launchBrowser() {
     await page.locator('.mv-array').waitFor();
     await page.screenshot({ path: 'artifacts/ng-game-mobile.png' });
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile overflow on Angular game');
-    console.log('PASS offline Angular game + mobile viewport screenshot');
+    await page.goto(`${base}/#play/market-day?level=2`);
+    await page.locator('#start-btn').waitFor();
+    await page.locator('#start-btn').click();
+    await page.locator('.mv-scene').waitFor();
+    await page.screenshot({ path: 'artifacts/ng-phase2b-mobile.png' });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile overflow on Angular market-day');
+    console.log('PASS offline Angular game + mobile viewport screenshots');
 
     assert.deepEqual(errors, [], 'no runtime page errors');
     assert.deepEqual(external, [], 'no external requests');
