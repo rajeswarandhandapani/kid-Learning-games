@@ -55,3 +55,7 @@ body.kid-game .quiz-choice-btn.has-visual > span {
 body.kid-game .quiz-choice-btn.has-visual .kv-bar {
   width: 100%;
 }
+
+body.kid-game .quiz-question {
+  white-space: pre-line;
+}

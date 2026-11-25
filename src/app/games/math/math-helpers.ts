@@ -58,6 +58,19 @@ export interface MeasureVisGlobal {
   thermometer(temp: number, opts?: { min?: number; max?: number; label?: string }): HTMLElement;
 }
 
+export interface WordPicsGlobal {
+  PICS: Record<string, string>;
+  OPPOSITES: ReadonlyArray<[string, string]>;
+  pic(word: string): string | undefined;
+  has(word: string): boolean;
+}
+
+export interface SceneGlobal {
+  scene(opts?: Record<string, unknown>): HTMLElement;
+  preset(name: string, overrides?: Record<string, unknown>): HTMLElement;
+  PRESETS: Record<string, unknown>;
+}
+
 function winGlobal<T>(key: string): T | undefined {
   return (window as unknown as Record<string, T | undefined>)[key];
 }
@@ -69,6 +82,14 @@ export const klgFracVis = () => winGlobal<FracVisGlobal>('KlgFractionVis') || wi
 export const klgClock = () => winGlobal<ClockGlobal>('KlgClock');
 export const klgMoneyVis = () => winGlobal<MoneyVisGlobal>('KlgMoneyVis');
 export const klgMeasureVis = () => winGlobal<MeasureVisGlobal>('KlgMeasureVis');
+export const klgWordPics = () => winGlobal<WordPicsGlobal>('KlgWordPics');
+export const klgScene = () => winGlobal<SceneGlobal>('KlgScene');
+
+/** Unwraps CJS modules imported with allowJs so both default and named-export interop shapes work cleanly. */
+export function unwrapCjs<T>(mod: unknown): T {
+  const m = mod as { default?: T } & T;
+  return (m && m.default ? m.default : m) as T;
+}
 
 export function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
