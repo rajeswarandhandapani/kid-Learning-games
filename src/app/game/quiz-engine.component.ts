@@ -254,7 +254,7 @@ function snapshotToQuestion(snapshot: Record<string, unknown>, reviewId: string)
             <p
               #questionTextEl
               id="question-text"
-              class="quiz-question mb-4"
+              [class]="'quiz-question mb-4 ' + questionExtraClass()"
               [class.quiz-question-sm]="!!currentQuestion()?.smallQuestion"
               [class.klg-tappable]="!!currentQuestion()?.promptTappable"
               [attr.tabindex]="currentQuestion()?.promptTappable ? 0 : -1"
@@ -296,7 +296,7 @@ function snapshotToQuestion(snapshot: Record<string, unknown>, reviewId: string)
                   class="btn quiz-choice-btn"
                   [class.has-visual]="!!choice.visual"
                   [class.correct]="locked() && choice.isCorrect"
-                  [class.incorrect]="locked() && choice.isSelectedWrong"
+                  [class.incorrect]="locked() && isChoiceSelectedWrong(choice.formatted)"
                   [disabled]="locked()"
                   [attr.aria-label]="choice.label"
                   [attr.data-answer]="choice.formatted"
@@ -305,7 +305,7 @@ function snapshotToQuestion(snapshot: Record<string, unknown>, reviewId: string)
                   @if (choice.visual) {
                     <span [klgDomNode]="choice.visual"></span>
                   } @else {
-                    {{ choice.formatted }}
+                    {{ choice.display }}
                   }
                 </button>
                 @if (choice.showListen) {
@@ -568,31 +568,42 @@ export class QuizEngineComponent {
     return Math.max(0, (this.timeRemaining() / max) * 100);
   });
 
+  protected readonly questionExtraClass = computed(
+    () => this.currentQuestion()?.questionClass || this.config().questionClass || ''
+  );
+
   protected readonly renderedChoices = computed(() => {
     const q = this.currentQuestion();
     const fmt = this.config().formatAnswer || ((v: string | number) => String(v));
-    const sel = this.selectedAnswer();
     if (!q) return [];
     const correctFormatted = fmt(q.correctAnswer);
     return q.choices.map((raw, idx) => {
       const formatted = fmt(raw);
       const label = q.choiceLabels?.[String(raw)] || formatted;
+      const display = q.choiceDisplay?.[String(raw)] || formatted;
       const visual = q.choiceVisuals?.[String(raw)] || null;
       const isCorrect = formatted === correctFormatted;
-      const isSelectedWrong = sel !== null && fmt(sel) === formatted && !isCorrect;
       const showListen = this.sounds.canSpeak() && !q.noChoiceListen && /[A-Za-z]{2,}/.test(label);
       return {
         key: `${idx}:${formatted}`,
         raw,
         formatted,
+        display,
         label,
         visual,
         isCorrect,
-        isSelectedWrong,
         showListen,
       };
     });
   });
+
+  protected isChoiceSelectedWrong(formatted: string): boolean {
+    const q = this.currentQuestion();
+    const sel = this.selectedAnswer();
+    if (!q || sel === null) return false;
+    const fmt = this.config().formatAnswer || ((v: string | number) => String(v));
+    return fmt(sel) === formatted && formatted !== fmt(q.correctAnswer);
+  }
 
   protected readonly nextButtonLabel = computed(() => {
     if (this.questionNumber() < this.totalQuestions()) return 'Next question →';

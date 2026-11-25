@@ -1,20 +1,74 @@
 export interface MathVisGlobal {
-  array(rows: number, cols: number, emoji?: string): Node;
-  circled(total: number, groupSize: number, emoji?: string): Node;
+  groups(count: number, each: number, emoji: string, opts?: { holder?: string; label?: string }): HTMLElement;
+  array(rows: number, cols: number, emoji?: string, opts?: { label?: string }): HTMLElement;
+  numberLine(opts: { step: number; hops: number; max?: number; back?: boolean; hideEnd?: boolean; label?: string }): HTMLElement;
+  circled(total: number, groupSize: number, emoji?: string, opts?: { label?: string }): HTMLElement;
+  share(total: number, people: number, emoji: string, opts?: { label?: string }): HTMLElement;
+  triangle(product: number, a: number, b: number, hidden: string | null): HTMLElement;
+  pile(count: number, emoji: string, opts?: { label?: string }): HTMLElement;
+  figure(label: string, className: string): HTMLElement;
+  el(name: string, attrs: Record<string, string | number>, text?: string): Element;
+  HOLDER_WORD: Record<string, string>;
+  numberChoices(answer: number, mistakes: number[]): number[];
 }
 
 export interface BlocksGlobal {
-  tenFrame(n: number, opts?: { emoji?: string; split?: number; crossed?: number }): HTMLElement;
-  blocks(n: number, opts?: { compact?: boolean }): HTMLElement;
+  tenFrame(n: number, opts?: { emoji?: string; split?: number; crossed?: number; label?: string }): HTMLElement;
+  blocks(n: number, opts?: { compact?: boolean; highlight?: string; label?: string }): HTMLElement;
+  chart(n: number, opts?: { label?: string }): HTMLElement;
 }
 
-export function klgMathVis(): MathVisGlobal | undefined {
-  return (window as unknown as { KlgMathVis?: MathVisGlobal }).KlgMathVis;
+export interface ShapesGlobal {
+  polygon(name: string, opts?: { label?: string }): HTMLElement;
+  solid(name: string, opts?: { label?: string }): HTMLElement;
+  SIDES: Record<string, number>;
+  FACES: Record<string, { faces: number; edges: number; corners: number; flat: number; curved: number }>;
 }
 
-export function klgBlocks(): BlocksGlobal | undefined {
-  return (window as unknown as { KlgBlocks?: BlocksGlobal }).KlgBlocks;
+export interface FracVisGlobal {
+  pie(n: number, d: number, opts?: { label?: string }): HTMLElement;
+  bar(n: number, d: number, opts?: { label?: string }): HTMLElement;
+  set(n: number, d: number, emoji: string, opts?: { label?: string }): HTMLElement;
+  line(n: number, d: number, opts?: { max?: number; label?: string }): HTMLElement;
+  stacked(list: Array<[number, number]>, opts?: { label?: string }): HTMLElement;
 }
+
+export interface ClockGlobal {
+  face(h: number, m: number, opts?: { label?: string }): HTMLElement;
+  handAngles(h: number, m: number): { hour: number; minute: number };
+  digital(h: number, m: number): string;
+  spoken(h: number, m: number): string;
+  timeline(startMin: number, durMin: number, opts?: { label?: string }): HTMLElement;
+  fmt(min: number): string;
+}
+
+export interface MoneyVisGlobal {
+  tray(list: number[], opts?: { label?: string }): HTMLElement;
+  describe(list: number[]): string;
+  sum(list: number[]): number;
+  fmt(cents: number): string;
+  greedy(cents: number): number[];
+  tag(emoji: string, name: string, cents: number): HTMLElement;
+}
+
+export interface MeasureVisGlobal {
+  ruler(len: number, opts?: { unit?: string; emoji?: string; max?: number; label?: string }): HTMLElement;
+  balance(left: number, right: number, opts?: { leftEmoji?: string; rightEmoji?: string; label?: string }): HTMLElement;
+  jug(fill: number, max: number, opts?: { unit?: string; label?: string }): HTMLElement;
+  thermometer(temp: number, opts?: { min?: number; max?: number; label?: string }): HTMLElement;
+}
+
+function winGlobal<T>(key: string): T | undefined {
+  return (window as unknown as Record<string, T | undefined>)[key];
+}
+
+export const klgMathVis = () => winGlobal<MathVisGlobal>('KlgMathVis');
+export const klgBlocks = () => winGlobal<BlocksGlobal>('KlgBlocks');
+export const klgShapes = () => winGlobal<ShapesGlobal>('KlgShapes');
+export const klgFracVis = () => winGlobal<FracVisGlobal>('KlgFractionVis') || winGlobal<FracVisGlobal>('KlgFracVis');
+export const klgClock = () => winGlobal<ClockGlobal>('KlgClock');
+export const klgMoneyVis = () => winGlobal<MoneyVisGlobal>('KlgMoneyVis');
+export const klgMeasureVis = () => winGlobal<MeasureVisGlobal>('KlgMeasureVis');
 
 export function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
