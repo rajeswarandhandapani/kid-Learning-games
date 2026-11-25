@@ -12,7 +12,7 @@ export interface QuizQuestion {
   choiceLabels?: Record<string, string>;
   noChoiceListen?: boolean;
   promptTappable?: boolean;
-  speech?: boolean;
+  speech?: boolean | string;
   speechPrompt?: string;
   speechRate?: number;
   explanation?: string;

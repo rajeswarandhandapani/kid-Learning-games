@@ -11,17 +11,19 @@ import { KlgHubService } from './services/klg-hub.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ParentDialogComponent, QuizEngineComponent, ToastComponent, ConfirmDialogComponent],
   template: `
-    @if (hub.view() === 'play' && hub.activeGame() && hub.activeDefinition()) {
-      <klg-quiz-engine
-        [game]="hub.activeGame()!"
-        [definition]="hub.activeDefinition()!"
-        [query]="hub.activeGameQuery()"
-        [angularGameIds]="hub.angularGameIds"
-        (navigateQuery)="hub.setActiveGameQuery($event)"
-        (goWorld)="hub.go(null, 'world/' + $event)"
-        (goHome)="hub.go(null, 'home')"
-        (openGame)="hub.openGame(null, $event.gameId, $event.query)"
-      />
+    @if (hub.view() === 'play' && hub.activeGame()) {
+      @if (hub.activeDefinition(); as def) {
+        <klg-quiz-engine
+          [game]="hub.activeGame()!"
+          [definition]="def"
+          [query]="hub.activeGameQuery()"
+          [angularGameIds]="hub.angularGameIds"
+          (navigateQuery)="hub.setActiveGameQuery($event)"
+          (goWorld)="hub.go(null, 'world/' + $event)"
+          (goHome)="hub.go(null, 'home')"
+          (openGame)="hub.openGame(null, $event.gameId, $event.query)"
+        />
+      }
     } @else {
     <a class="skip-link" href="#main" (click)="skipToMain($event)">Skip to games</a>
     <div class="kid-clouds" aria-hidden="true"></div>

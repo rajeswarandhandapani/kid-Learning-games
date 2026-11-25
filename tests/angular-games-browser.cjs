@@ -1,5 +1,5 @@
-// End-to-end verification of the Phase 2A + 2B Angular-hosted Math Quiz suite (all 17 Math QuizEngine games)
-// (#play/<id> SPA routing, level persistence, visuals/hints, Practice/Challenge,
+// End-to-end verification of the Phase 2A + 2B + 2C Angular-hosted QuizEngine suite (all 30 non-Tamil games)
+// (#play/<id> SPA routing, lazy subject chunks, level persistence, visuals/hints, Practice/Challenge,
 // live Hub progress sync, Review My Mistakes, offline ngsw play, and mobile layout).
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
@@ -194,6 +194,51 @@ async function launchBrowser() {
     }
     console.log('PASS all 12 Phase 2B Angular Math Quiz games');
 
+    // 9C. Phase 2C — all 13 English, Logic & Science QuizEngine games (lazy subject chunks)
+    const phase2cRoutes = [
+      { route: 'picture-words', check: null },
+      { route: 'english-alphabets?mode=phonics', check: null },
+      { route: 'rhyming-words?mode=picture', check: '.quiz-choice-btn.has-visual .kv-choice' },
+      { route: 'reading-stories', check: '.quiz-visual .kv-clue' },
+      { route: 'opposites?mode=picture', check: '.quiz-choice-btn.has-visual .kv-choice' },
+      { route: 'patterns?mode=skip', check: null },
+      { route: 'feelings-faces', check: null },
+      { route: 'everyday-tools', check: null },
+      { route: 'baby-animals?mode=baby', check: '.quiz-visual .kv-clue' },
+      { route: 'animal-habitats', check: '.quiz-choice-btn.has-visual .kv-scene', screenshot: 'artifacts/ng-phase2c-habitats.png' },
+      { route: 'solar-system?mode=order', check: '.quiz-visual .kv-solar, .quiz-choice-btn.has-visual .kv-planet' },
+      { route: 'science-quiz', check: null },
+      { route: 'world-capitals?mode=flag', check: '.quiz-choice-btn.has-visual .kv-choice' },
+    ];
+    for (const item of phase2cRoutes) {
+      await page.goto(`${base}/#play/${item.route}`);
+      await page.locator('#start-btn').waitFor();
+      await page.locator('#start-btn').click();
+      await page.waitForFunction(() => {
+        const prompt = (document.getElementById('question-text')?.textContent || '').trim();
+        const btns = document.querySelectorAll('.quiz-choice-btn:not([disabled])');
+        return prompt.length > 0 && btns.length >= 2;
+      });
+      if (item.check) {
+        await page.locator(item.check).first().waitFor();
+      }
+      if (item.route === 'animal-habitats') {
+        const box = await page.locator('.quiz-choice-btn.has-visual .kv-scene').first().boundingBox();
+        assert.ok(box && box.width >= 80 && box.height >= 60, `habitat scene visual should not collapse: ${JSON.stringify(box)}`);
+      }
+      if (item.screenshot) {
+        await page.screenshot({ path: item.screenshot });
+      }
+      await page.locator('.quiz-choice-btn').first().click();
+      await page.waitForFunction(() => {
+        const fb = (document.getElementById('quiz-feedback')?.textContent || '').trim();
+        const nextBtn = document.querySelector('.quiz-next');
+        return fb.length > 0 && nextBtn && !nextBtn.closest('.d-none');
+      });
+      await page.locator('.quiz-next').click();
+    }
+    console.log('PASS all 13 Phase 2C Angular English/Logic/Science Quiz games');
+
     // 10. Review My Mistakes inside Angular (#play/counting?max=10&review=1)
     await page.evaluate(() => {
       localStorage.setItem('klg-review-v1', JSON.stringify({
@@ -248,6 +293,12 @@ async function launchBrowser() {
     await page.locator('.mv-scene').waitFor();
     await page.screenshot({ path: 'artifacts/ng-phase2b-mobile.png' });
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile overflow on Angular market-day');
+    await page.goto(`${base}/#play/solar-system?mode=order`);
+    await page.locator('#start-btn').waitFor();
+    await page.locator('#start-btn').click();
+    await page.locator('.quiz-visual .kv-solar, .quiz-choice-btn.has-visual .kv-planet').first().waitFor();
+    await page.screenshot({ path: 'artifacts/ng-phase2c-mobile.png' });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile overflow on Angular solar-system');
     console.log('PASS offline Angular game + mobile viewport screenshots');
 
     assert.deepEqual(errors, [], 'no runtime page errors');

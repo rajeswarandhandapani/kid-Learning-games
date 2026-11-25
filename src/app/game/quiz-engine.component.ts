@@ -549,7 +549,10 @@ export class QuizEngineComponent {
 
   protected readonly questionSpeech = computed(() => {
     const q = this.currentQuestion();
-    if (!q || !this.sounds.canSpeak() || q.speech) return '';
+    if (!q || !this.sounds.canSpeak() || q.speech === true) return '';
+    if (typeof q.speech === 'string' && q.speech.trim()) {
+      return q.speech.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
+    }
     if (q.speechPrompt !== undefined) {
       return q.speechPrompt.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
     }

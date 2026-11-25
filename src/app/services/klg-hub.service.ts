@@ -11,7 +11,7 @@ import {
   type KlgTrickyItem,
 } from '../core/klg-progress.service';
 import { KlgSoundsService } from '../core/klg-sounds.service';
-import { ANGULAR_GAME_IDS, getAngularQuizGame, isAngularGame } from '../games/game-registry';
+import { ANGULAR_GAME_IDS, isAngularGame, loadAngularQuizGame } from '../games/game-registry';
 import type { QuizGameDefinition } from '../game/quiz-types';
 
 export type {
@@ -126,6 +126,7 @@ export class KlgHubService {
 
   private initialized = false;
   private firstRoute = true;
+  private loadSeq = 0;
 
   readonly subjects = computed(() => this.catService.subjects());
   readonly badges = computed<KlgBadge[]>(() => this.progressService.badges());
@@ -135,7 +136,7 @@ export class KlgHubService {
     const id = this.activeGameId();
     return id ? this.catService.byId(id) || null : null;
   });
-  readonly activeDefinition = computed<QuizGameDefinition | null>(() => getAngularQuizGame(this.activeGameId()));
+  readonly activeDefinition = signal<QuizGameDefinition | null>(null);
 
   readonly canSpeak = (): boolean => this.soundsService.canSpeak();
 
@@ -437,8 +438,7 @@ export class KlgHubService {
     } else if (hashPath.startsWith('play/')) {
       const id = hashPath.slice(5);
       const game = this.catService.byId(id);
-      const def = getAngularQuizGame(id);
-      if (game && def) {
+      if (game && isAngularGame(id)) {
         if (!hashQuery) {
           const saved = this.progressService.readSavedQuery(game);
           if (saved) {
@@ -459,10 +459,21 @@ export class KlgHubService {
       this.soundsService.cancelSpeech();
     }
 
+    const prevGameId = this.activeGameId();
     this.view.set(nextView);
     this.world.set(nextWorld);
     this.activeGameId.set(nextGameId);
     this.activeGameQuery.set(nextGameId ? hashQuery : '');
+
+    if (nextView === 'play' && nextGameId) {
+      if (prevGameId !== nextGameId || !this.activeDefinition()) {
+        this.activeDefinition.set(null);
+        this.loadGameDefinition(nextGameId);
+      }
+    } else {
+      this.loadSeq += 1;
+      if (this.activeDefinition()) this.activeDefinition.set(null);
+    }
 
     if (typeof document !== 'undefined') {
       document.body.dataset['view'] = nextView;
@@ -516,6 +527,15 @@ export class KlgHubService {
       location.hash = target;
     }
     this.syncFromHash();
+  }
+
+  private loadGameDefinition(id: string): void {
+    const seq = ++this.loadSeq;
+    void loadAngularQuizGame(id).then((def) => {
+      if (seq === this.loadSeq && this.activeGameId() === id) {
+        this.activeDefinition.set(def);
+      }
+    });
   }
 
   go(event: Event | null, hashTarget: string): void {
